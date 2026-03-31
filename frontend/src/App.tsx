@@ -13,7 +13,8 @@ import { LandingSiteListPage } from "@/pages/landing-sites/LandingSiteListPage";
 import { LandingSiteFormPage } from "@/pages/landing-sites/LandingSiteFormPage";
 import { OperationListPage } from "@/pages/operations/OperationListPage";
 import { OperationFormPage } from "@/pages/operations/OperationFormPage";
-import { PlaceholderPage } from "@/pages/PlaceholderPage";
+import { OrderListPage } from "@/pages/orders/OrderListPage";
+import { OrderFormPage } from "@/pages/orders/OrderFormPage";
 
 export default function App() {
   return (
@@ -38,7 +39,9 @@ export default function App() {
             <Route path="/operations" element={<OperationListPage />} />
             <Route path="/operations/new" element={<OperationFormPage />} />
             <Route path="/operations/:id" element={<OperationFormPage />} />
-            <Route path="/orders" element={<PlaceholderPage />} />
+            <Route path="/orders" element={<OrderListPage />} />
+            <Route path="/orders/new" element={<OrderFormPage />} />
+            <Route path="/orders/:id" element={<OrderFormPage />} />
           </Route>
         </Route>
       </Routes>

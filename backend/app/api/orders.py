@@ -263,13 +263,10 @@ async def list_orders(
     db: Annotated[AsyncSession, Depends(get_db)],
     order_status: int | None = None,
 ) -> list[dict]:
-    """List orders filtered by status. Default: status=2 (submitted) per PRD 6.6.g."""
-    effective_status = order_status if order_status is not None else 2
-    query = (
-        select(FlightOrder)
-        .where(FlightOrder.status == effective_status)
-        .order_by(FlightOrder.planned_start_datetime.asc())
-    )
+    """List orders, optionally filtered by status. Frontend defaults to status=2 per PRD 6.6.g."""
+    query = select(FlightOrder).order_by(FlightOrder.planned_start_datetime.asc())
+    if order_status is not None:
+        query = query.where(FlightOrder.status == order_status)
     result = await db.execute(query)
     orders = result.scalars().all()
     return [

@@ -1,0 +1,197 @@
+/**
+ * OrderListPage — list flight orders with status filter and RBAC actions.
+ * Default filter: status=2 (Przekazane do akceptacji) per PRD 6.6.g.
+ */
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select } from "@/components/ui/select";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Plus } from "lucide-react";
+
+interface OrderListItem {
+  id: number;
+  planned_start_datetime: string;
+  helicopter_registration: string;
+  pilot_name: string;
+  status: number;
+}
+
+const STATUS_LABELS: Record<number, string> = {
+  1: "Wprowadzona",
+  2: "Przekazane do akceptacji",
+  3: "Odrzucona",
+  4: "Zaakceptowana",
+  5: "Częściowo zrealizowana",
+  6: "Zrealizowana / Rozliczona",
+  7: "Rezygnacja",
+};
+
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+
+const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
+  1: "default",
+  2: "outline",
+  3: "destructive",
+  4: "default",
+  5: "outline",
+  6: "default",
+  7: "secondary",
+};
+
+const STATUS_BADGE_CLASS: Record<number, string> = {
+  1: "bg-blue-500 text-white border-transparent",
+  2: "bg-amber-500 text-white border-transparent",
+  3: "", // destructive handles red
+  4: "bg-green-600 text-white border-transparent",
+  5: "bg-orange-500 text-white border-transparent",
+  6: "bg-green-600 text-white border-transparent",
+  7: "", // secondary handles grey
+};
+
+export function OrderListPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  // Default filter: status=2 per PRD 6.6.g
+  const [statusFilter, setStatusFilter] = useState<string>("2");
+
+  const canCreate = user?.system_role === "Pilot";
+
+  const queryParams =
+    statusFilter === "" ? "" : `?order_status=${statusFilter}`;
+
+  const {
+    data: orders = [],
+    isLoading,
+    error,
+  } = useQuery<OrderListItem[]>({
+    queryKey: ["orders", statusFilter],
+    queryFn: () => apiFetch<OrderListItem[]>(`/orders${queryParams}`),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <p className="text-muted-foreground">Ładowanie zleceń…</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-md border border-red-200 bg-red-50 p-4">
+        <p className="text-sm text-red-600">
+          Błąd ładowania:{" "}
+          {error instanceof Error ? error.message : "Nieznany błąd"}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            Zlecenia lotnicze
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Zarządzanie zleceniami lotniczymi
+          </p>
+        </div>
+        {canCreate && (
+          <Link to="/orders/new">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Dodaj zlecenie
+            </Button>
+          </Link>
+        )}
+      </div>
+
+      {/* Status filter */}
+      <div className="mb-4 flex items-center gap-3">
+        <label className="text-sm font-medium text-foreground">
+          Filtruj po statusie:
+        </label>
+        <Select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="w-56"
+        >
+          <option value="">Wszystkie</option>
+          {Object.entries(STATUS_LABELS).map(([val, label]) => (
+            <option key={val} value={val}>
+              {label}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      <div className="rounded-md border bg-white">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16">Nr</TableHead>
+              <TableHead>Planowany start</TableHead>
+              <TableHead>Helikopter</TableHead>
+              <TableHead>Pilot</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {orders.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-muted-foreground py-8"
+                >
+                  Brak zleceń
+                </TableCell>
+              </TableRow>
+            ) : (
+              orders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => navigate(`/orders/${order.id}`)}
+                >
+                  <TableCell className="font-medium">{order.id}</TableCell>
+                  <TableCell>
+                    {new Date(order.planned_start_datetime).toLocaleString(
+                      "pl-PL"
+                    )}
+                  </TableCell>
+                  <TableCell>{order.helicopter_registration}</TableCell>
+                  <TableCell>{order.pilot_name}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={
+                        STATUS_BADGE_VARIANT[order.status] ?? "secondary"
+                      }
+                      className={STATUS_BADGE_CLASS[order.status] ?? ""}
+                    >
+                      {STATUS_LABELS[order.status] ??
+                        `Status ${order.status}`}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
