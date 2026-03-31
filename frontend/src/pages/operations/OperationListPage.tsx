@@ -80,7 +80,7 @@ export function OperationListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("3");
 
   const role = user?.system_role ?? "";
   const isPlanner = role === "Osoba planująca";
