@@ -185,6 +185,11 @@ async def _validate_fk_entities(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Helicopter {helicopter_id} not found",
             )
+        if helicopter.status != "aktywny":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Helicopter {helicopter_id} is not active",
+            )
 
     crew_member_ids = getattr(body, "crew_member_ids", None)
     if crew_member_ids is not None:
@@ -510,6 +515,12 @@ async def accept_order(
     """Accept an order (status 2→4). Supervisor only."""
     order = await _get_order_or_404(order_id, db)
     _check_status_transition(order, 2, "accept")
+
+    if order.planned_end_datetime <= order.planned_start_datetime:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="planned_end_datetime must be after planned_start_datetime",
+        )
 
     order.status = 4
     await db.flush()

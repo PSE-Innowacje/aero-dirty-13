@@ -6,7 +6,7 @@ import re
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 
-VALID_ROLES = ["Pilot", "Obserwator"]
+VALID_ROLES = ["Pilot", "Obserwator", "Mechanik", "Operator"]
 
 # PRD email validation: letters, digits, ., _, %, +, - before @;
 # at least two groups of letters separated by . after @.

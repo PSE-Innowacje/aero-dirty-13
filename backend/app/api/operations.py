@@ -232,7 +232,7 @@ async def list_operations(
     op_status: int | None = None,
 ) -> list[dict]:
     """List operations, optionally filtered by status. All authenticated roles."""
-    query = select(FlightOperation).order_by(FlightOperation.id.desc())
+    query = select(FlightOperation).order_by(FlightOperation.planned_date_earliest.asc().nullslast(), FlightOperation.id.desc())
     if op_status is not None:
         query = query.where(FlightOperation.status == op_status)
     result = await db.execute(query)
