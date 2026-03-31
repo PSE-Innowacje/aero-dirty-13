@@ -98,6 +98,8 @@
     "trainingExpiry": "Data szkolenia",
     "rolePilot": "Pilot",
     "roleObserver": "Obserwator",
+    "roleMechanic": "Mechanik",
+    "roleOperator": "Operator",
     "editTitle": "Edytuj członka załogi",
     "newTitle": "Nowy członek załogi",
     "create": "Utwórz członka załogi",

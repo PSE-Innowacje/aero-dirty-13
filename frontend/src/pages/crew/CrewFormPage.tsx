@@ -25,11 +25,13 @@ interface CrewMember {
   training_expiry: string;
 }
 
-const ROLES = ["Pilot", "Obserwator"];
+const ROLES = ["Pilot", "Obserwator", "Mechanik", "Operator"];
 
 const roleDisplayKey: Record<string, string> = {
   Pilot: "crew.rolePilot",
   Obserwator: "crew.roleObserver",
+  Mechanik: "crew.roleMechanic",
+  Operator: "crew.roleOperator",
 };
 
 export function CrewFormPage() {
@@ -52,7 +54,7 @@ export function CrewFormPage() {
 
   const { data: existing, isLoading: loadingExisting } = useQuery<CrewMember>({
     queryKey: ["crew", id],
-    queryFn: () => apiFetch<CrewMember>(`/crew/${id}`),
+    queryFn: () => apiFetch<CrewMember>(`/crew-members/${id}`),
     enabled: isEdit,
   });
 

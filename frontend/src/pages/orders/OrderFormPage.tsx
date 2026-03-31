@@ -215,10 +215,11 @@ export function OrderFormPage() {
 
   const totalCrewWeight = useMemo(() => {
     const crewWeight = selectedCrewMembers.reduce((sum, c) => sum + c.weight, 0);
-    // Pilot weight is auto-added by backend; show it here for display
-    // We'll estimate pilot weight from user's crew profile if available
-    return crewWeight;
-  }, [selectedCrewMembers]);
+    // Include pilot weight from their crew-member profile (matched by email)
+    const pilotMember = allCrew.find((c) => c.role === "Pilot" && c.email === user?.email);
+    const pilotWeight = pilotMember?.weight ?? 0;
+    return crewWeight + pilotWeight;
+  }, [selectedCrewMembers, allCrew, user]);
 
   // ── Fetch order for detail mode ────────────────────────────────
   const { data: order, isLoading: loadingOrder } = useQuery<FlightOrderDetail>({

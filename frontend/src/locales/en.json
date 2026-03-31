@@ -98,6 +98,8 @@
     "trainingExpiry": "Training date",
     "rolePilot": "Pilot",
     "roleObserver": "Observer",
+    "roleMechanic": "Mechanic",
+    "roleOperator": "Operator",
     "editTitle": "Edit crew member",
     "newTitle": "New crew member",
     "create": "Create crew member",

@@ -43,11 +43,15 @@ interface CrewMember {
 const roleBadgeVariant: Record<string, "default" | "secondary"> = {
   Pilot: "default",
   Obserwator: "secondary",
+  Mechanik: "secondary",
+  Operator: "secondary",
 };
 
 const roleDisplayKey: Record<string, string> = {
   Pilot: "crew.rolePilot",
   Obserwator: "crew.roleObserver",
+  Mechanik: "crew.roleMechanic",
+  Operator: "crew.roleOperator",
 };
 
 export function CrewListPage() {
@@ -64,7 +68,7 @@ export function CrewListPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      apiFetch<void>(`/crew/${id}`, { method: "DELETE" }),
+      apiFetch<void>(`/crew-members/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crew"] });
       setDeleteTarget(null);
