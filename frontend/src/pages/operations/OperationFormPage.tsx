@@ -88,13 +88,13 @@ const ACTIVITY_TYPE_OPTIONS = [
 // Status labels now use t('operations.statusN') via i18n
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white border-transparent",
-  2: "bg-red-500 text-white border-transparent",
-  3: "bg-green-600 text-white border-transparent",
-  4: "bg-amber-500 text-white border-transparent",
-  5: "bg-orange-500 text-white border-transparent",
-  6: "bg-green-600 text-white border-transparent",
-  7: "bg-gray-400 text-white border-transparent",
+  1: "bg-blue-500 text-white",
+  2: "bg-red-500 text-white",
+  3: "bg-green-600 text-white",
+  4: "bg-amber-500 text-white",
+  5: "bg-orange-500 text-white",
+  6: "bg-green-600 text-white",
+  7: "bg-gray-400 text-white",
 };
 
 // ── Main Component ─────────────────────────────────────────────────
@@ -376,8 +376,8 @@ export function OperationFormPage() {
 
       {/* Error banner */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="rounded-md bg-destructive/10 p-3 mb-4">
+          <p className="text-sm text-destructive-foreground">{error}</p>
         </div>
       )}
 
@@ -397,7 +397,7 @@ export function OperationFormPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left: Form fields */}
-        <div className="rounded-md border bg-white p-6">
+        <div className="rounded-md bg-surface-container-low p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="orderNumber">{t('operations.orderNumber')}</Label>
@@ -550,7 +550,7 @@ export function OperationFormPage() {
           <div className="space-y-6">
             {/* KML Upload */}
             {canEdit && (
-              <div className="rounded-md border bg-white p-6">
+              <div className="rounded-md bg-surface-container-low p-6">
                 <h2 className="text-lg font-semibold mb-3">{t('operations.kmlFile')}</h2>
                 {operation?.route_km != null && (
                   <p className="text-sm text-muted-foreground mb-3">
@@ -584,7 +584,7 @@ export function OperationFormPage() {
             {/* Map */}
             {operation?.route_coordinates &&
               operation.route_coordinates.length > 0 && (
-                <div className="rounded-md border bg-white p-6">
+                <div className="rounded-md bg-surface-container-low p-6">
                   <h2 className="text-lg font-semibold mb-3">
                     {t('operations.routeMap')}
                     {operation.route_km != null &&
@@ -603,7 +603,7 @@ export function OperationFormPage() {
 
       {/* Audit Trail (detail mode only) */}
       {!isCreate && operation && operation.audit_logs.length > 0 && (
-        <div className="mt-6 rounded-md border bg-white p-6">
+        <div className="mt-6 rounded-md bg-surface-container-low p-6">
           <h2 className="text-lg font-semibold mb-3">{t('operations.auditTrail')}</h2>
           <div className="overflow-x-auto">
             <Table>
@@ -640,7 +640,7 @@ export function OperationFormPage() {
 
       {/* Comments (detail mode only) */}
       {!isCreate && operation && (
-        <div className="mt-6 rounded-md border bg-white p-6">
+        <div className="mt-6 rounded-md bg-surface-container-low p-6">
           <h2 className="text-lg font-semibold mb-3">{t('operations.comments')}</h2>
 
           {operation.comments.length === 0 ? (

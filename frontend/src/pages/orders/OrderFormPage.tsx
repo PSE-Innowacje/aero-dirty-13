@@ -103,13 +103,13 @@ interface OperationDetailForMap {
 // Status labels now use t('orders.statusN') via i18n
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white border-transparent",
-  2: "bg-amber-500 text-white border-transparent",
-  3: "bg-red-500 text-white border-transparent",
-  4: "bg-green-600 text-white border-transparent",
-  5: "bg-orange-500 text-white border-transparent",
-  6: "bg-green-600 text-white border-transparent",
-  7: "bg-gray-400 text-white border-transparent",
+  1: "bg-blue-500 text-white",
+  2: "bg-amber-500 text-white",
+  3: "bg-red-500 text-white",
+  4: "bg-green-600 text-white",
+  5: "bg-orange-500 text-white",
+  6: "bg-green-600 text-white",
+  7: "bg-gray-400 text-white",
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -512,16 +512,16 @@ export function OrderFormPage() {
 
       {/* Error banners */}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
-          <p className="text-sm text-red-600">{error}</p>
+        <div className="rounded-md bg-destructive/10 p-3 mb-4">
+          <p className="text-sm text-destructive-foreground">{error}</p>
         </div>
       )}
       {validationErrors.length > 0 && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
+        <div className="rounded-md bg-destructive/10 p-3 mb-4">
           <p className="text-sm font-semibold text-red-700 mb-1">
             {t('orders.safetyValidationFailed')}
           </p>
-          <ul className="list-disc list-inside text-sm text-red-600">
+          <ul className="list-disc list-inside text-sm text-destructive-foreground">
             {validationErrors.map((err, i) => (
               <li key={i}>{err}</li>
             ))}
@@ -552,7 +552,7 @@ export function OrderFormPage() {
 
       {isCreate ? (
         /* ═══════════ CREATE MODE ═══════════ */
-        <div className="rounded-md border bg-white p-6">
+        <div className="rounded-md bg-surface-container-low p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Pilot — auto-filled, read-only */}
             <div className="space-y-2">
@@ -653,7 +653,7 @@ export function OrderFormPage() {
                   className={
                     selectedHelicopter &&
                     totalCrewWeight > selectedHelicopter.max_payload_weight
-                      ? "text-red-600 font-bold"
+                      ? "text-destructive-foreground font-bold"
                       : ""
                   }
                 >
@@ -664,7 +664,7 @@ export function OrderFormPage() {
                     {" "}
                     / {selectedHelicopter.max_payload_weight} kg max
                     {totalCrewWeight > selectedHelicopter.max_payload_weight && (
-                      <span className="text-red-600 ml-1">
+                      <span className="text-destructive-foreground ml-1">
                         {t('orders.weightExceeded')}
                       </span>
                     )}
@@ -781,7 +781,7 @@ export function OrderFormPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left: Order details */}
           <div className="space-y-6">
-            <div className="rounded-md border bg-white p-6 space-y-4">
+            <div className="rounded-md bg-surface-container-low p-6 space-y-4">
               <h2 className="text-lg font-semibold">{t('orders.orderDetails')}</h2>
 
               <div className="grid grid-cols-2 gap-4">
@@ -859,7 +859,7 @@ export function OrderFormPage() {
 
             {/* Actual datetimes — editable by pilot when status=4 */}
             {isPilot && currentStatus === 4 && (
-              <div className="rounded-md border bg-white p-6 space-y-4">
+              <div className="rounded-md bg-surface-container-low p-6 space-y-4">
                 <h2 className="text-lg font-semibold">
                   {t('orders.actualTimes')}
                 </h2>
@@ -897,7 +897,7 @@ export function OrderFormPage() {
             {/* Read-only actual datetimes when not editable */}
             {(!isPilot || currentStatus !== 4) &&
               (order?.actual_start_datetime || order?.actual_end_datetime) && (
-                <div className="rounded-md border bg-white p-6 space-y-4">
+                <div className="rounded-md bg-surface-container-low p-6 space-y-4">
                   <h2 className="text-lg font-semibold">
                     {t('orders.actualTimes')}
                   </h2>
@@ -931,7 +931,7 @@ export function OrderFormPage() {
               )}
 
             {/* Crew members list */}
-            <div className="rounded-md border bg-white p-6">
+            <div className="rounded-md bg-surface-container-low p-6">
               <h2 className="text-lg font-semibold mb-3">{t('orders.crewSection')}</h2>
               {order && order.crew_members.length > 0 ? (
                 <ul className="space-y-1">
@@ -950,7 +950,7 @@ export function OrderFormPage() {
             </div>
 
             {/* Operations list */}
-            <div className="rounded-md border bg-white p-6">
+            <div className="rounded-md bg-surface-container-low p-6">
               <h2 className="text-lg font-semibold mb-3">{t('orders.operationsSection')}</h2>
               {order && order.operations.length > 0 ? (
                 <ul className="space-y-1">
@@ -974,7 +974,7 @@ export function OrderFormPage() {
           {/* Right: Map */}
           <div className="space-y-6">
             {(mapOperations.length > 0 || startSiteForMap || endSiteForMap) && (
-              <div className="rounded-md border bg-white p-6">
+              <div className="rounded-md bg-surface-container-low p-6">
                 <h2 className="text-lg font-semibold mb-3">
                   {t('orders.routeMap')}
                 </h2>

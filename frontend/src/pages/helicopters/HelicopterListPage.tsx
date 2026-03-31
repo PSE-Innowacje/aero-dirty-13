@@ -89,8 +89,8 @@ export function HelicopterListPage() {
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4">
-        <p className="text-sm text-red-600">
+      <div className="rounded-md bg-destructive/10 p-4">
+        <p className="text-sm text-destructive-foreground">
           {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
         </p>
       </div>
@@ -116,7 +116,7 @@ export function HelicopterListPage() {
         )}
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md bg-surface-container-low">
         <Table>
           <TableHeader>
             <TableRow>

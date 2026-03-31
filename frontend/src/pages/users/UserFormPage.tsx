@@ -156,7 +156,7 @@ export function UserFormPage() {
         </h1>
       </div>
 
-      <div className="max-w-lg rounded-md border bg-white p-6">
+      <div className="max-w-lg rounded-md bg-surface-container-low p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">{t('users.firstName')} *</Label>
@@ -234,8 +234,8 @@ export function UserFormPage() {
           </div>
 
           {error && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-3">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="rounded-md bg-destructive/10 p-3">
+              <p className="text-sm text-destructive-foreground">{error}</p>
             </div>
           )}
 

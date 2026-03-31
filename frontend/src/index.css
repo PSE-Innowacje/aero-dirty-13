@@ -1,30 +1,55 @@
 @import "tailwindcss";
 
+/* ── AERO Design System: "Precision Aviator" ─────────────────
+   Dark cockpit palette with Aviation Orange accents.
+   Surface hierarchy creates depth without borders.
+   See DESIGN.md for rationale. ──────────────────────────────── */
+
 @theme {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222 47% 11%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222 47% 11%);
-  --color-primary: hsl(221 83% 53%);
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(210 40% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
-  --color-muted: hsl(210 40% 96%);
-  --color-muted-foreground: hsl(215 16% 47%);
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(214 32% 91%);
-  --color-input: hsl(214 32% 91%);
-  --color-ring: hsl(221 83% 53%);
-  --radius: 0.5rem;
+  /* ── Surface hierarchy (dark cockpit stack) ──────────────── */
+  --color-surface:                #081425;
+  --color-surface-container-lowest: #040E1F;
+  --color-surface-container-low:  #111C2D;
+  --color-surface-container:      #152031;
+  --color-surface-container-high: #1F2A3C;
+  --color-surface-container-highest: #293548;
+
+  /* ── Semantic tokens mapped to surface hierarchy ─────────── */
+  --color-background: #081425;
+  --color-foreground: #E0E4EA;
+  --color-card: #111C2D;
+  --color-card-foreground: #E0E4EA;
+  --color-primary: #FFB599;
+  --color-primary-foreground: #081425;
+  --color-primary-container: #F66018;
+  --color-secondary: #293548;
+  --color-secondary-foreground: #E0E4EA;
+  --color-muted: #152031;
+  --color-muted-foreground: #8A9BB5;
+  --color-destructive: #93000A;
+  --color-destructive-foreground: #FFD9D6;
+  --color-accent: #2192FD;
+  --color-accent-foreground: #E0E4EA;
+  --color-border: rgba(90, 65, 56, 0.15);
+  --color-input: #040E1F;
+  --color-ring: #F66018;
+  --color-on-surface-variant: #8A9BB5;
+  --color-outline-variant: rgba(90, 65, 56, 0.15);
+
+  /* ── Radius: industrial "machined" feel ──────────────────── */
+  --radius: 0.375rem;
+  --radius-sm: 0.125rem;
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

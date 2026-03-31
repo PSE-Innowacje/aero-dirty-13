@@ -49,12 +49,12 @@ const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 };
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white border-transparent",
+  1: "bg-blue-500 text-white",
   2: "",  // destructive variant handles red
-  3: "bg-green-600 text-white border-transparent",
-  4: "bg-amber-500 text-white border-transparent",
-  5: "bg-orange-500 text-white border-transparent",
-  6: "bg-green-600 text-white border-transparent",
+  3: "bg-green-600 text-white",
+  4: "bg-amber-500 text-white",
+  5: "bg-orange-500 text-white",
+  6: "bg-green-600 text-white",
   7: "",  // secondary variant handles grey
 };
 
@@ -96,8 +96,8 @@ export function OperationListPage() {
 
   if (error) {
     return (
-      <div className="rounded-md border border-red-200 bg-red-50 p-4">
-        <p className="text-sm text-red-600">
+      <div className="rounded-md bg-destructive/10 p-4">
+        <p className="text-sm text-destructive-foreground">
           {t('operations.loadingError')}:{" "}
           {error instanceof Error ? error.message : t('operations.unknownError')}
         </p>
@@ -145,7 +145,7 @@ export function OperationListPage() {
         </Select>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md bg-surface-container-low">
         <Table>
           <TableHeader>
             <TableRow>

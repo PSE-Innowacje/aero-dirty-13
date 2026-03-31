@@ -24,8 +24,8 @@ export function LoginPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950">
-        <p className="text-slate-400">{t("common.loading")}</p>
+      <div className="flex h-screen items-center justify-center bg-surface">
+        <p className="text-muted-foreground">{t("common.loading")}</p>
       </div>
     );
   }
@@ -48,21 +48,21 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-      <Card className="w-full max-w-sm border-slate-800 bg-slate-900 text-slate-100">
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4">
+      <Card className="w-full max-w-sm bg-surface-container-low">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600">
-            <Plane className="h-6 w-6 text-white" />
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary-container">
+            <Plane className="h-6 w-6 text-primary-foreground" />
           </div>
-          <CardTitle className="text-2xl text-white">AERO PSE</CardTitle>
-          <CardDescription className="text-slate-400">
+          <CardTitle className="text-2xl text-foreground">AERO PSE</CardTitle>
+          <CardDescription className="text-muted-foreground">
             {t("auth.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">
+              <Label htmlFor="email" className="text-on-surface-variant">
                 {t("auth.email")}
               </Label>
               <Input
@@ -72,11 +72,10 @@ export function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:ring-blue-600"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-slate-300">
+              <Label htmlFor="password" className="text-on-surface-variant">
                 {t("auth.password")}
               </Label>
               <Input
@@ -85,15 +84,14 @@ export function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:ring-blue-600"
               />
             </div>
             {error && (
-              <p className="text-sm text-red-400">{error}</p>
+              <p className="text-sm text-destructive-foreground bg-destructive/20 rounded-sm px-3 py-2">{error}</p>
             )}
             <Button
               type="submit"
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
+              className="w-full"
               disabled={submitting}
             >
               {submitting ? t("auth.signingIn") : t("auth.signIn")}

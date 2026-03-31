@@ -1,6 +1,5 @@
 /**
- * Minimal dialog component — no radix dependency, just a native <dialog> wrapper
- * styled to match shadcn/ui patterns.
+ * Minimal dialog component — glassmorphism backdrop per AERO Design System.
  */
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -19,9 +18,9 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
       role="dialog"
       aria-modal="true"
     >
-      {/* backdrop */}
+      {/* Glassmorphism backdrop */}
       <div
-        className="fixed inset-0 bg-black/50"
+        className="fixed inset-0 bg-surface/60 backdrop-blur-[12px]"
         onClick={() => onOpenChange(false)}
       />
       {/* content */}
@@ -37,7 +36,7 @@ const DialogContent = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "w-full max-w-lg rounded-lg border bg-background p-6 shadow-lg",
+      "w-full max-w-lg rounded-md bg-surface-container-low p-6 text-foreground shadow-[0_0_32px_rgba(4,14,31,0.6)]",
       className
     )}
     {...props}
@@ -63,7 +62,7 @@ function DialogTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h2
-      className={cn("text-lg font-semibold leading-none tracking-tight", className)}
+      className={cn("text-lg font-semibold leading-none tracking-tight text-foreground", className)}
       {...props}
     />
   );
