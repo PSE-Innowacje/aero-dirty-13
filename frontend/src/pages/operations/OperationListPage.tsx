@@ -81,6 +81,7 @@ export function OperationListPage() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<string>("3");
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const role = user?.system_role ?? "";
   const isPlanner = role === "Osoba planująca";
@@ -127,6 +128,10 @@ export function OperationListPage() {
       apiFetch(`/operations/${opId}/reject`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["operations"] });
+      setMutationError(null);
+    },
+    onError: (err: Error) => {
+      setMutationError(err.message);
     },
   });
 
@@ -135,6 +140,10 @@ export function OperationListPage() {
       apiFetch(`/operations/${opId}/resign`, { method: "POST" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["operations"] });
+      setMutationError(null);
+    },
+    onError: (err: Error) => {
+      setMutationError(err.message);
     },
   });
 
@@ -187,6 +196,13 @@ export function OperationListPage() {
           </Link>
         )}
       </div>
+
+      {/* Mutation error banner */}
+      {mutationError && (
+        <div className="rounded-md bg-destructive/10 p-3 mb-4">
+          <p className="text-sm text-destructive-foreground">{mutationError}</p>
+        </div>
+      )}
 
       {/* Status filter */}
       <div className="mb-4 flex items-center gap-3">
