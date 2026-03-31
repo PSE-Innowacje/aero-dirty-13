@@ -155,7 +155,9 @@ export function OrderListPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order) => (
+              [...orders]
+                .sort((a, b) => a.planned_start_datetime.localeCompare(b.planned_start_datetime))
+                .map((order) => (
                 <TableRow
                   key={order.id}
                   className="cursor-pointer hover:bg-muted/50"

@@ -18,11 +18,14 @@ logger = logging.getLogger("aero")
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 AdminUser = Annotated[User, Depends(require_role("Administrator"))]
+UsersReader = Annotated[
+    User, Depends(require_role("Administrator", "Osoba nadzorująca", "Pilot"))
+]
 
 
 @router.get("", response_model=list[UserResponse])
 async def list_users(
-    _admin: AdminUser,
+    _user: UsersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> list[User]:
     """List all system users. Admin only."""
@@ -62,7 +65,7 @@ async def create_user(
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: int,
-    _admin: AdminUser,
+    _user: UsersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
     """Get a user by ID. Admin only."""

@@ -334,6 +334,21 @@ export function OperationFormPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Client-side validation for required fields
+    if (!orderNumber.trim()) {
+      setError(t('operations.validationOrderNumberRequired'));
+      return;
+    }
+    if (!shortDescription.trim()) {
+      setError(t('operations.validationShortDescriptionRequired'));
+      return;
+    }
+    if (activityTypes.length === 0) {
+      setError(t('operations.validationActivityTypeRequired'));
+      return;
+    }
+
     saveMutation.mutate();
   }
 
@@ -405,7 +420,11 @@ export function OperationFormPage() {
           status={currentStatus}
           isSupervisor={isSupervisor}
           isPlanner={isPlanner}
-          onConfirm={() => setShowConfirmDialog(true)}
+          onConfirm={() => {
+            setConfirmPlannedEarliest(operation?.proposed_date_earliest ?? "");
+            setConfirmPlannedLatest(operation?.proposed_date_latest ?? "");
+            setShowConfirmDialog(true);
+          }}
           onReject={() => setShowRejectDialog(true)}
           onResign={() => setShowResignDialog(true)}
           rejectPending={rejectMutation.isPending}
@@ -418,7 +437,7 @@ export function OperationFormPage() {
         <div className="rounded-md bg-surface-container-low p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="orderNumber">{t('operations.orderNumber')}</Label>
+              <Label htmlFor="orderNumber">{t('operations.orderNumber')} *</Label>
               <Input
                 id="orderNumber"
                 value={orderNumber}
@@ -429,7 +448,7 @@ export function OperationFormPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="shortDescription">{t('operations.shortDescription')}</Label>
+              <Label htmlFor="shortDescription">{t('operations.shortDescription')} *</Label>
               <Input
                 id="shortDescription"
                 value={shortDescription}
@@ -441,7 +460,7 @@ export function OperationFormPage() {
 
             {/* Activity types checkboxes */}
             <div className="space-y-2">
-              <Label>{t('operations.activityTypesLabel')}</Label>
+              <Label>{t('operations.activityTypesLabel')} *</Label>
               <div className="flex flex-wrap gap-3">
                 {ACTIVITY_TYPE_OPTIONS.map((opt) => (
                   <label

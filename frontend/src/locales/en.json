@@ -235,7 +235,10 @@
     "activityTypePhotos": "photos",
     "activityTypePatrolling": "patrolling",
     "loadingError": "Loading error",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "validationOrderNumberRequired": "Order number is required",
+    "validationShortDescriptionRequired": "Short description is required",
+    "validationActivityTypeRequired": "Select at least one activity type"
   },
   "orders": {
     "title": "Flight Orders",

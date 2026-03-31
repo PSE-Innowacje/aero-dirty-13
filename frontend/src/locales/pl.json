@@ -236,7 +236,10 @@
     "activityTypePhotos": "zdjęcia",
     "activityTypePatrolling": "patrolowanie",
     "loadingError": "Błąd ładowania",
-    "unknownError": "Nieznany błąd"
+    "unknownError": "Nieznany błąd",
+    "validationOrderNumberRequired": "Nr zlecenia jest wymagany",
+    "validationShortDescriptionRequired": "Krótki opis jest wymagany",
+    "validationActivityTypeRequired": "Wybierz co najmniej jeden rodzaj czynności"
   },
   "orders": {
     "title": "Zlecenia lotnicze",

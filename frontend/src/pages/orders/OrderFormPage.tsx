@@ -307,9 +307,7 @@ export function OrderFormPage() {
         start_landing_site_id: Number(startSiteId),
         end_landing_site_id: Number(endSiteId),
         operation_ids: selectedOpIds,
-        estimated_route_km: estimatedRouteKm
-          ? Number(estimatedRouteKm)
-          : null,
+        estimated_route_km: Number(estimatedRouteKm),
       };
       return apiFetch<FlightOrderDetail>("/orders", {
         method: "POST",
@@ -564,6 +562,7 @@ export function OrderFormPage() {
           status={currentStatus}
           isPilot={isPilot}
           isSupervisor={isSupervisor}
+          hasActualTimes={!!order?.actual_start_datetime && !!order?.actual_end_datetime}
           onSubmit={() => submitMutation.mutate()}
           onAccept={() => acceptMutation.mutate()}
           onReject={() => setShowRejectDialog(true)}
@@ -654,7 +653,9 @@ export function OrderFormPage() {
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
-                  {allCrew.map((c) => (
+                  {[...allCrew]
+                    .sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`))
+                    .map((c) => (
                     <label
                       key={c.id}
                       className="flex items-center gap-2 text-sm py-0.5"
@@ -747,7 +748,9 @@ export function OrderFormPage() {
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
-                  {confirmedOps.map((op) => (
+                  {[...confirmedOps]
+                    .sort((a, b) => (a.planned_date_earliest || '').localeCompare(b.planned_date_earliest || ''))
+                    .map((op) => (
                     <label
                       key={op.id}
                       className="flex items-center gap-2 text-sm py-0.5"
@@ -778,14 +781,14 @@ export function OrderFormPage() {
 
             {/* Estimated route km */}
             <div className="space-y-2">
-              <Label htmlFor="routeKm">{t('orders.estimatedRouteKm')}</Label>
+              <Label htmlFor="routeKm">{t('orders.estimatedRouteKm')} *</Label>
               <Input
                 id="routeKm"
                 type="number"
-                min={0}
+                min={1}
                 value={estimatedRouteKm}
                 onChange={(e) => setEstimatedRouteKm(e.target.value)}
-                placeholder={t('orders.optional')}
+                required
               />
             </div>
 
@@ -1018,7 +1021,7 @@ export function OrderFormPage() {
                     <li key={op.id} className="text-sm">
                       #{op.id} — {op.short_description ?? t('orders.noDescription')}{" "}
                       <Badge variant="outline" className="ml-1 text-xs">
-                        Status {op.status}
+                        {t(`operations.status${op.status}`, { defaultValue: `Status ${op.status}` })}
                       </Badge>
                     </li>
                   ))}
@@ -1128,6 +1131,7 @@ function OrderStatusActions({
   status,
   isPilot,
   isSupervisor,
+  hasActualTimes,
   onSubmit,
   onAccept,
   onReject,
@@ -1144,6 +1148,7 @@ function OrderStatusActions({
   status: number;
   isPilot: boolean;
   isSupervisor: boolean;
+  hasActualTimes: boolean;
   onSubmit: () => void;
   onAccept: () => void;
   onReject: () => void;
@@ -1195,7 +1200,7 @@ function OrderStatusActions({
         <>
           <Button
             onClick={onCompletePartial}
-            disabled={completePartialPending}
+            disabled={completePartialPending || !hasActualTimes}
             className="bg-orange-500 hover:bg-orange-600"
           >
             {completePartialPending
@@ -1204,7 +1209,7 @@ function OrderStatusActions({
           </Button>
           <Button
             onClick={onCompleteFull}
-            disabled={completeFullPending}
+            disabled={completeFullPending || !hasActualTimes}
             className="bg-green-600 hover:bg-green-700"
           >
             {completeFullPending

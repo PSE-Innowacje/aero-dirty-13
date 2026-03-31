@@ -52,7 +52,7 @@ class FlightOrderCreate(BaseModel):
     start_landing_site_id: int
     end_landing_site_id: int
     operation_ids: list[int]
-    estimated_route_km: Optional[int] = None
+    estimated_route_km: int
 
 
 class FlightOrderUpdate(BaseModel):

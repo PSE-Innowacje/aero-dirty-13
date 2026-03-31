@@ -158,8 +158,6 @@ async def _get_order_or_404(order_id: int, db: AsyncSession) -> FlightOrder:
 async def _validate_fk_entities(
     body: FlightOrderCreate | FlightOrderUpdate,
     db: AsyncSession,
-    *,
-    is_update: bool = False,
 ) -> tuple[
     Helicopter | None,
     list[CrewMember],
@@ -217,7 +215,7 @@ async def _validate_fk_entities(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Operation {oid} not found",
                 )
-            if not is_update and op.status != 3:
+            if op.status != 3:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Operation {oid} is not in status 3 (confirmed), current status: {op.status}",
@@ -390,13 +388,20 @@ async def update_order(
     """
     order = await _get_order_or_404(order_id, db)
 
+    # Block edits on terminal statuses (5, 6, 7) and submitted-for-approval (2)
+    if order.status in {2, 5, 6, 7}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot edit order in status {order.status}",
+        )
+
     update_data = body.model_dump(exclude_unset=True)
     if not update_data:
         return _serialize_order(order)
 
     # Validate FK entities if any references changed
     helicopter, crew_members, operations, _start, _end = await _validate_fk_entities(
-        body, db, is_update=True
+        body, db
     )
 
     # Apply simple field updates
@@ -609,7 +614,6 @@ async def not_completed(
     """Not completed (status 4→7). Cascades operations back to status 3. Pilot only."""
     order = await _get_order_or_404(order_id, db)
     _check_status_transition(order, 4, "not-completed")
-    _check_settlement_prereqs(order)
 
     order.status = 7
     await _cascade_operations_status(order, 3, db)

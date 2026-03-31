@@ -27,11 +27,14 @@ export default function App() {
             {/* Dashboard — all roles */}
             <Route path="/" element={<DashboardPage />} />
 
-            {/* Users — Administrator only */}
-            <Route element={<RoleGuard allowedRoles={["Administrator"]} />}>
+            {/* Users — view: Admin, Supervisor, Pilot; write: Administrator only (backend enforced) */}
+            <Route element={<RoleGuard allowedRoles={["Administrator", "Osoba nadzorująca", "Pilot"]} />}>
               <Route path="/users" element={<UserListPage />} />
-              <Route path="/users/new" element={<UserFormPage />} />
               <Route path="/users/:id/edit" element={<UserFormPage />} />
+            </Route>
+            {/* Users create — Administrator only */}
+            <Route element={<RoleGuard allowedRoles={["Administrator"]} />}>
+              <Route path="/users/new" element={<UserFormPage />} />
             </Route>
 
             {/* Resources — Admin, Supervisor, Pilot (NOT Planner) */}
