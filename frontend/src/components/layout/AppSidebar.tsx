@@ -6,6 +6,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth";
+import { useTheme } from "@/lib/theme";
 import {
   Plane,
   Settings,
@@ -19,6 +20,8 @@ import {
   ChevronLeft,
   Menu,
   Globe,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -103,6 +106,7 @@ interface AppSidebarProps {
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const menuGroups = getMenuForRole(user?.system_role ?? "");
 
@@ -200,6 +204,25 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
           <Globe className="h-4 w-4 shrink-0" />
           {!collapsed && (
             <span>{currentLang === "pl" ? "EN" : "PL"}</span>
+          )}
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          title={theme === "dark" ? t("theme.light") : t("theme.dark")}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm text-on-surface-variant hover:bg-surface-container-high hover:text-foreground",
+            collapsed && "justify-center"
+          )}
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4 shrink-0" />
+          ) : (
+            <Moon className="h-4 w-4 shrink-0" />
+          )}
+          {!collapsed && (
+            <span>{theme === "dark" ? t("theme.light") : t("theme.dark")}</span>
           )}
         </button>
 

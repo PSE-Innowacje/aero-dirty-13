@@ -300,5 +300,9 @@
     "notCompleted": "Nie zrealizowane",
     "loadingError": "Błąd ładowania",
     "unknownError": "Nieznany błąd"
+  },
+  "theme": {
+    "dark": "Ciemny",
+    "light": "Jasny"
   }
 }

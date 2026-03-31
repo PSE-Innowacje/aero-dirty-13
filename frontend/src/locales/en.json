@@ -300,5 +300,9 @@
     "notCompleted": "Not completed",
     "loadingError": "Loading error",
     "unknownError": "Unknown error"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
   }
 }
