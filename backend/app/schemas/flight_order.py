@@ -66,6 +66,8 @@ class FlightOrderUpdate(BaseModel):
     end_landing_site_id: Optional[int] = None
     operation_ids: Optional[list[int]] = None
     estimated_route_km: Optional[int] = None
+    actual_start_datetime: Optional[datetime.datetime] = None
+    actual_end_datetime: Optional[datetime.datetime] = None
 
 
 # ── Response ─────────────────────────────────────────────────────────
