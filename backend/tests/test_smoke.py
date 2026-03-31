@@ -86,7 +86,9 @@ class TestSmokePlanner:
         resp = await client.post(
             "/api/operations",
             json={
+                "order_number": "SMOKE-001",
                 "short_description": "Smoke test op",
+                "activity_types": ["oględziny wizualne"],
                 "proposed_date_earliest": "2027-01-15",
                 "proposed_date_latest": "2027-01-20",
             },

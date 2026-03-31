@@ -32,9 +32,9 @@ STATUS_LABELS: dict[int, str] = {
 class OperationCreate(BaseModel):
     """Schema for creating a flight operation (no KML — uploaded separately)."""
 
-    order_number: Optional[str] = Field(None, max_length=30)
-    short_description: Optional[str] = Field(None, max_length=100)
-    activity_types: Optional[list[str]] = None
+    order_number: str = Field(..., min_length=1, max_length=30)
+    short_description: str = Field(..., min_length=1, max_length=100)
+    activity_types: list[str] = Field(..., min_length=1)
     additional_info: Optional[str] = Field(None, max_length=500)
     contact_emails: Optional[list[str]] = None
     proposed_date_earliest: Optional[datetime.date] = None

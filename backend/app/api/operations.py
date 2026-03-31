@@ -41,7 +41,7 @@ PlannerOnly = Annotated[User, Depends(require_role("Osoba planująca"))]
 AnyAuthenticated = Annotated[User, Depends(get_current_user)]
 
 # Fields Planner cannot modify (only Supervisor can set these via confirm)
-PLANNER_LOCKED_FIELDS = {"planned_date_earliest", "planned_date_latest"}
+PLANNER_LOCKED_FIELDS = {"planned_date_earliest", "planned_date_latest", "post_realization_notes"}
 
 # Updatable fields for audit tracking
 AUDITABLE_FIELDS = {

@@ -275,7 +275,9 @@ async def create_operation(
     resp = await client.post(
         "/api/operations",
         json={
+            "order_number": "TEST-OP-001",
             "short_description": "Test Op",
+            "activity_types": ["oględziny wizualne"],
             "proposed_date_earliest": proposed_earliest,
             "proposed_date_latest": proposed_latest,
         },

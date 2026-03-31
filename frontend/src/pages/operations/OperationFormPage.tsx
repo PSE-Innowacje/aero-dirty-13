@@ -579,6 +579,14 @@ export function OperationFormPage() {
               </div>
             )}
 
+            {isCreate && (
+              <div className="rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
+                <p className="text-sm text-blue-400">
+                  ℹ️ {t('operations.kmlUploadAfterCreate')}
+                </p>
+              </div>
+            )}
+
             {canEdit && (
               <div className="flex gap-3 pt-2">
                 <Button type="submit" disabled={saveMutation.isPending}>

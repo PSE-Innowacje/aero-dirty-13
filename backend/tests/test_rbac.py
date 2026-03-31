@@ -340,7 +340,9 @@ class TestOperationsRBAC:
         resp = await client.post(
             "/api/operations",
             json={
+                "order_number": f"OP-{role[:3].upper()}",
                 "short_description": f"Op by {role}",
+                "activity_types": ["oględziny wizualne"],
                 "proposed_date_earliest": "2027-05-01",
                 "proposed_date_latest": "2027-05-10",
             },

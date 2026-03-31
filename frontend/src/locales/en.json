@@ -238,7 +238,8 @@
     "unknownError": "Unknown error",
     "validationOrderNumberRequired": "Order number is required",
     "validationShortDescriptionRequired": "Short description is required",
-    "validationActivityTypeRequired": "Select at least one activity type"
+    "validationActivityTypeRequired": "Select at least one activity type",
+    "kmlUploadAfterCreate": "KML file (route) is required. After creating the operation you will be redirected to the detail page where you can upload the KML file."
   },
   "orders": {
     "title": "Flight Orders",

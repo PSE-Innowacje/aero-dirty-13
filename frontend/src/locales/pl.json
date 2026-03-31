@@ -239,7 +239,8 @@
     "unknownError": "Nieznany błąd",
     "validationOrderNumberRequired": "Nr zlecenia jest wymagany",
     "validationShortDescriptionRequired": "Krótki opis jest wymagany",
-    "validationActivityTypeRequired": "Wybierz co najmniej jeden rodzaj czynności"
+    "validationActivityTypeRequired": "Wybierz co najmniej jeden rodzaj czynności",
+    "kmlUploadAfterCreate": "Plik KML (trasa) jest wymagany. Po utworzeniu operacji zostaniesz przekierowany do strony szczegółów, gdzie możesz przesłać plik KML."
   },
   "orders": {
     "title": "Zlecenia lotnicze",
