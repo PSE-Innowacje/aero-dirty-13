@@ -5,6 +5,12 @@ import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { UserListPage } from "@/pages/users/UserListPage";
 import { UserFormPage } from "@/pages/users/UserFormPage";
+import { HelicopterListPage } from "@/pages/helicopters/HelicopterListPage";
+import { HelicopterFormPage } from "@/pages/helicopters/HelicopterFormPage";
+import { CrewListPage } from "@/pages/crew/CrewListPage";
+import { CrewFormPage } from "@/pages/crew/CrewFormPage";
+import { LandingSiteListPage } from "@/pages/landing-sites/LandingSiteListPage";
+import { LandingSiteFormPage } from "@/pages/landing-sites/LandingSiteFormPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 
 export default function App() {
@@ -18,9 +24,15 @@ export default function App() {
             <Route path="/users" element={<UserListPage />} />
             <Route path="/users/new" element={<UserFormPage />} />
             <Route path="/users/:id/edit" element={<UserFormPage />} />
-            <Route path="/helicopters" element={<PlaceholderPage />} />
-            <Route path="/crew" element={<PlaceholderPage />} />
-            <Route path="/landing-sites" element={<PlaceholderPage />} />
+            <Route path="/helicopters" element={<HelicopterListPage />} />
+            <Route path="/helicopters/new" element={<HelicopterFormPage />} />
+            <Route path="/helicopters/:id/edit" element={<HelicopterFormPage />} />
+            <Route path="/crew" element={<CrewListPage />} />
+            <Route path="/crew/new" element={<CrewFormPage />} />
+            <Route path="/crew/:id/edit" element={<CrewFormPage />} />
+            <Route path="/landing-sites" element={<LandingSiteListPage />} />
+            <Route path="/landing-sites/new" element={<LandingSiteFormPage />} />
+            <Route path="/landing-sites/:id/edit" element={<LandingSiteFormPage />} />
             <Route path="/operations" element={<PlaceholderPage />} />
             <Route path="/orders" element={<PlaceholderPage />} />
           </Route>
