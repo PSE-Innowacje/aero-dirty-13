@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,13 @@ const roleBadgeVariant: Record<string, "default" | "secondary"> = {
   Obserwator: "secondary",
 };
 
+const roleDisplayKey: Record<string, string> = {
+  Pilot: "crew.rolePilot",
+  Obserwator: "crew.roleObserver",
+};
+
 export function CrewListPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.system_role === "Administrator";
   const queryClient = useQueryClient();
@@ -70,7 +77,7 @@ export function CrewListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie członków załogi…</p>
+        <p className="text-muted-foreground">{t('crew.loading')}</p>
       </div>
     );
   }
@@ -79,7 +86,7 @@ export function CrewListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania: {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
         </p>
       </div>
     );
@@ -89,16 +96,16 @@ export function CrewListPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Członkowie załogi</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('crew.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie pilotami i obserwatorami
+            {t('crew.subtitle')}
           </p>
         </div>
         {isAdmin && (
           <Link to="/crew/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj członka załogi
+              {t('crew.addCrewMember')}
             </Button>
           </Link>
         )}
@@ -108,20 +115,20 @@ export function CrewListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Imię</TableHead>
-              <TableHead>Nazwisko</TableHead>
-              <TableHead>Rola</TableHead>
-              <TableHead>Nr licencji</TableHead>
-              <TableHead>Data szkolenia</TableHead>
-              {isAdmin && <TableHead className="text-right">Akcje</TableHead>}
+              <TableHead>{t('crew.email')}</TableHead>
+              <TableHead>{t('crew.firstName')}</TableHead>
+              <TableHead>{t('crew.lastName')}</TableHead>
+              <TableHead>{t('crew.role')}</TableHead>
+              <TableHead>{t('crew.licenseNumber')}</TableHead>
+              <TableHead>{t('crew.trainingDate')}</TableHead>
+              {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-8">
-                  Brak członków załogi
+                  {t('crew.noCrewMembers')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -132,7 +139,7 @@ export function CrewListPage() {
                   <TableCell>{c.last_name}</TableCell>
                   <TableCell>
                     <Badge variant={roleBadgeVariant[c.role] ?? "secondary"}>
-                      {c.role}
+                      {t(roleDisplayKey[c.role] ?? c.role)}
                     </Badge>
                   </TableCell>
                   <TableCell>{c.pilot_license_number ?? "—"}</TableCell>
@@ -140,7 +147,7 @@ export function CrewListPage() {
                   {isAdmin && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Link to={`/crew/${c.id}/edit`} title="Edytuj">
+                        <Link to={`/crew/${c.id}/edit`} title={t('common.edit')}>
                           <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -149,7 +156,7 @@ export function CrewListPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeleteTarget(c)}
-                          title="Usuń"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -167,25 +174,25 @@ export function CrewListPage() {
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
             <DialogDescription>
-              Czy na pewno chcesz usunąć członka załogi{" "}
+              {t('crew.confirmDeleteMsg')}{" "}
               <strong>
                 {deleteTarget?.first_name} {deleteTarget?.last_name}
               </strong>{" "}
-              ({deleteTarget?.email})? Tej operacji nie można cofnąć.
+              ({deleteTarget?.email})? {t('common.cannotUndo')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Usuwanie…" : "Usuń"}
+              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

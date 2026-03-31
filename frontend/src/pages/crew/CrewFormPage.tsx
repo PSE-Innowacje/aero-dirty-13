@@ -5,6 +5,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,13 @@ interface CrewMember {
 
 const ROLES = ["Pilot", "Obserwator"];
 
+const roleDisplayKey: Record<string, string> = {
+  Pilot: "crew.rolePilot",
+  Obserwator: "crew.roleObserver",
+};
+
 export function CrewFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -104,7 +111,7 @@ export function CrewFormPage() {
             const errors: Record<string, string> = {};
             for (const item of detail) {
               const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? "Nieprawidłowa wartość";
+              errors[field] = item.msg ?? t('common.invalidValue');
             }
             setFieldErrors(errors);
             setError(null);
@@ -127,15 +134,15 @@ export function CrewFormPage() {
     setFieldErrors({});
 
     const errors: Record<string, string> = {};
-    if (!firstName.trim()) errors.first_name = "Imię jest wymagane";
-    if (!lastName.trim()) errors.last_name = "Nazwisko jest wymagane";
-    if (!email.trim()) errors.email = "Email jest wymagany";
+    if (!firstName.trim()) errors.first_name = t('crew.validationFirstNameRequired');
+    if (!lastName.trim()) errors.last_name = t('crew.validationLastNameRequired');
+    if (!email.trim()) errors.email = t('crew.validationEmailRequired');
     const w = Number(weight);
-    if (isNaN(w) || w < 30 || w > 200) errors.weight = "Musi być między 30 a 200";
-    if (!trainingExpiry) errors.training_expiry = "Data szkolenia jest wymagana";
+    if (isNaN(w) || w < 30 || w > 200) errors.weight = t('crew.validationWeightRange');
+    if (!trainingExpiry) errors.training_expiry = t('crew.validationTrainingRequired');
     if (role === "Pilot") {
-      if (!pilotLicenseNumber.trim()) errors.pilot_license_number = "Nr licencji jest wymagany dla pilota";
-      if (!pilotLicenseExpiry) errors.pilot_license_expiry = "Data ważności licencji jest wymagana dla pilota";
+      if (!pilotLicenseNumber.trim()) errors.pilot_license_number = t('crew.validationLicenseRequired');
+      if (!pilotLicenseExpiry) errors.pilot_license_expiry = t('crew.validationLicenseExpiryRequired');
     }
 
     if (Object.keys(errors).length > 0) {
@@ -149,7 +156,7 @@ export function CrewFormPage() {
   if (isEdit && loadingExisting) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie…</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -159,17 +166,17 @@ export function CrewFormPage() {
       <div className="mb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/crew")} className="mb-2">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('common.backToList')}
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          {isEdit ? "Edytuj członka załogi" : "Nowy członek załogi"}
+          {isEdit ? t('crew.editTitle') : t('crew.newTitle')}
         </h1>
       </div>
 
       <div className="max-w-lg rounded-md border bg-white p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Imię *</Label>
+            <Label htmlFor="firstName">{t('crew.firstName')} *</Label>
             <Input
               id="firstName"
               value={firstName}
@@ -183,7 +190,7 @@ export function CrewFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Nazwisko *</Label>
+            <Label htmlFor="lastName">{t('crew.lastName')} *</Label>
             <Input
               id="lastName"
               value={lastName}
@@ -197,7 +204,7 @@ export function CrewFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t('crew.email')} *</Label>
             <Input
               id="email"
               type="email"
@@ -212,7 +219,7 @@ export function CrewFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="weight">Waga (kg) *</Label>
+            <Label htmlFor="weight">{t('crew.weight')} *</Label>
             <Input
               id="weight"
               type="number"
@@ -228,7 +235,7 @@ export function CrewFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Rola *</Label>
+            <Label htmlFor="role">{t('crew.role')} *</Label>
             <Select
               id="role"
               value={role}
@@ -236,7 +243,7 @@ export function CrewFormPage() {
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {t(roleDisplayKey[r] ?? r)}
                 </option>
               ))}
             </Select>
@@ -245,7 +252,7 @@ export function CrewFormPage() {
           {role === "Pilot" && (
             <>
               <div className="space-y-2">
-                <Label htmlFor="pilotLicenseNumber">Nr licencji pilota *</Label>
+                <Label htmlFor="pilotLicenseNumber">{t('crew.pilotLicenseNumber')} *</Label>
                 <Input
                   id="pilotLicenseNumber"
                   value={pilotLicenseNumber}
@@ -259,7 +266,7 @@ export function CrewFormPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pilotLicenseExpiry">Data ważności licencji *</Label>
+                <Label htmlFor="pilotLicenseExpiry">{t('crew.pilotLicenseExpiry')} *</Label>
                 <Input
                   id="pilotLicenseExpiry"
                   type="date"
@@ -275,7 +282,7 @@ export function CrewFormPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="trainingExpiry">Data szkolenia *</Label>
+            <Label htmlFor="trainingExpiry">{t('crew.trainingExpiry')} *</Label>
             <Input
               id="trainingExpiry"
               type="date"
@@ -297,13 +304,13 @@ export function CrewFormPage() {
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={saveMutation.isPending}>
               {saveMutation.isPending
-                ? "Zapisywanie…"
+                ? t('common.saving')
                 : isEdit
-                  ? "Zapisz zmiany"
-                  : "Utwórz członka załogi"}
+                  ? t('common.saveChanges')
+                  : t('crew.create')}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/crew")}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

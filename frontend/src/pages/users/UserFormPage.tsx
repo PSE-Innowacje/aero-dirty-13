@@ -5,6 +5,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { User } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,15 @@ const ROLES = [
   "Pilot",
 ];
 
+const roleDisplayKey: Record<string, string> = {
+  Administrator: "users.roleAdmin",
+  "Osoba planująca": "users.rolePlanner",
+  "Osoba nadzorująca": "users.roleSupervisor",
+  Pilot: "users.rolePilot",
+};
+
 export function UserFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -89,7 +98,7 @@ export function UserFormPage() {
             const errors: Record<string, string> = {};
             for (const item of detail) {
               const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? "Nieprawidłowa wartość";
+              errors[field] = item.msg ?? t('common.invalidValue');
             }
             setFieldErrors(errors);
             setError(null);
@@ -113,11 +122,11 @@ export function UserFormPage() {
 
     // Client-side validation
     const errors: Record<string, string> = {};
-    if (!firstName.trim()) errors.first_name = "Imię jest wymagane";
-    if (!lastName.trim()) errors.last_name = "Nazwisko jest wymagane";
-    if (!email.trim()) errors.email = "Email jest wymagany";
-    if (!isEdit && !password) errors.password = "Hasło jest wymagane";
-    if (password && password.length < 6) errors.password = "Minimum 6 znaków";
+    if (!firstName.trim()) errors.first_name = t('users.validationFirstNameRequired');
+    if (!lastName.trim()) errors.last_name = t('users.validationLastNameRequired');
+    if (!email.trim()) errors.email = t('users.validationEmailRequired');
+    if (!isEdit && !password) errors.password = t('users.validationPasswordRequired');
+    if (password && password.length < 6) errors.password = t('users.validationPasswordMin');
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -130,7 +139,7 @@ export function UserFormPage() {
   if (isEdit && loadingUser) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie…</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -140,17 +149,17 @@ export function UserFormPage() {
       <div className="mb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/users")} className="mb-2">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('common.backToList')}
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          {isEdit ? "Edytuj użytkownika" : "Nowy użytkownik"}
+          {isEdit ? t('users.editTitle') : t('users.newTitle')}
         </h1>
       </div>
 
       <div className="max-w-lg rounded-md border bg-white p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">Imię *</Label>
+            <Label htmlFor="firstName">{t('users.firstName')} *</Label>
             <Input
               id="firstName"
               value={firstName}
@@ -164,7 +173,7 @@ export function UserFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="lastName">Nazwisko *</Label>
+            <Label htmlFor="lastName">{t('users.lastName')} *</Label>
             <Input
               id="lastName"
               value={lastName}
@@ -178,7 +187,7 @@ export function UserFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t('users.email')} *</Label>
             <Input
               id="email"
               type="email"
@@ -194,7 +203,7 @@ export function UserFormPage() {
 
           <div className="space-y-2">
             <Label htmlFor="password">
-              Hasło {isEdit ? "(pozostaw puste aby nie zmieniać)" : "*"}
+              {t('users.password')} {isEdit ? t('users.passwordHintEdit') : "*"}
             </Label>
             <Input
               id="password"
@@ -210,7 +219,7 @@ export function UserFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Rola *</Label>
+            <Label htmlFor="role">{t('users.role')} *</Label>
             <Select
               id="role"
               value={systemRole}
@@ -218,7 +227,7 @@ export function UserFormPage() {
             >
               {ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {r}
+                  {t(roleDisplayKey[r] ?? r)}
                 </option>
               ))}
             </Select>
@@ -233,13 +242,13 @@ export function UserFormPage() {
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={saveMutation.isPending}>
               {saveMutation.isPending
-                ? "Zapisywanie…"
+                ? t('common.saving')
                 : isEdit
-                  ? "Zapisz zmiany"
-                  : "Utwórz użytkownika"}
+                  ? t('common.saveChanges')
+                  : t('users.create')}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/users")}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

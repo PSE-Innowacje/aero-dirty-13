@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ interface LandingSite {
 }
 
 export function LandingSiteListPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.system_role === "Administrator";
   const queryClient = useQueryClient();
@@ -59,7 +61,7 @@ export function LandingSiteListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie lądowisk…</p>
+        <p className="text-muted-foreground">{t('landingSites.loading')}</p>
       </div>
     );
   }
@@ -68,7 +70,7 @@ export function LandingSiteListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania: {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
         </p>
       </div>
     );
@@ -78,16 +80,16 @@ export function LandingSiteListPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Lądowiska</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('landingSites.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie miejscami lądowania
+            {t('landingSites.subtitle')}
           </p>
         </div>
         {isAdmin && (
           <Link to="/landing-sites/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj lądowisko
+              {t('landingSites.addLandingSite')}
             </Button>
           </Link>
         )}
@@ -97,17 +99,17 @@ export function LandingSiteListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nazwa</TableHead>
-              <TableHead>Szerokość</TableHead>
-              <TableHead>Długość</TableHead>
-              {isAdmin && <TableHead className="text-right">Akcje</TableHead>}
+              <TableHead>{t('landingSites.name')}</TableHead>
+              <TableHead>{t('landingSites.latitude')}</TableHead>
+              <TableHead>{t('landingSites.longitude')}</TableHead>
+              {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isAdmin ? 4 : 3} className="text-center text-muted-foreground py-8">
-                  Brak lądowisk
+                  {t('landingSites.noLandingSites')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -119,7 +121,7 @@ export function LandingSiteListPage() {
                   {isAdmin && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Link to={`/landing-sites/${s.id}/edit`} title="Edytuj">
+                        <Link to={`/landing-sites/${s.id}/edit`} title={t('common.edit')}>
                           <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -128,7 +130,7 @@ export function LandingSiteListPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeleteTarget(s)}
-                          title="Usuń"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -146,23 +148,23 @@ export function LandingSiteListPage() {
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
             <DialogDescription>
-              Czy na pewno chcesz usunąć lądowisko{" "}
+              {t('landingSites.confirmDeleteMsg')}{" "}
               <strong>{deleteTarget?.name}</strong>?
-              Tej operacji nie można cofnąć.
+              {" "}{t('common.cannotUndo')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Usuwanie…" : "Usuń"}
+              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

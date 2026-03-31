@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -28,15 +29,7 @@ interface OrderListItem {
   status: number;
 }
 
-const STATUS_LABELS: Record<number, string> = {
-  1: "Wprowadzona",
-  2: "Przekazane do akceptacji",
-  3: "Odrzucona",
-  4: "Zaakceptowana",
-  5: "Częściowo zrealizowana",
-  6: "Zrealizowana / Rozliczona",
-  7: "Rezygnacja",
-};
+const STATUS_KEYS = [1, 2, 3, 4, 5, 6, 7];
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -63,6 +56,7 @@ const STATUS_BADGE_CLASS: Record<number, string> = {
 export function OrderListPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   // Default filter: status=2 per PRD 6.6.g
   const [statusFilter, setStatusFilter] = useState<string>("2");
 
@@ -83,7 +77,7 @@ export function OrderListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie zleceń…</p>
+        <p className="text-muted-foreground">{t('orders.loading')}</p>
       </div>
     );
   }
@@ -92,8 +86,8 @@ export function OrderListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania:{" "}
-          {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('orders.loadingError')}:{" "}
+          {error instanceof Error ? error.message : t('orders.unknownError')}
         </p>
       </div>
     );
@@ -104,17 +98,17 @@ export function OrderListPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Zlecenia lotnicze
+            {t('orders.title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie zleceniami lotniczymi
+            {t('orders.subtitle')}
           </p>
         </div>
         {canCreate && (
           <Link to="/orders/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj zlecenie
+              {t('orders.addOrder')}
             </Button>
           </Link>
         )}
@@ -123,17 +117,17 @@ export function OrderListPage() {
       {/* Status filter */}
       <div className="mb-4 flex items-center gap-3">
         <label className="text-sm font-medium text-foreground">
-          Filtruj po statusie:
+          {t('orders.filterByStatus')}
         </label>
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="w-56"
         >
-          <option value="">Wszystkie</option>
-          {Object.entries(STATUS_LABELS).map(([val, label]) => (
+          <option value="">{t('orders.allStatuses')}</option>
+          {STATUS_KEYS.map((val) => (
             <option key={val} value={val}>
-              {label}
+              {t(`orders.status${val}`)}
             </option>
           ))}
         </Select>
@@ -143,11 +137,11 @@ export function OrderListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16">Nr</TableHead>
-              <TableHead>Planowany start</TableHead>
-              <TableHead>Helikopter</TableHead>
-              <TableHead>Pilot</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="w-16">{t('orders.id')}</TableHead>
+              <TableHead>{t('orders.plannedStart')}</TableHead>
+              <TableHead>{t('orders.helicopter')}</TableHead>
+              <TableHead>{t('orders.pilot')}</TableHead>
+              <TableHead>{t('common.status')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -157,7 +151,7 @@ export function OrderListPage() {
                   colSpan={5}
                   className="text-center text-muted-foreground py-8"
                 >
-                  Brak zleceń
+                  {t('orders.noOrders')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -182,8 +176,7 @@ export function OrderListPage() {
                       }
                       className={STATUS_BADGE_CLASS[order.status] ?? ""}
                     >
-                      {STATUS_LABELS[order.status] ??
-                        `Status ${order.status}`}
+                      {t(`orders.status${order.status}`, { defaultValue: `Status ${order.status}` })}
                     </Badge>
                   </TableCell>
                 </TableRow>

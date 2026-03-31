@@ -5,6 +5,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,13 @@ interface Helicopter {
 
 const STATUSES = ["aktywny", "nieaktywny"];
 
+const statusDisplayKey: Record<string, string> = {
+  aktywny: "helicopters.statusActive",
+  nieaktywny: "helicopters.statusInactive",
+};
+
 export function HelicopterFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -98,7 +105,7 @@ export function HelicopterFormPage() {
             const errors: Record<string, string> = {};
             for (const item of detail) {
               const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? "Nieprawidłowa wartość";
+              errors[field] = item.msg ?? t('common.invalidValue');
             }
             setFieldErrors(errors);
             setError(null);
@@ -121,15 +128,15 @@ export function HelicopterFormPage() {
     setFieldErrors({});
 
     const errors: Record<string, string> = {};
-    if (!registrationNumber.trim()) errors.registration_number = "Numer rejestracyjny jest wymagany";
-    if (!helicopterType.trim()) errors.helicopter_type = "Typ jest wymagany";
+    if (!registrationNumber.trim()) errors.registration_number = t('helicopters.validationRegistrationRequired');
+    if (!helicopterType.trim()) errors.helicopter_type = t('helicopters.validationTypeRequired');
     const crew = Number(maxCrew);
-    if (isNaN(crew) || crew < 1 || crew > 10) errors.max_crew = "Musi być między 1 a 10";
+    if (isNaN(crew) || crew < 1 || crew > 10) errors.max_crew = t('helicopters.validationMaxCrewRange');
     const payload = Number(maxPayloadWeight);
-    if (isNaN(payload) || payload < 1 || payload > 1000) errors.max_payload_weight = "Musi być między 1 a 1000";
+    if (isNaN(payload) || payload < 1 || payload > 1000) errors.max_payload_weight = t('helicopters.validationMaxPayloadRange');
     const range = Number(rangeKm);
-    if (isNaN(range) || range < 1 || range > 1000) errors.range_km = "Musi być między 1 a 1000";
-    if (status === "aktywny" && !inspectionDate) errors.inspection_date = "Data przeglądu jest wymagana dla aktywnych";
+    if (isNaN(range) || range < 1 || range > 1000) errors.range_km = t('helicopters.validationRangeKmRange');
+    if (status === "aktywny" && !inspectionDate) errors.inspection_date = t('helicopters.validationInspectionRequired');
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -142,7 +149,7 @@ export function HelicopterFormPage() {
   if (isEdit && loadingExisting) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie…</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -152,17 +159,17 @@ export function HelicopterFormPage() {
       <div className="mb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/helicopters")} className="mb-2">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('common.backToList')}
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          {isEdit ? "Edytuj helikopter" : "Nowy helikopter"}
+          {isEdit ? t('helicopters.editTitle') : t('helicopters.newTitle')}
         </h1>
       </div>
 
       <div className="max-w-lg rounded-md border bg-white p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="registrationNumber">Numer rejestracyjny *</Label>
+            <Label htmlFor="registrationNumber">{t('helicopters.registrationNumber')} *</Label>
             <Input
               id="registrationNumber"
               value={registrationNumber}
@@ -176,7 +183,7 @@ export function HelicopterFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="helicopterType">Typ *</Label>
+            <Label htmlFor="helicopterType">{t('helicopters.type')} *</Label>
             <Input
               id="helicopterType"
               value={helicopterType}
@@ -190,7 +197,7 @@ export function HelicopterFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Opis</Label>
+            <Label htmlFor="description">{t('helicopters.description')}</Label>
             <Input
               id="description"
               value={description}
@@ -203,7 +210,7 @@ export function HelicopterFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="maxCrew">Maks. załoga *</Label>
+            <Label htmlFor="maxCrew">{t('helicopters.maxCrew')} *</Label>
             <Input
               id="maxCrew"
               type="number"
@@ -219,7 +226,7 @@ export function HelicopterFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="maxPayloadWeight">Maks. ładowność (kg) *</Label>
+            <Label htmlFor="maxPayloadWeight">{t('helicopters.maxPayload')} *</Label>
             <Input
               id="maxPayloadWeight"
               type="number"
@@ -235,7 +242,7 @@ export function HelicopterFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status *</Label>
+            <Label htmlFor="status">{t('helicopters.statusLabel')} *</Label>
             <Select
               id="status"
               value={status}
@@ -243,7 +250,7 @@ export function HelicopterFormPage() {
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {t(statusDisplayKey[s] ?? s)}
                 </option>
               ))}
             </Select>
@@ -251,7 +258,7 @@ export function HelicopterFormPage() {
 
           {status === "aktywny" && (
             <div className="space-y-2">
-              <Label htmlFor="inspectionDate">Data przeglądu *</Label>
+              <Label htmlFor="inspectionDate">{t('helicopters.inspectionDate')} *</Label>
               <Input
                 id="inspectionDate"
                 type="date"
@@ -266,7 +273,7 @@ export function HelicopterFormPage() {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="rangeKm">Zasięg (km) *</Label>
+            <Label htmlFor="rangeKm">{t('helicopters.rangeKm')} *</Label>
             <Input
               id="rangeKm"
               type="number"
@@ -290,13 +297,13 @@ export function HelicopterFormPage() {
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={saveMutation.isPending}>
               {saveMutation.isPending
-                ? "Zapisywanie…"
+                ? t('common.saving')
                 : isEdit
-                  ? "Zapisz zmiany"
-                  : "Utwórz helikopter"}
+                  ? t('common.saveChanges')
+                  : t('helicopters.create')}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/helicopters")}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

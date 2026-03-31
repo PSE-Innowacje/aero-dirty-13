@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { Plane } from "lucide-react";
 
 export function LoginPage() {
   const { login, isAuthenticated, isLoading } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function LoginPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-950">
-        <p className="text-slate-400">Loading…</p>
+        <p className="text-slate-400">{t("common.loading")}</p>
       </div>
     );
   }
@@ -39,7 +41,7 @@ export function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : t("auth.loginFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -54,14 +56,14 @@ export function LoginPage() {
           </div>
           <CardTitle className="text-2xl text-white">AERO PSE</CardTitle>
           <CardDescription className="text-slate-400">
-            Sign in to your account
+            {t("auth.subtitle")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-300">
-                Email
+                {t("auth.email")}
               </Label>
               <Input
                 id="email"
@@ -75,7 +77,7 @@ export function LoginPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-slate-300">
-                Password
+                {t("auth.password")}
               </Label>
               <Input
                 id="password"
@@ -94,7 +96,7 @@ export function LoginPage() {
               className="w-full bg-blue-600 text-white hover:bg-blue-700"
               disabled={submitting}
             >
-              {submitting ? "Signing in…" : "Sign in"}
+              {submitting ? t("auth.signingIn") : t("auth.signIn")}
             </Button>
           </form>
         </CardContent>

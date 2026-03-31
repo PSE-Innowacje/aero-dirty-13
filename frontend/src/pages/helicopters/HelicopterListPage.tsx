@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,13 @@ const statusBadgeVariant: Record<string, "default" | "secondary"> = {
   nieaktywny: "secondary",
 };
 
+const statusDisplayKey: Record<string, string> = {
+  aktywny: "helicopters.statusActive",
+  nieaktywny: "helicopters.statusInactive",
+};
+
 export function HelicopterListPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdmin = user?.system_role === "Administrator";
   const queryClient = useQueryClient();
@@ -75,7 +82,7 @@ export function HelicopterListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie helikopterów…</p>
+        <p className="text-muted-foreground">{t('helicopters.loading')}</p>
       </div>
     );
   }
@@ -84,7 +91,7 @@ export function HelicopterListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania: {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
         </p>
       </div>
     );
@@ -94,16 +101,16 @@ export function HelicopterListPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Helikoptery</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('helicopters.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie flotą helikopterów
+            {t('helicopters.subtitle')}
           </p>
         </div>
         {isAdmin && (
           <Link to="/helicopters/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj helikopter
+              {t('helicopters.addHelicopter')}
             </Button>
           </Link>
         )}
@@ -113,19 +120,19 @@ export function HelicopterListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Numer rejestracyjny</TableHead>
-              <TableHead>Typ</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Data przeglądu</TableHead>
-              <TableHead>Zasięg (km)</TableHead>
-              {isAdmin && <TableHead className="text-right">Akcje</TableHead>}
+              <TableHead>{t('helicopters.registrationNumber')}</TableHead>
+              <TableHead>{t('helicopters.type')}</TableHead>
+              <TableHead>{t('common.status')}</TableHead>
+              <TableHead>{t('helicopters.inspectionDate')}</TableHead>
+              <TableHead>{t('helicopters.rangeKm')}</TableHead>
+              {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isAdmin ? 6 : 5} className="text-center text-muted-foreground py-8">
-                  Brak helikopterów
+                  {t('helicopters.noHelicopters')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -135,7 +142,7 @@ export function HelicopterListPage() {
                   <TableCell>{h.helicopter_type}</TableCell>
                   <TableCell>
                     <Badge variant={statusBadgeVariant[h.status] ?? "secondary"}>
-                      {h.status}
+                      {t(statusDisplayKey[h.status] ?? h.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>{h.inspection_date ?? "—"}</TableCell>
@@ -143,7 +150,7 @@ export function HelicopterListPage() {
                   {isAdmin && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Link to={`/helicopters/${h.id}/edit`} title="Edytuj">
+                        <Link to={`/helicopters/${h.id}/edit`} title={t('common.edit')}>
                           <Button variant="ghost" size="icon">
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -152,7 +159,7 @@ export function HelicopterListPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => setDeleteTarget(h)}
-                          title="Usuń"
+                          title={t('common.delete')}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
@@ -170,23 +177,23 @@ export function HelicopterListPage() {
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
             <DialogDescription>
-              Czy na pewno chcesz usunąć helikopter{" "}
+              {t('helicopters.confirmDeleteMsg')}{" "}
               <strong>{deleteTarget?.registration_number}</strong> ({deleteTarget?.helicopter_type})?
-              Tej operacji nie można cofnąć.
+              {" "}{t('common.cannotUndo')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Usuwanie…" : "Usuń"}
+              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

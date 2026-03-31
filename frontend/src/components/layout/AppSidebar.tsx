@@ -1,7 +1,9 @@
 /**
  * AppSidebar — Dark sidebar with AERO branding, RBAC-filtered menu groups per PRD 7.1/7.2.
+ * Internationalized via react-i18next. RBAC filtering uses stable `id` fields, not translated labels.
  */
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth";
 import {
   Plane,
@@ -15,69 +17,76 @@ import {
   Navigation,
   ChevronLeft,
   Menu,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ── Menu structure per PRD 7.1 ────────────────────────────── */
 interface MenuItem {
-  label: string;
+  id: string;
+  labelKey: string;
   href: string;
   icon: React.ElementType;
 }
 
 interface MenuGroup {
-  label: string;
+  id: string;
+  labelKey: string;
   icon: React.ElementType;
   items: MenuItem[];
 }
 
+/** Static menu structure — labels are translation keys, resolved at render time. */
 const ALL_MENU_GROUPS: MenuGroup[] = [
   {
-    label: "Administracja",
+    id: "admin",
+    labelKey: "sidebar.admin",
     icon: Settings,
     items: [
-      { label: "Helikoptery", href: "/helicopters", icon: Navigation },
-      { label: "Członkowie załogi", href: "/crew", icon: UserCog },
-      { label: "Lądowiska planowe", href: "/landing-sites", icon: MapPin },
-      { label: "Użytkownicy", href: "/users", icon: Users },
+      { id: "helicopters", labelKey: "sidebar.helicopters", href: "/helicopters", icon: Navigation },
+      { id: "crew", labelKey: "sidebar.crewMembers", href: "/crew", icon: UserCog },
+      { id: "landing-sites", labelKey: "sidebar.landingSites", href: "/landing-sites", icon: MapPin },
+      { id: "users", labelKey: "sidebar.users", href: "/users", icon: Users },
     ],
   },
   {
-    label: "Planowanie operacji",
+    id: "operations",
+    labelKey: "sidebar.operations",
     icon: ClipboardList,
     items: [
-      { label: "Lista operacji", href: "/operations", icon: ClipboardList },
+      { id: "operations-list", labelKey: "sidebar.operationsList", href: "/operations", icon: ClipboardList },
     ],
   },
   {
-    label: "Zlecenia na lot",
+    id: "orders",
+    labelKey: "sidebar.orders",
     icon: FileText,
     items: [
-      { label: "Lista zleceń", href: "/orders", icon: FileText },
+      { id: "orders-list", labelKey: "sidebar.ordersList", href: "/orders", icon: FileText },
     ],
   },
 ];
 
-/* ── RBAC filtering per PRD 7.2 ────────────────────────────── */
+/* ── RBAC filtering per PRD 7.2 — uses stable group ids ────── */
 type RoleKey = "Administrator" | "Osoba planująca" | "Osoba nadzorująca" | "Pilot";
 
 const ROLE_ALLOWED_GROUPS: Record<RoleKey, string[]> = {
-  "Administrator": ["Administracja", "Planowanie operacji", "Zlecenia na lot"],
-  "Osoba planująca": ["Planowanie operacji"],
-  "Osoba nadzorująca": ["Administracja", "Planowanie operacji", "Zlecenia na lot"],
-  "Pilot": ["Administracja", "Planowanie operacji", "Zlecenia na lot"],
+  "Administrator": ["admin", "operations", "orders"],
+  "Osoba planująca": ["operations"],
+  "Osoba nadzorująca": ["admin", "operations", "orders"],
+  "Pilot": ["admin", "operations", "orders"],
 };
 
 function getMenuForRole(role: string): MenuGroup[] {
   const allowed = ROLE_ALLOWED_GROUPS[role as RoleKey];
   if (!allowed) return [];
 
-  return ALL_MENU_GROUPS.filter((g) => allowed.includes(g.label)).map((group) => {
+  return ALL_MENU_GROUPS.filter((g) => allowed.includes(g.id)).map((group) => {
     // Administracja: only Użytkownicy for Admin (full CRUD) — others see view links minus Użytkownicy
-    if (group.label === "Administracja" && role !== "Administrator") {
+    if (group.id === "admin" && role !== "Administrator") {
       return {
         ...group,
-        items: group.items.filter((item) => item.label !== "Użytkownicy"),
+        items: group.items.filter((item) => item.id !== "users"),
       };
     }
     return group;
@@ -93,8 +102,15 @@ interface AppSidebarProps {
 
 export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   const { user, logout } = useAuth();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const menuGroups = getMenuForRole(user?.system_role ?? "");
+
+  const currentLang = i18n.language;
+  const toggleLanguage = () => {
+    const next = currentLang === "pl" ? "en" : "pl";
+    i18n.changeLanguage(next);
+  };
 
   return (
     <aside
@@ -110,7 +126,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600">
               <Plane className="h-4 w-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-white">AERO</span>
+            <span className="text-lg font-bold text-white">{t("sidebar.brand")}</span>
           </div>
         )}
         <button
@@ -125,12 +141,12 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 py-4">
         {menuGroups.map((group) => (
-          <div key={group.label} className="mb-6">
+          <div key={group.id} className="mb-6">
             {!collapsed && (
               <div className="mb-2 flex items-center gap-2 px-2">
                 <group.icon className="h-4 w-4 text-slate-500" />
                 <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  {group.label}
+                  {t(group.labelKey)}
                 </span>
               </div>
             )}
@@ -141,7 +157,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                   <li key={item.href}>
                     <Link
                       to={item.href}
-                      title={collapsed ? item.label : undefined}
+                      title={collapsed ? t(item.labelKey) : undefined}
                       className={cn(
                         "flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors",
                         isActive
@@ -151,7 +167,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                       )}
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.label}</span>}
+                      {!collapsed && <span>{t(item.labelKey)}</span>}
                     </Link>
                   </li>
                 );
@@ -161,7 +177,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         ))}
       </nav>
 
-      {/* Footer — user info + logout */}
+      {/* Footer — user info + language toggle + logout */}
       <div className="border-t border-slate-800 p-3">
         {!collapsed && user && (
           <div className="mb-2 px-1">
@@ -171,16 +187,33 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
             <p className="truncate text-xs text-slate-500">{user.system_role}</p>
           </div>
         )}
+
+        {/* Language switcher */}
+        <button
+          onClick={toggleLanguage}
+          title={currentLang === "pl" ? t("language.en") : t("language.pl")}
+          className={cn(
+            "flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white",
+            collapsed && "justify-center"
+          )}
+        >
+          <Globe className="h-4 w-4 shrink-0" />
+          {!collapsed && (
+            <span>{currentLang === "pl" ? "EN" : "PL"}</span>
+          )}
+        </button>
+
+        {/* Logout */}
         <button
           onClick={logout}
-          title="Wyloguj"
+          title={t("sidebar.logout")}
           className={cn(
             "flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-white",
             collapsed && "justify-center"
           )}
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          {!collapsed && <span>Wyloguj</span>}
+          {!collapsed && <span>{t("sidebar.logout")}</span>}
         </button>
       </div>
     </aside>

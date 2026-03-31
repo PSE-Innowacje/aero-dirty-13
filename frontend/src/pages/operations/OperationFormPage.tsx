@@ -8,6 +8,7 @@
 import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError, getStoredToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -77,22 +78,14 @@ interface OperationDetail {
 // ── Constants ──────────────────────────────────────────────────────
 
 const ACTIVITY_TYPE_OPTIONS = [
-  "oględziny wizualne",
-  "skan 3D",
-  "lokalizacja awarii",
-  "zdjęcia",
-  "patrolowanie",
+  { value: "oględziny wizualne", labelKey: "operations.activityTypeVisualInspection" },
+  { value: "skan 3D", labelKey: "operations.activityType3dScan" },
+  { value: "lokalizacja awarii", labelKey: "operations.activityTypeFaultLocation" },
+  { value: "zdjęcia", labelKey: "operations.activityTypePhotos" },
+  { value: "patrolowanie", labelKey: "operations.activityTypePatrolling" },
 ];
 
-const STATUS_LABELS: Record<number, string> = {
-  1: "Wprowadzona",
-  2: "Odrzucona",
-  3: "Potwierdzona",
-  4: "Zaplanowana",
-  5: "Częściowo zrealizowana",
-  6: "Zrealizowana",
-  7: "Rezygnacja",
-};
+// Status labels now use t('operations.statusN') via i18n
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white border-transparent",
@@ -112,6 +105,7 @@ export function OperationFormPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const role = user?.system_role ?? "";
   const isPlanner = role === "Osoba planująca";
@@ -252,7 +246,7 @@ export function OperationFormPage() {
         setKmlFile(null);
       }
     } catch (err) {
-      setKmlError(err instanceof Error ? err.message : "Błąd przesyłania");
+      setKmlError(err instanceof Error ? err.message : t('operations.uploadError'));
     } finally {
       setKmlUploading(false);
     }
@@ -329,9 +323,9 @@ export function OperationFormPage() {
     saveMutation.mutate();
   }
 
-  function handleActivityToggle(type: string) {
+  function handleActivityToggle(value: string) {
     setActivityTypes((prev) =>
-      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value]
     );
   }
 
@@ -339,7 +333,7 @@ export function OperationFormPage() {
   if (!isCreate && loadingOp) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie operacji…</p>
+        <p className="text-muted-foreground">{t('operations.loading')}</p>
       </div>
     );
   }
@@ -357,23 +351,23 @@ export function OperationFormPage() {
           className="mb-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('operations.backToList')}
         </Button>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-foreground">
             {isCreate
-              ? "Nowa operacja lotnicza"
-              : `Operacja #${operation?.id}`}
+              ? t('operations.newOperation')
+              : t('operations.operationNumber', { id: operation?.id })}
           </h1>
           {!isCreate && (
             <Badge className={STATUS_BADGE_CLASS[currentStatus] ?? ""}>
-              {STATUS_LABELS[currentStatus] ?? `Status ${currentStatus}`}
+              {t(`operations.status${currentStatus}`, { defaultValue: `Status ${currentStatus}` })}
             </Badge>
           )}
         </div>
         {!isCreate && operation && (
           <p className="text-sm text-muted-foreground mt-1">
-            Utworzona przez: {operation.created_by_email}
+            {t('operations.createdBy', { email: operation.created_by_email })}
             {operation.created_at &&
               ` • ${new Date(operation.created_at).toLocaleString("pl-PL")}`}
           </p>
@@ -406,7 +400,7 @@ export function OperationFormPage() {
         <div className="rounded-md border bg-white p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="orderNumber">Nr zlecenia</Label>
+              <Label htmlFor="orderNumber">{t('operations.orderNumber')}</Label>
               <Input
                 id="orderNumber"
                 value={orderNumber}
@@ -417,7 +411,7 @@ export function OperationFormPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="shortDescription">Krótki opis</Label>
+              <Label htmlFor="shortDescription">{t('operations.shortDescription')}</Label>
               <Input
                 id="shortDescription"
                 value={shortDescription}
@@ -429,28 +423,28 @@ export function OperationFormPage() {
 
             {/* Activity types checkboxes */}
             <div className="space-y-2">
-              <Label>Rodzaj czynności</Label>
+              <Label>{t('operations.activityTypesLabel')}</Label>
               <div className="flex flex-wrap gap-3">
-                {ACTIVITY_TYPE_OPTIONS.map((type) => (
+                {ACTIVITY_TYPE_OPTIONS.map((opt) => (
                   <label
-                    key={type}
+                    key={opt.value}
                     className="flex items-center gap-1.5 text-sm"
                   >
                     <input
                       type="checkbox"
-                      checked={activityTypes.includes(type)}
-                      onChange={() => handleActivityToggle(type)}
+                      checked={activityTypes.includes(opt.value)}
+                      onChange={() => handleActivityToggle(opt.value)}
                       disabled={!canEdit}
                       className="rounded border-input"
                     />
-                    {type}
+                    {t(opt.labelKey)}
                   </label>
                 ))}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="additionalInfo">Informacje dodatkowe</Label>
+              <Label htmlFor="additionalInfo">{t('operations.additionalInfo')}</Label>
               <Textarea
                 id="additionalInfo"
                 value={additionalInfo}
@@ -465,7 +459,7 @@ export function OperationFormPage() {
 
             <div className="space-y-2">
               <Label htmlFor="contactEmails">
-                E-maile kontaktowe (rozdzielone przecinkami)
+                {t('operations.contactEmails')}
               </Label>
               <Input
                 id="contactEmails"
@@ -480,7 +474,7 @@ export function OperationFormPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="proposedDateEarliest">
-                  Proponowana data od
+                  {t('operations.proposedDateFrom')}
                 </Label>
                 <Input
                   id="proposedDateEarliest"
@@ -491,7 +485,7 @@ export function OperationFormPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="proposedDateLatest">Proponowana data do</Label>
+                <Label htmlFor="proposedDateLatest">{t('operations.proposedDateTo')}</Label>
                 <Input
                   id="proposedDateLatest"
                   type="date"
@@ -507,7 +501,7 @@ export function OperationFormPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="plannedDateEarliest">
-                    Planowana data od
+                    {t('operations.plannedDateFrom')}
                   </Label>
                   <Input
                     id="plannedDateEarliest"
@@ -518,7 +512,7 @@ export function OperationFormPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="plannedDateLatest">Planowana data do</Label>
+                  <Label htmlFor="plannedDateLatest">{t('operations.plannedDateTo')}</Label>
                   <Input
                     id="plannedDateLatest"
                     type="date"
@@ -534,17 +528,17 @@ export function OperationFormPage() {
               <div className="flex gap-3 pt-2">
                 <Button type="submit" disabled={saveMutation.isPending}>
                   {saveMutation.isPending
-                    ? "Zapisywanie…"
+                    ? t('operations.saving')
                     : isCreate
-                      ? "Utwórz operację"
-                      : "Zapisz zmiany"}
+                      ? t('operations.createOperation')
+                      : t('operations.saveChanges')}
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/operations")}
                 >
-                  Anuluj
+                  {t('operations.cancel')}
                 </Button>
               </div>
             )}
@@ -557,10 +551,10 @@ export function OperationFormPage() {
             {/* KML Upload */}
             {canEdit && (
               <div className="rounded-md border bg-white p-6">
-                <h2 className="text-lg font-semibold mb-3">Plik KML</h2>
+                <h2 className="text-lg font-semibold mb-3">{t('operations.kmlFile')}</h2>
                 {operation?.route_km != null && (
                   <p className="text-sm text-muted-foreground mb-3">
-                    Aktualna trasa: <strong>{operation.route_km} km</strong>
+                    {t('operations.currentRouteText')} <strong>{operation.route_km} km</strong>
                   </p>
                 )}
                 <div className="flex items-center gap-3">
@@ -578,7 +572,7 @@ export function OperationFormPage() {
                     variant="outline"
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    {kmlUploading ? "Przesyłanie…" : "Prześlij KML"}
+                    {kmlUploading ? t('operations.uploading') : t('operations.uploadKml')}
                   </Button>
                 </div>
                 {kmlError && (
@@ -592,7 +586,7 @@ export function OperationFormPage() {
               operation.route_coordinates.length > 0 && (
                 <div className="rounded-md border bg-white p-6">
                   <h2 className="text-lg font-semibold mb-3">
-                    Mapa trasy
+                    {t('operations.routeMap')}
                     {operation.route_km != null &&
                       ` (${operation.route_km} km)`}
                   </h2>
@@ -610,16 +604,16 @@ export function OperationFormPage() {
       {/* Audit Trail (detail mode only) */}
       {!isCreate && operation && operation.audit_logs.length > 0 && (
         <div className="mt-6 rounded-md border bg-white p-6">
-          <h2 className="text-lg font-semibold mb-3">Historia zmian</h2>
+          <h2 className="text-lg font-semibold mb-3">{t('operations.auditTrail')}</h2>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Pole</TableHead>
-                  <TableHead>Stara wartość</TableHead>
-                  <TableHead>Nowa wartość</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Osoba</TableHead>
+                  <TableHead>{t('operations.auditField')}</TableHead>
+                  <TableHead>{t('operations.auditOldValue')}</TableHead>
+                  <TableHead>{t('operations.auditNewValue')}</TableHead>
+                  <TableHead>{t('operations.auditDate')}</TableHead>
+                  <TableHead>{t('operations.auditPerson')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -647,11 +641,11 @@ export function OperationFormPage() {
       {/* Comments (detail mode only) */}
       {!isCreate && operation && (
         <div className="mt-6 rounded-md border bg-white p-6">
-          <h2 className="text-lg font-semibold mb-3">Komentarze</h2>
+          <h2 className="text-lg font-semibold mb-3">{t('operations.comments')}</h2>
 
           {operation.comments.length === 0 ? (
             <p className="text-sm text-muted-foreground mb-4">
-              Brak komentarzy
+              {t('operations.noComments')}
             </p>
           ) : (
             <div className="space-y-3 mb-4">
@@ -679,7 +673,7 @@ export function OperationFormPage() {
               onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
                 setCommentText(e.target.value)
               }
-              placeholder="Dodaj komentarz…"
+              placeholder={t('operations.addCommentPlaceholder')}
               maxLength={500}
               rows={2}
               className="flex-1"
@@ -689,7 +683,7 @@ export function OperationFormPage() {
               disabled={!commentText.trim() || commentMutation.isPending}
               className="self-end"
             >
-              {commentMutation.isPending ? "Dodawanie…" : "Dodaj"}
+              {commentMutation.isPending ? t('operations.adding') : t('operations.addComment')}
             </Button>
           </div>
         </div>
@@ -702,14 +696,14 @@ export function OperationFormPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź operację</DialogTitle>
+            <DialogTitle>{t('operations.confirmOperation')}</DialogTitle>
             <DialogDescription>
-              Podaj planowane daty realizacji operacji.
+              {t('operations.confirmDescription')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="confirmEarliest">Planowana data od</Label>
+              <Label htmlFor="confirmEarliest">{t('operations.plannedDateFrom')}</Label>
               <Input
                 id="confirmEarliest"
                 type="date"
@@ -718,7 +712,7 @@ export function OperationFormPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmLatest">Planowana data do</Label>
+              <Label htmlFor="confirmLatest">{t('operations.plannedDateTo')}</Label>
               <Input
                 id="confirmLatest"
                 type="date"
@@ -732,7 +726,7 @@ export function OperationFormPage() {
               variant="outline"
               onClick={() => setShowConfirmDialog(false)}
             >
-              Anuluj
+              {t('operations.cancel')}
             </Button>
             <Button
               onClick={() => confirmMutation.mutate()}
@@ -742,7 +736,7 @@ export function OperationFormPage() {
                 confirmMutation.isPending
               }
             >
-              {confirmMutation.isPending ? "Potwierdzanie…" : "Potwierdź"}
+              {confirmMutation.isPending ? t('operations.confirming') : t('operations.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -772,6 +766,7 @@ function StatusActions({
   rejectPending: boolean;
   resignPending: boolean;
 }) {
+  const { t } = useTranslation();
   const showSupervisorActions = isSupervisor && status === 1;
   const showResign = isPlanner && [1, 3, 4].includes(status);
 
@@ -783,7 +778,7 @@ function StatusActions({
         <>
           <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700">
             <CheckCircle className="mr-2 h-4 w-4" />
-            Potwierdź
+            {t('operations.confirm')}
           </Button>
           <Button
             variant="destructive"
@@ -791,7 +786,7 @@ function StatusActions({
             disabled={rejectPending}
           >
             <XCircle className="mr-2 h-4 w-4" />
-            {rejectPending ? "Odrzucanie…" : "Odrzuć"}
+            {rejectPending ? t('operations.rejecting') : t('operations.reject')}
           </Button>
         </>
       )}
@@ -802,7 +797,7 @@ function StatusActions({
           disabled={resignPending}
         >
           <LogOut className="mr-2 h-4 w-4" />
-          {resignPending ? "Rezygnacja…" : "Rezygnuj"}
+          {resignPending ? t('operations.resigning') : t('operations.resign')}
         </Button>
       )}
     </div>

@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import type { User } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,15 @@ const roleBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
   Pilot: "secondary",
 };
 
+const roleDisplayKey: Record<string, string> = {
+  Administrator: "users.roleAdmin",
+  "Osoba planująca": "users.rolePlanner",
+  "Osoba nadzorująca": "users.roleSupervisor",
+  Pilot: "users.rolePilot",
+};
+
 export function UserListPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
@@ -57,7 +66,7 @@ export function UserListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie użytkowników…</p>
+        <p className="text-muted-foreground">{t('users.loading')}</p>
       </div>
     );
   }
@@ -66,7 +75,7 @@ export function UserListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania: {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
         </p>
       </div>
     );
@@ -76,15 +85,15 @@ export function UserListPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Użytkownicy</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie kontami użytkowników systemu
+            {t('users.subtitle')}
           </p>
         </div>
         <Link to="/users/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Dodaj użytkownika
+            {t('users.addUser')}
           </Button>
         </Link>
       </div>
@@ -93,18 +102,18 @@ export function UserListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Email</TableHead>
-              <TableHead>Imię</TableHead>
-              <TableHead>Nazwisko</TableHead>
-              <TableHead>Rola</TableHead>
-              <TableHead className="text-right">Akcje</TableHead>
+              <TableHead>{t('users.email')}</TableHead>
+              <TableHead>{t('users.firstName')}</TableHead>
+              <TableHead>{t('users.lastName')}</TableHead>
+              <TableHead>{t('users.role')}</TableHead>
+              <TableHead className="text-right">{t('common.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Brak użytkowników
+                  {t('users.noUsers')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -115,12 +124,12 @@ export function UserListPage() {
                   <TableCell>{u.last_name}</TableCell>
                   <TableCell>
                     <Badge variant={roleBadgeVariant[u.system_role] ?? "secondary"}>
-                      {u.system_role}
+                      {t(roleDisplayKey[u.system_role] ?? u.system_role)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Link to={`/users/${u.id}/edit`} title="Edytuj">
+                      <Link to={`/users/${u.id}/edit`} title={t('common.edit')}>
                         <Button variant="ghost" size="icon">
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -129,7 +138,7 @@ export function UserListPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setDeleteTarget(u)}
-                        title="Usuń"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -146,25 +155,25 @@ export function UserListPage() {
       <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Potwierdź usunięcie</DialogTitle>
+            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
             <DialogDescription>
-              Czy na pewno chcesz usunąć użytkownika{" "}
+              {t('users.confirmDeleteMsg')}{" "}
               <strong>
                 {deleteTarget?.first_name} {deleteTarget?.last_name}
               </strong>{" "}
-              ({deleteTarget?.email})? Tej operacji nie można cofnąć.
+              ({deleteTarget?.email})? {t('common.cannotUndo')}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
               disabled={deleteMutation.isPending}
             >
-              {deleteMutation.isPending ? "Usuwanie…" : "Usuń"}
+              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
             </Button>
           </DialogFooter>
         </DialogContent>

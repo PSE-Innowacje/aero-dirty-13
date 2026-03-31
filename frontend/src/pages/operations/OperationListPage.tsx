@@ -5,6 +5,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -33,15 +34,7 @@ interface OperationListItem {
   route_km: number | null;
 }
 
-const STATUS_LABELS: Record<number, string> = {
-  1: "Wprowadzona",
-  2: "Odrzucona",
-  3: "Potwierdzona",
-  4: "Zaplanowana",
-  5: "Częściowo zrealizowana",
-  6: "Zrealizowana",
-  7: "Rezygnacja",
-};
+const STATUS_KEYS = [1, 2, 3, 4, 5, 6, 7];
 
 type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 
@@ -74,6 +67,7 @@ function formatDateRange(earliest: string | null, latest: string | null): string
 export function OperationListPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   const canCreate =
@@ -95,7 +89,7 @@ export function OperationListPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie operacji…</p>
+        <p className="text-muted-foreground">{t('operations.loading')}</p>
       </div>
     );
   }
@@ -104,8 +98,8 @@ export function OperationListPage() {
     return (
       <div className="rounded-md border border-red-200 bg-red-50 p-4">
         <p className="text-sm text-red-600">
-          Błąd ładowania:{" "}
-          {error instanceof Error ? error.message : "Nieznany błąd"}
+          {t('operations.loadingError')}:{" "}
+          {error instanceof Error ? error.message : t('operations.unknownError')}
         </p>
       </div>
     );
@@ -116,17 +110,17 @@ export function OperationListPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            Operacje lotnicze
+            {t('operations.title')}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Zarządzanie operacjami lotniczymi
+            {t('operations.subtitle')}
           </p>
         </div>
         {canCreate && (
           <Link to="/operations/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Dodaj operację
+              {t('operations.addOperation')}
             </Button>
           </Link>
         )}
@@ -135,17 +129,17 @@ export function OperationListPage() {
       {/* Status filter */}
       <div className="mb-4 flex items-center gap-3">
         <label className="text-sm font-medium text-foreground">
-          Filtruj po statusie:
+          {t('operations.filterByStatus')}
         </label>
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="w-56"
         >
-          <option value="">Wszystkie</option>
-          {Object.entries(STATUS_LABELS).map(([val, label]) => (
+          <option value="">{t('operations.allStatuses')}</option>
+          {STATUS_KEYS.map((val) => (
             <option key={val} value={val}>
-              {label}
+              {t(`operations.status${val}`)}
             </option>
           ))}
         </Select>
@@ -155,13 +149,13 @@ export function OperationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-16">Nr</TableHead>
-              <TableHead>Nr zlecenia</TableHead>
-              <TableHead>Rodzaj czynności</TableHead>
-              <TableHead>Proponowane daty</TableHead>
-              <TableHead>Planowane daty</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Trasa km</TableHead>
+              <TableHead className="w-16">{t('operations.id')}</TableHead>
+              <TableHead>{t('operations.orderNumber')}</TableHead>
+              <TableHead>{t('operations.activityTypes')}</TableHead>
+              <TableHead>{t('operations.proposedDates')}</TableHead>
+              <TableHead>{t('operations.plannedDates')}</TableHead>
+              <TableHead>{t('common.status')}</TableHead>
+              <TableHead className="text-right">{t('operations.routeKm')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -171,7 +165,7 @@ export function OperationListPage() {
                   colSpan={7}
                   className="text-center text-muted-foreground py-8"
                 >
-                  Brak operacji
+                  {t('operations.noOperations')}
                 </TableCell>
               </TableRow>
             ) : (
@@ -203,7 +197,7 @@ export function OperationListPage() {
                       variant={STATUS_BADGE_VARIANT[op.status] ?? "secondary"}
                       className={STATUS_BADGE_CLASS[op.status] ?? ""}
                     >
-                      {STATUS_LABELS[op.status] ?? `Status ${op.status}`}
+                      {t(`operations.status${op.status}`, { defaultValue: `Status ${op.status}` })}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

@@ -5,6 +5,7 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ interface LandingSite {
 }
 
 export function LandingSiteFormPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -75,7 +77,7 @@ export function LandingSiteFormPage() {
             const errors: Record<string, string> = {};
             for (const item of detail) {
               const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? "Nieprawidłowa wartość";
+              errors[field] = item.msg ?? t('common.invalidValue');
             }
             setFieldErrors(errors);
             setError(null);
@@ -98,11 +100,11 @@ export function LandingSiteFormPage() {
     setFieldErrors({});
 
     const errors: Record<string, string> = {};
-    if (!name.trim()) errors.name = "Nazwa jest wymagana";
+    if (!name.trim()) errors.name = t('landingSites.validationNameRequired');
     const lat = Number(latitude);
-    if (isNaN(lat) || lat < -90 || lat > 90) errors.latitude = "Musi być między -90 a 90";
+    if (isNaN(lat) || lat < -90 || lat > 90) errors.latitude = t('landingSites.validationLatitudeRange');
     const lng = Number(longitude);
-    if (isNaN(lng) || lng < -180 || lng > 180) errors.longitude = "Musi być między -180 a 180";
+    if (isNaN(lng) || lng < -180 || lng > 180) errors.longitude = t('landingSites.validationLongitudeRange');
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -115,7 +117,7 @@ export function LandingSiteFormPage() {
   if (isEdit && loadingExisting) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie…</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -125,17 +127,17 @@ export function LandingSiteFormPage() {
       <div className="mb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/landing-sites")} className="mb-2">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('common.backToList')}
         </Button>
         <h1 className="text-2xl font-bold text-foreground">
-          {isEdit ? "Edytuj lądowisko" : "Nowe lądowisko"}
+          {isEdit ? t('landingSites.editTitle') : t('landingSites.newTitle')}
         </h1>
       </div>
 
       <div className="max-w-lg rounded-md border bg-white p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Nazwa *</Label>
+            <Label htmlFor="name">{t('landingSites.name')} *</Label>
             <Input
               id="name"
               value={name}
@@ -149,7 +151,7 @@ export function LandingSiteFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="latitude">Szerokość geograficzna *</Label>
+            <Label htmlFor="latitude">{t('landingSites.latitudeLabel')} *</Label>
             <Input
               id="latitude"
               type="number"
@@ -166,7 +168,7 @@ export function LandingSiteFormPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="longitude">Długość geograficzna *</Label>
+            <Label htmlFor="longitude">{t('landingSites.longitudeLabel')} *</Label>
             <Input
               id="longitude"
               type="number"
@@ -191,13 +193,13 @@ export function LandingSiteFormPage() {
           <div className="flex gap-3 pt-2">
             <Button type="submit" disabled={saveMutation.isPending}>
               {saveMutation.isPending
-                ? "Zapisywanie…"
+                ? t('common.saving')
                 : isEdit
-                  ? "Zapisz zmiany"
-                  : "Utwórz lądowisko"}
+                  ? t('common.saveChanges')
+                  : t('landingSites.create')}
             </Button>
             <Button type="button" variant="outline" onClick={() => navigate("/landing-sites")}>
-              Anuluj
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

@@ -8,6 +8,7 @@
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -99,15 +100,7 @@ interface OperationDetailForMap {
 
 // ── Constants ──────────────────────────────────────────────────────
 
-const STATUS_LABELS: Record<number, string> = {
-  1: "Wprowadzona",
-  2: "Przekazane do akceptacji",
-  3: "Odrzucona",
-  4: "Zaakceptowana",
-  5: "Częściowo zrealizowana",
-  6: "Zrealizowana / Rozliczona",
-  7: "Rezygnacja",
-};
+// Status labels now use t('orders.statusN') via i18n
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white border-transparent",
@@ -156,6 +149,7 @@ export function OrderFormPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const role = user?.system_role ?? "";
   const isPilot = role === "Pilot";
@@ -462,7 +456,7 @@ export function OrderFormPage() {
   if (!isCreate && loadingOrder) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Ładowanie zlecenia…</p>
+        <p className="text-muted-foreground">{t('orders.loading')}</p>
       </div>
     );
   }
@@ -495,21 +489,21 @@ export function OrderFormPage() {
           className="mb-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót do listy
+          {t('orders.backToList')}
         </Button>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-foreground">
-            {isCreate ? "Nowe zlecenie lotnicze" : `Zlecenie #${order?.id}`}
+            {isCreate ? t('orders.newOrder') : t('orders.orderNumber', { id: order?.id })}
           </h1>
           {!isCreate && (
             <Badge className={STATUS_BADGE_CLASS[currentStatus] ?? ""}>
-              {STATUS_LABELS[currentStatus] ?? `Status ${currentStatus}`}
+              {t(`orders.status${currentStatus}`, { defaultValue: `Status ${currentStatus}` })}
             </Badge>
           )}
         </div>
         {!isCreate && order && (
           <p className="text-sm text-muted-foreground mt-1">
-            Pilot: {order.pilot_name} • Utworzone przez: {order.created_by_email}
+            {t('orders.pilotLabel', { name: order.pilot_name })} • {t('orders.createdBy', { email: order.created_by_email })}
             {order.created_at &&
               ` • ${new Date(order.created_at).toLocaleString("pl-PL")}`}
           </p>
@@ -525,7 +519,7 @@ export function OrderFormPage() {
       {validationErrors.length > 0 && (
         <div className="rounded-md border border-red-200 bg-red-50 p-3 mb-4">
           <p className="text-sm font-semibold text-red-700 mb-1">
-            Walidacja bezpieczeństwa nie powiodła się:
+            {t('orders.safetyValidationFailed')}
           </p>
           <ul className="list-disc list-inside text-sm text-red-600">
             {validationErrors.map((err, i) => (
@@ -562,7 +556,7 @@ export function OrderFormPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Pilot — auto-filled, read-only */}
             <div className="space-y-2">
-              <Label>Pilot (auto-uzupełniony)</Label>
+              <Label>{t('orders.pilotAutoFilled')}</Label>
               <Input
                 value={
                   user
@@ -577,7 +571,7 @@ export function OrderFormPage() {
             {/* Planned dates */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="plannedStart">Planowany start</Label>
+                <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')}</Label>
                 <Input
                   id="plannedStart"
                   type="datetime-local"
@@ -587,7 +581,7 @@ export function OrderFormPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="plannedEnd">Planowany koniec</Label>
+                <Label htmlFor="plannedEnd">{t('orders.plannedEndLabel')}</Label>
                 <Input
                   id="plannedEnd"
                   type="datetime-local"
@@ -600,10 +594,10 @@ export function OrderFormPage() {
 
             {/* Helicopter dropdown */}
             <div className="space-y-2">
-              <Label htmlFor="helicopter">Helikopter</Label>
+              <Label htmlFor="helicopter">{t('orders.helicopterLabel')}</Label>
               {activeHelicopters.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Brak aktywnych helikopterów
+                  {t('orders.noActiveHelicopters')}
                 </p>
               ) : (
                 <Select
@@ -612,11 +606,10 @@ export function OrderFormPage() {
                   onChange={(e) => setHelicopterId(e.target.value)}
                   required
                 >
-                  <option value="">Wybierz helikopter…</option>
+                  <option value="">{t('orders.selectHelicopter')}</option>
                   {activeHelicopters.map((h) => (
                     <option key={h.id} value={h.id}>
-                      {h.registration_number} — {h.helicopter_type} (max{" "}
-                      {h.max_payload_weight} kg, zasięg {h.range_km} km)
+                      {h.registration_number} — {h.helicopter_type} ({t('orders.helicopterOptionSuffix', { maxPayload: h.max_payload_weight, range: h.range_km })})
                     </option>
                   ))}
                 </Select>
@@ -625,10 +618,10 @@ export function OrderFormPage() {
 
             {/* Crew multi-select with weight */}
             <div className="space-y-2">
-              <Label>Załoga</Label>
+              <Label>{t('orders.crewLabel')}</Label>
               {allCrew.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Brak członków załogi
+                  {t('orders.noCrewMembers')}
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
@@ -655,7 +648,7 @@ export function OrderFormPage() {
               )}
               {/* Weight summary */}
               <div className="text-sm mt-1">
-                <span className="font-medium">Waga załogi:</span>{" "}
+                <span className="font-medium">{t('orders.crewWeight')}</span>{" "}
                 <span
                   className={
                     selectedHelicopter &&
@@ -672,7 +665,7 @@ export function OrderFormPage() {
                     / {selectedHelicopter.max_payload_weight} kg max
                     {totalCrewWeight > selectedHelicopter.max_payload_weight && (
                       <span className="text-red-600 ml-1">
-                        ⚠ Przekroczono dopuszczalną masę!
+                        {t('orders.weightExceeded')}
                       </span>
                     )}
                   </span>
@@ -683,14 +676,14 @@ export function OrderFormPage() {
             {/* Landing sites */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startSite">Lądowisko startowe</Label>
+                <Label htmlFor="startSite">{t('orders.startLandingSite')}</Label>
                 <Select
                   id="startSite"
                   value={startSiteId}
                   onChange={(e) => setStartSiteId(e.target.value)}
                   required
                 >
-                  <option value="">Wybierz lądowisko…</option>
+                  <option value="">{t('orders.selectLandingSite')}</option>
                   {landingSites.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -699,14 +692,14 @@ export function OrderFormPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="endSite">Lądowisko końcowe</Label>
+                <Label htmlFor="endSite">{t('orders.endLandingSite')}</Label>
                 <Select
                   id="endSite"
                   value={endSiteId}
                   onChange={(e) => setEndSiteId(e.target.value)}
                   required
                 >
-                  <option value="">Wybierz lądowisko…</option>
+                  <option value="">{t('orders.selectLandingSite')}</option>
                   {landingSites.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -718,10 +711,10 @@ export function OrderFormPage() {
 
             {/* Operations multi-select */}
             <div className="space-y-2">
-              <Label>Operacje (status: Potwierdzona)</Label>
+              <Label>{t('orders.operationsConfirmed')}</Label>
               {confirmedOps.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Brak potwierdzonych operacji do przypisania
+                  {t('orders.noConfirmedOperations')}
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
@@ -737,7 +730,7 @@ export function OrderFormPage() {
                         className="rounded border-input"
                       />
                       <span>
-                        #{op.id} — {op.short_description || "Brak opisu"}
+                        #{op.id} — {op.short_description || t('orders.noDescription')}
                       </span>
                       {op.planned_date_earliest && (
                         <span className="text-muted-foreground">
@@ -756,29 +749,29 @@ export function OrderFormPage() {
 
             {/* Estimated route km */}
             <div className="space-y-2">
-              <Label htmlFor="routeKm">Szacowana trasa (km)</Label>
+              <Label htmlFor="routeKm">{t('orders.estimatedRouteKm')}</Label>
               <Input
                 id="routeKm"
                 type="number"
                 min={0}
                 value={estimatedRouteKm}
                 onChange={(e) => setEstimatedRouteKm(e.target.value)}
-                placeholder="opcjonalnie"
+                placeholder={t('orders.optional')}
               />
             </div>
 
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={createMutation.isPending}>
                 {createMutation.isPending
-                  ? "Tworzenie…"
-                  : "Utwórz zlecenie"}
+                  ? t('orders.creating')
+                  : t('orders.createOrder')}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/orders")}
               >
-                Anuluj
+                {t('orders.cancel')}
               </Button>
             </div>
           </form>
@@ -789,12 +782,12 @@ export function OrderFormPage() {
           {/* Left: Order details */}
           <div className="space-y-6">
             <div className="rounded-md border bg-white p-6 space-y-4">
-              <h2 className="text-lg font-semibold">Szczegóły zlecenia</h2>
+              <h2 className="text-lg font-semibold">{t('orders.orderDetails')}</h2>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">
-                    Planowany start
+                    {t('orders.plannedStartLabel')}
                   </Label>
                   <p className="text-sm font-medium">
                     {order
@@ -806,7 +799,7 @@ export function OrderFormPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">
-                    Planowany koniec
+                    {t('orders.plannedEndLabel')}
                   </Label>
                   <p className="text-sm font-medium">
                     {order
@@ -820,14 +813,14 @@ export function OrderFormPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-muted-foreground">Helikopter</Label>
+                  <Label className="text-muted-foreground">{t('orders.helicopter')}</Label>
                   <p className="text-sm font-medium">
                     {order?.helicopter_registration ?? "—"}
                   </p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">
-                    Szacowana trasa
+                    {t('orders.estimatedRoute')}
                   </Label>
                   <p className="text-sm font-medium">
                     {order?.estimated_route_km != null
@@ -838,7 +831,7 @@ export function OrderFormPage() {
               </div>
 
               <div>
-                <Label className="text-muted-foreground">Waga załogi</Label>
+                <Label className="text-muted-foreground">{t('orders.crewWeightLabel')}</Label>
                 <p className="text-sm font-medium">
                   {order?.crew_weight != null ? `${order.crew_weight} kg` : "—"}
                 </p>
@@ -847,7 +840,7 @@ export function OrderFormPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-muted-foreground">
-                    Lądowisko startowe
+                    {t('orders.startLandingSiteLabel')}
                   </Label>
                   <p className="text-sm font-medium">
                     {order?.start_landing_site_name ?? "—"}
@@ -855,7 +848,7 @@ export function OrderFormPage() {
                 </div>
                 <div>
                   <Label className="text-muted-foreground">
-                    Lądowisko końcowe
+                    {t('orders.endLandingSiteLabel')}
                   </Label>
                   <p className="text-sm font-medium">
                     {order?.end_landing_site_name ?? "—"}
@@ -868,11 +861,11 @@ export function OrderFormPage() {
             {isPilot && currentStatus === 4 && (
               <div className="rounded-md border bg-white p-6 space-y-4">
                 <h2 className="text-lg font-semibold">
-                  Rzeczywiste czasy realizacji
+                  {t('orders.actualTimes')}
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="actualStart">Rzeczywisty start</Label>
+                    <Label htmlFor="actualStart">{t('orders.actualStart')}</Label>
                     <Input
                       id="actualStart"
                       type="datetime-local"
@@ -881,7 +874,7 @@ export function OrderFormPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="actualEnd">Rzeczywisty koniec</Label>
+                    <Label htmlFor="actualEnd">{t('orders.actualEnd')}</Label>
                     <Input
                       id="actualEnd"
                       type="datetime-local"
@@ -895,8 +888,8 @@ export function OrderFormPage() {
                   disabled={updateMutation.isPending}
                 >
                   {updateMutation.isPending
-                    ? "Zapisywanie…"
-                    : "Zapisz czasy"}
+                    ? t('orders.savingTimes')
+                    : t('orders.saveTimes')}
                 </Button>
               </div>
             )}
@@ -906,12 +899,12 @@ export function OrderFormPage() {
               (order?.actual_start_datetime || order?.actual_end_datetime) && (
                 <div className="rounded-md border bg-white p-6 space-y-4">
                   <h2 className="text-lg font-semibold">
-                    Rzeczywiste czasy realizacji
+                    {t('orders.actualTimes')}
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-muted-foreground">
-                        Rzeczywisty start
+                        {t('orders.actualStart')}
                       </Label>
                       <p className="text-sm font-medium">
                         {order.actual_start_datetime
@@ -923,7 +916,7 @@ export function OrderFormPage() {
                     </div>
                     <div>
                       <Label className="text-muted-foreground">
-                        Rzeczywisty koniec
+                        {t('orders.actualEnd')}
                       </Label>
                       <p className="text-sm font-medium">
                         {order.actual_end_datetime
@@ -939,7 +932,7 @@ export function OrderFormPage() {
 
             {/* Crew members list */}
             <div className="rounded-md border bg-white p-6">
-              <h2 className="text-lg font-semibold mb-3">Załoga</h2>
+              <h2 className="text-lg font-semibold mb-3">{t('orders.crewSection')}</h2>
               {order && order.crew_members.length > 0 ? (
                 <ul className="space-y-1">
                   {order.crew_members.map((cm) => (
@@ -952,18 +945,18 @@ export function OrderFormPage() {
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-muted-foreground">Brak załogi</p>
+                <p className="text-sm text-muted-foreground">{t('orders.noCrew')}</p>
               )}
             </div>
 
             {/* Operations list */}
             <div className="rounded-md border bg-white p-6">
-              <h2 className="text-lg font-semibold mb-3">Operacje</h2>
+              <h2 className="text-lg font-semibold mb-3">{t('orders.operationsSection')}</h2>
               {order && order.operations.length > 0 ? (
                 <ul className="space-y-1">
                   {order.operations.map((op) => (
                     <li key={op.id} className="text-sm">
-                      #{op.id} — {op.short_description ?? "Brak opisu"}{" "}
+                      #{op.id} — {op.short_description ?? t('orders.noDescription')}{" "}
                       <Badge variant="outline" className="ml-1 text-xs">
                         Status {op.status}
                       </Badge>
@@ -972,7 +965,7 @@ export function OrderFormPage() {
                 </ul>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Brak powiązanych operacji
+                  {t('orders.noLinkedOperations')}
                 </p>
               )}
             </div>
@@ -983,7 +976,7 @@ export function OrderFormPage() {
             {(mapOperations.length > 0 || startSiteForMap || endSiteForMap) && (
               <div className="rounded-md border bg-white p-6">
                 <h2 className="text-lg font-semibold mb-3">
-                  Mapa trasy
+                  {t('orders.routeMap')}
                 </h2>
                 <OrderMap
                   operations={mapOperations}
@@ -1050,6 +1043,7 @@ function OrderStatusActions({
   completeFullPending: boolean;
   notCompletedPending: boolean;
 }) {
+  const { t } = useTranslation();
   const showSubmit = isPilot && status === 1;
   const showSupervisorActions = isSupervisor && status === 2;
   const showSettlement = isPilot && status === 4;
@@ -1060,7 +1054,7 @@ function OrderStatusActions({
     <div className="mb-6 flex flex-wrap gap-3">
       {showSubmit && (
         <Button onClick={onSubmit} disabled={submitPending}>
-          {submitPending ? "Wysyłanie…" : "Przekaż do akceptacji"}
+          {submitPending ? t('orders.submitting') : t('orders.submitForAcceptance')}
         </Button>
       )}
       {showSupervisorActions && (
@@ -1071,7 +1065,7 @@ function OrderStatusActions({
             className="bg-green-600 hover:bg-green-700"
           >
             <CheckCircle className="mr-2 h-4 w-4" />
-            {acceptPending ? "Akceptowanie…" : "Akceptuj"}
+            {acceptPending ? t('orders.accepting') : t('orders.accept')}
           </Button>
           <Button
             variant="destructive"
@@ -1079,7 +1073,7 @@ function OrderStatusActions({
             disabled={rejectPending}
           >
             <XCircle className="mr-2 h-4 w-4" />
-            {rejectPending ? "Odrzucanie…" : "Odrzuć"}
+            {rejectPending ? t('orders.rejecting') : t('orders.reject')}
           </Button>
         </>
       )}
@@ -1091,8 +1085,8 @@ function OrderStatusActions({
             className="bg-orange-500 hover:bg-orange-600"
           >
             {completePartialPending
-              ? "Przetwarzanie…"
-              : "Zrealizowane w części"}
+              ? t('orders.processing')
+              : t('orders.completePartial')}
           </Button>
           <Button
             onClick={onCompleteFull}
@@ -1100,15 +1094,15 @@ function OrderStatusActions({
             className="bg-green-600 hover:bg-green-700"
           >
             {completeFullPending
-              ? "Przetwarzanie…"
-              : "Zrealizowane w całości"}
+              ? t('orders.processing')
+              : t('orders.completeFull')}
           </Button>
           <Button
             variant="destructive"
             onClick={onNotCompleted}
             disabled={notCompletedPending}
           >
-            {notCompletedPending ? "Przetwarzanie…" : "Nie zrealizowane"}
+            {notCompletedPending ? t('orders.processing') : t('orders.notCompleted')}
           </Button>
         </>
       )}
