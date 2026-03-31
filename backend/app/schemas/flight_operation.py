@@ -199,6 +199,13 @@ class CommentEntry(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ConfirmRequest(BaseModel):
+    """Schema for confirming an operation — Supervisor provides planned dates."""
+
+    planned_date_earliest: datetime.date
+    planned_date_latest: datetime.date
+
+
 class CommentCreate(BaseModel):
     """Schema for creating a comment on an operation."""
 

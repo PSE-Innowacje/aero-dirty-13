@@ -23,6 +23,7 @@ from app.api.users import router as users_router
 from app.api.helicopters import router as helicopters_router
 from app.api.crew_members import router as crew_members_router
 from app.api.landing_sites import router as landing_sites_router
+from app.api.operations import router as operations_router
 
 # Import models so Base.metadata sees all tables
 import app.models  # noqa: F401
@@ -80,6 +81,7 @@ def create_app() -> FastAPI:
     application.include_router(helicopters_router)
     application.include_router(crew_members_router)
     application.include_router(landing_sites_router)
+    application.include_router(operations_router)
 
     return application
 
