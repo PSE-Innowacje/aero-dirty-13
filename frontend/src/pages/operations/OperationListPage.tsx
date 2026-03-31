@@ -1,16 +1,27 @@
 /**
- * OperationListPage — list flight operations with status filter and RBAC actions.
+ * OperationListPage — list flight operations with status filter, RBAC actions,
+ * and inline status change buttons per PRD 6.5 c/d/f/g.
  * Sorted by id DESC (newest first). Status badges with color mapping.
  */
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableHeader,
@@ -19,7 +30,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle, XCircle, Ban } from "lucide-react";
 
 interface OperationListItem {
   id: number;
@@ -67,12 +78,19 @@ function formatDateRange(earliest: string | null, latest: string | null): string
 export function OperationListPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const canCreate =
-    user?.system_role === "Osoba planująca" ||
-    user?.system_role === "Osoba nadzorująca";
+  const role = user?.system_role ?? "";
+  const isPlanner = role === "Osoba planująca";
+  const isSupervisor = role === "Osoba nadzorująca";
+  const canCreate = isPlanner || isSupervisor;
+
+  // ── Confirm dialog state ─────────────────────────────────────
+  const [confirmOpId, setConfirmOpId] = useState<number | null>(null);
+  const [confirmPlannedEarliest, setConfirmPlannedEarliest] = useState("");
+  const [confirmPlannedLatest, setConfirmPlannedLatest] = useState("");
 
   const queryParams = statusFilter ? `?op_status=${statusFilter}` : "";
 
@@ -85,6 +103,47 @@ export function OperationListPage() {
     queryFn: () =>
       apiFetch<OperationListItem[]>(`/operations${queryParams}`),
   });
+
+  // ── Status transition mutations ──────────────────────────────
+  const confirmMutation = useMutation({
+    mutationFn: () =>
+      apiFetch(`/operations/${confirmOpId}/confirm`, {
+        method: "POST",
+        body: JSON.stringify({
+          planned_date_earliest: confirmPlannedEarliest,
+          planned_date_latest: confirmPlannedLatest,
+        }),
+      }),
+    onSuccess: () => {
+      setConfirmOpId(null);
+      setConfirmPlannedEarliest("");
+      setConfirmPlannedLatest("");
+      queryClient.invalidateQueries({ queryKey: ["operations"] });
+    },
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: (opId: number) =>
+      apiFetch(`/operations/${opId}/reject`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["operations"] });
+    },
+  });
+
+  const resignMutation = useMutation({
+    mutationFn: (opId: number) =>
+      apiFetch(`/operations/${opId}/resign`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["operations"] });
+    },
+  });
+
+  /** Check if any action buttons should appear for this row */
+  function hasActions(opStatus: number): boolean {
+    if (isSupervisor && opStatus === 1) return true;
+    if (isPlanner && [1, 3, 4].includes(opStatus)) return true;
+    return false;
+  }
 
   if (isLoading) {
     return (
@@ -104,6 +163,9 @@ export function OperationListPage() {
       </div>
     );
   }
+
+  /** Whether any row in the list has actions — controls column visibility */
+  const showActionsColumn = operations.some((op) => hasActions(op.status));
 
   return (
     <div>
@@ -156,13 +218,16 @@ export function OperationListPage() {
               <TableHead>{t('operations.plannedDates')}</TableHead>
               <TableHead>{t('common.status')}</TableHead>
               <TableHead className="text-right">{t('operations.routeKm')}</TableHead>
+              {showActionsColumn && (
+                <TableHead className="text-right">{t('common.actions')}</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
             {operations.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={showActionsColumn ? 8 : 7}
                   className="text-center text-muted-foreground py-8"
                 >
                   {t('operations.noOperations')}
@@ -203,12 +268,113 @@ export function OperationListPage() {
                   <TableCell className="text-right">
                     {op.route_km != null ? `${op.route_km}` : "—"}
                   </TableCell>
+                  {showActionsColumn && (
+                    <TableCell className="text-right">
+                      <div
+                        className="flex items-center justify-end gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* PRD 6.5.f — Supervisor: Confirm (1→3) */}
+                        {isSupervisor && op.status === 1 && (
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => {
+                              setConfirmOpId(op.id);
+                              setConfirmPlannedEarliest("");
+                              setConfirmPlannedLatest("");
+                            }}
+                          >
+                            <CheckCircle className="mr-1 h-3 w-3" />
+                            {t('operations.confirm')}
+                          </Button>
+                        )}
+                        {/* PRD 6.5.f — Supervisor: Reject (1→2) */}
+                        {isSupervisor && op.status === 1 && (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => rejectMutation.mutate(op.id)}
+                            disabled={rejectMutation.isPending}
+                          >
+                            <XCircle className="mr-1 h-3 w-3" />
+                            {t('operations.reject')}
+                          </Button>
+                        )}
+                        {/* PRD 6.5.g — Planner: Resign (1,3,4→7) */}
+                        {isPlanner && [1, 3, 4].includes(op.status) && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => resignMutation.mutate(op.id)}
+                            disabled={resignMutation.isPending}
+                          >
+                            <Ban className="mr-1 h-3 w-3" />
+                            {t('operations.resign')}
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Confirm dialog — requires planned dates (PRD 6.5.f) */}
+      <Dialog
+        open={confirmOpId !== null}
+        onOpenChange={() => setConfirmOpId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t('operations.confirmOperation')} #{confirmOpId}
+            </DialogTitle>
+            <DialogDescription>
+              {t('operations.confirmDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>{t('operations.plannedDateFrom')}</Label>
+              <Input
+                type="date"
+                value={confirmPlannedEarliest}
+                onChange={(e) => setConfirmPlannedEarliest(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('operations.plannedDateTo')}</Label>
+              <Input
+                type="date"
+                value={confirmPlannedLatest}
+                onChange={(e) => setConfirmPlannedLatest(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmOpId(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700"
+              onClick={() => confirmMutation.mutate()}
+              disabled={
+                confirmMutation.isPending ||
+                !confirmPlannedEarliest ||
+                !confirmPlannedLatest
+              }
+            >
+              {confirmMutation.isPending
+                ? t('operations.confirming')
+                : t('operations.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
