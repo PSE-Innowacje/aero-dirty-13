@@ -39,6 +39,9 @@ PilotOrSupervisor = Annotated[
 ]
 SupervisorOnly = Annotated[User, Depends(require_role("Osoba nadzorująca"))]
 AnyAuthenticated = Annotated[User, Depends(get_current_user)]
+OrdersReader = Annotated[
+    User, Depends(require_role("Administrator", "Osoba nadzorująca", "Pilot"))
+]
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -259,7 +262,7 @@ def _check_status_transition(
 
 @router.get("", response_model=list[FlightOrderListItem])
 async def list_orders(
-    _user: AnyAuthenticated,
+    _user: OrdersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
     order_status: int | None = None,
 ) -> list[dict]:
@@ -361,7 +364,7 @@ async def create_order(
 @router.get("/{order_id}", response_model=FlightOrderResponse)
 async def get_order(
     order_id: int,
-    _user: AnyAuthenticated,
+    _user: OrdersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     """Get order detail with all relationships. All authenticated roles."""
