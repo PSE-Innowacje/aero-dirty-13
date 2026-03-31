@@ -104,12 +104,12 @@ interface OperationDetailForMap {
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-white",
+  2: "bg-amber-500 text-black",
   3: "bg-red-500 text-white",
   4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-white",
+  5: "bg-orange-500 text-black",
   6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
+  7: "bg-gray-400 text-black",
 };
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -1082,7 +1082,7 @@ function OrderStatusActions({
           <Button
             onClick={onCompletePartial}
             disabled={completePartialPending}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-orange-500 hover:bg-orange-600 text-black"
           >
             {completePartialPending
               ? t('orders.processing')

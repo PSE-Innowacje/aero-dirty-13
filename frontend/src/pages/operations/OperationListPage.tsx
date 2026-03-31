@@ -63,8 +63,8 @@ const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white",
   2: "",  // destructive variant handles red
   3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-white",
-  5: "bg-orange-500 text-white",
+  4: "bg-amber-500 text-black",
+  5: "bg-orange-500 text-black",
   6: "bg-green-600 text-white",
   7: "",  // secondary variant handles grey
 };

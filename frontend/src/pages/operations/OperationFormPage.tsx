@@ -91,10 +91,10 @@ const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white",
   2: "bg-red-500 text-white",
   3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-white",
-  5: "bg-orange-500 text-white",
+  4: "bg-amber-500 text-black",
+  5: "bg-orange-500 text-black",
   6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
+  7: "bg-gray-400 text-black",
 };
 
 // ── Main Component ─────────────────────────────────────────────────
