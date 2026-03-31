@@ -106,7 +106,7 @@
     "validationFirstNameRequired": "First name is required",
     "validationLastNameRequired": "Last name is required",
     "validationEmailRequired": "Email is required",
-    "validationWeightRange": "Must be between 30 and 200",
+    "validationEmailInvalid": "Invalid email format",
     "validationTrainingRequired": "Training date is required",
     "validationLicenseRequired": "License number is required for pilots",
     "validationLicenseExpiryRequired": "License expiry date is required for pilots"

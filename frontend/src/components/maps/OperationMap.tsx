@@ -2,7 +2,7 @@
  * OperationMap — renders a flight route polyline on OpenStreetMap tiles.
  * Uses react-leaflet v4. Auto-fits bounds to the route extent.
  */
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { MapContainer, TileLayer, Polyline, useMap } from "react-leaflet";
 import type { LatLngBoundsExpression } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -14,15 +14,13 @@ interface OperationMapProps {
 /** Inner component that auto-fits bounds whenever coordinates change. */
 function FitBounds({ coordinates }: { coordinates: [number, number][] }) {
   const map = useMap();
-  const fitted = useRef(false);
 
   useEffect(() => {
-    if (coordinates.length > 0 && !fitted.current) {
+    if (coordinates.length > 0) {
       const bounds: LatLngBoundsExpression = coordinates.map(
         (c) => [c[0], c[1]] as [number, number]
       );
       map.fitBounds(bounds, { padding: [30, 30] });
-      fitted.current = true;
     }
   }, [coordinates, map]);
 

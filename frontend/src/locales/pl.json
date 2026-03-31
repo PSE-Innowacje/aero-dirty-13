@@ -153,6 +153,7 @@
     "validationFirstNameRequired": "Imię jest wymagane",
     "validationLastNameRequired": "Nazwisko jest wymagane",
     "validationEmailRequired": "Email jest wymagany",
+    "validationEmailInvalid": "Nieprawidłowy format adresu email",
     "validationPasswordRequired": "Hasło jest wymagane",
     "validationPasswordMin": "Minimum 6 znaków"
   },

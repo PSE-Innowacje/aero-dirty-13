@@ -48,7 +48,7 @@ const STATUS_BADGE_CLASS: Record<number, string> = {
   2: "bg-amber-500 text-white",
   3: "", // destructive handles red
   4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-white",
+  5: "bg-orange-500 text-gray-900",
   6: "bg-green-600 text-white",
   7: "", // secondary handles grey
 };

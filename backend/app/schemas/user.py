@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
+from app.schemas.crew_member import EMAIL_RE
+
 VALID_ROLES = [
     "Administrator",
     "Osoba planująca",
@@ -81,7 +83,7 @@ class UserUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
-        if not v or "@" not in v:
+        if not v or not EMAIL_RE.match(v):
             raise ValueError("must be a valid email address")
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")

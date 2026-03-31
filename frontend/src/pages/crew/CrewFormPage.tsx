@@ -139,6 +139,7 @@ export function CrewFormPage() {
     if (!firstName.trim()) errors.first_name = t('crew.validationFirstNameRequired');
     if (!lastName.trim()) errors.last_name = t('crew.validationLastNameRequired');
     if (!email.trim()) errors.email = t('crew.validationEmailRequired');
+    else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)) errors.email = t('crew.validationEmailInvalid');
     const w = Number(weight);
     if (isNaN(w) || w < 30 || w > 200) errors.weight = t('crew.validationWeightRange');
     if (!trainingExpiry) errors.training_expiry = t('crew.validationTrainingRequired');
