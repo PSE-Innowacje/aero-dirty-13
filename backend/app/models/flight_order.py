@@ -79,6 +79,7 @@ class FlightOrder(Base):
     operations: Mapped[list["FlightOperation"]] = relationship(  # noqa: F821
         "FlightOperation",
         secondary=order_operations,
+        back_populates="flight_orders",
         lazy="selectin",
     )
     crew_members: Mapped[list["CrewMember"]] = relationship(  # noqa: F821

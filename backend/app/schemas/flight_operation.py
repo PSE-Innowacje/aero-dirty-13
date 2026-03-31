@@ -17,12 +17,12 @@ VALID_ACTIVITY_TYPES = [
 ]
 
 STATUS_LABELS: dict[int, str] = {
-    1: "Wprowadzona",
-    2: "Odrzucona",
-    3: "Potwierdzona",
-    4: "Zaplanowana",
-    5: "Częściowo zrealizowana",
-    6: "Zrealizowana",
+    1: "Wprowadzone",
+    2: "Odrzucone",
+    3: "Potwierdzone",
+    4: "Zaplanowane",
+    5: "Częściowo zrealizowane",
+    6: "Zrealizowane",
     7: "Rezygnacja",
 }
 
@@ -224,6 +224,16 @@ class CommentCreate(BaseModel):
 
 # ── Full response ───────────────────────────────────────────────────
 
+
+class LinkedOrderBrief(BaseModel):
+    """Brief flight-order reference for the operation response."""
+
+    id: int
+    status: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class OperationResponse(BaseModel):
     """Full flight operation response including audit trail and comments."""
 
@@ -245,6 +255,7 @@ class OperationResponse(BaseModel):
     created_by_email: str
     audit_logs: list[AuditLogEntry] = []
     comments: list[CommentEntry] = []
+    linked_orders: list[LinkedOrderBrief] = []
 
     model_config = ConfigDict(from_attributes=True)
 

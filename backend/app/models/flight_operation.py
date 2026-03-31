@@ -54,6 +54,13 @@ class FlightOperation(Base):
         cascade="all, delete-orphan",
         order_by="OperationComment.created_at.desc()",
     )
+    flight_orders: Mapped[list["FlightOrder"]] = relationship(  # noqa: F821
+        "FlightOrder",
+        secondary="order_operations",
+        back_populates="operations",
+        lazy="selectin",
+        viewonly=True,
+    )
 
     def __repr__(self) -> str:
         return f"<FlightOperation #{self.id} status={self.status}>"

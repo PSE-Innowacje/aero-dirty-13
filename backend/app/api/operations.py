@@ -219,6 +219,10 @@ def _serialize_operation(op: FlightOperation) -> dict:
             )
             for c in (op.comments or [])
         ],
+        "linked_orders": [
+            {"id": o.id, "status": o.status}
+            for o in (op.flight_orders or [])
+        ],
     }
 
 
