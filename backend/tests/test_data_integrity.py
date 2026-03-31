@@ -181,6 +181,7 @@ class TestOrderAcceptDateValidation:
                 "start_landing_site_id": site_a,
                 "end_landing_site_id": site_b,
                 "operation_ids": [op_id],
+                "estimated_route_km": 50,
             },
             headers=pilot_h,
         )
@@ -221,6 +222,7 @@ class TestOrderAcceptDateValidation:
                 "start_landing_site_id": site_a,
                 "end_landing_site_id": site_b,
                 "operation_ids": [op_id],
+                "estimated_route_km": 50,
             },
             headers=pilot_h,
         )
@@ -266,6 +268,7 @@ class TestHelicopterActiveStatus:
                 "start_landing_site_id": site_a,
                 "end_landing_site_id": site_b,
                 "operation_ids": [op_id],
+                "estimated_route_km": 50,
             },
             headers=pilot_h,
         )
@@ -297,6 +300,7 @@ class TestHelicopterActiveStatus:
                 "start_landing_site_id": site_a,
                 "end_landing_site_id": site_b,
                 "operation_ids": [op_id],
+                "estimated_route_km": 50,
             },
             headers=pilot_h,
         )
@@ -338,6 +342,7 @@ class TestCrewWeightIncludesPilot:
                 "start_landing_site_id": site_a,
                 "end_landing_site_id": site_b,
                 "operation_ids": [op_id],
+                "estimated_route_km": 50,
             },
             headers=pilot_h,
         )

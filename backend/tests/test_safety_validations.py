@@ -77,9 +77,8 @@ def _order_payload(env: dict, *, crew_ids: list[int] | None = None, estimated_ro
         "start_landing_site_id": env["site_a"],
         "end_landing_site_id": env["site_b"],
         "operation_ids": [env["op_id"]],
+        "estimated_route_km": estimated_route_km if estimated_route_km is not None else 50,
     }
-    if estimated_route_km is not None:
-        payload["estimated_route_km"] = estimated_route_km
     return payload
 
 

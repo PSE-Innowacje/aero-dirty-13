@@ -69,9 +69,8 @@ async def _create_order(
         "start_landing_site_id": env["site_a"],
         "end_landing_site_id": env["site_b"],
         "operation_ids": [env["op_id"]],
+        "estimated_route_km": estimated_route_km if estimated_route_km is not None else 50,
     }
-    if estimated_route_km is not None:
-        payload["estimated_route_km"] = estimated_route_km
     resp = await client.post("/api/orders", json=payload, headers=auth_headers["Pilot"])
     assert resp.status_code == 201, f"Order create failed: {resp.text}"
     return resp.json()["id"]
@@ -298,6 +297,7 @@ class TestSettlementPrereqs:
     async def test_not_completed_without_actuals(
         self, client: AsyncClient, auth_headers: dict
     ):
+        """Status 7 (not completed) does NOT require actual datetimes — flight never happened."""
         env = await _setup_order_env(client, auth_headers, heli_reg="SP-PR3")
         oid = await _create_order(client, auth_headers, env)
         await _accept_order(client, auth_headers, oid)
@@ -305,7 +305,7 @@ class TestSettlementPrereqs:
         resp = await client.post(
             f"/api/orders/{oid}/not-completed", headers=auth_headers["Pilot"]
         )
-        assert resp.status_code == 400
+        assert resp.status_code == 200
 
 
 class TestOperationCascadeOnCreate:
