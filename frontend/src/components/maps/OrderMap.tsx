@@ -3,6 +3,7 @@
  * Uses react-leaflet v4. CircleMarker avoids broken default icon issue.
  */
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   MapContainer,
   TileLayer,
@@ -75,6 +76,8 @@ export function OrderMap({
   startLandingSite,
   endLandingSite,
 }: OrderMapProps) {
+  const { t } = useTranslation();
+
   // Determine default center
   let center: LatLngExpression = [51.9, 19.1]; // Poland center fallback
   if (startLandingSite) {
@@ -121,7 +124,7 @@ export function OrderMap({
             }}
           >
             <Popup>
-              <strong>Start:</strong> {startLandingSite.name}
+              <strong>{t('map.startLandingSite')}</strong> {startLandingSite.name}
             </Popup>
           </CircleMarker>
         )}
@@ -139,7 +142,7 @@ export function OrderMap({
             }}
           >
             <Popup>
-              <strong>Lądowisko końcowe:</strong> {endLandingSite.name}
+              <strong>{t('map.endLandingSite')}</strong> {endLandingSite.name}
             </Popup>
           </CircleMarker>
         )}

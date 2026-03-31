@@ -301,6 +301,10 @@
     "loadingError": "Loading error",
     "unknownError": "Unknown error"
   },
+  "map": {
+    "startLandingSite": "Start:",
+    "endLandingSite": "End landing site:"
+  },
   "theme": {
     "dark": "Dark",
     "light": "Light"
