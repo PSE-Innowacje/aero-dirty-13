@@ -11,6 +11,8 @@ import { CrewListPage } from "@/pages/crew/CrewListPage";
 import { CrewFormPage } from "@/pages/crew/CrewFormPage";
 import { LandingSiteListPage } from "@/pages/landing-sites/LandingSiteListPage";
 import { LandingSiteFormPage } from "@/pages/landing-sites/LandingSiteFormPage";
+import { OperationListPage } from "@/pages/operations/OperationListPage";
+import { OperationFormPage } from "@/pages/operations/OperationFormPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 
 export default function App() {
@@ -33,7 +35,9 @@ export default function App() {
             <Route path="/landing-sites" element={<LandingSiteListPage />} />
             <Route path="/landing-sites/new" element={<LandingSiteFormPage />} />
             <Route path="/landing-sites/:id/edit" element={<LandingSiteFormPage />} />
-            <Route path="/operations" element={<PlaceholderPage />} />
+            <Route path="/operations" element={<OperationListPage />} />
+            <Route path="/operations/new" element={<OperationFormPage />} />
+            <Route path="/operations/:id" element={<OperationFormPage />} />
             <Route path="/orders" element={<PlaceholderPage />} />
           </Route>
         </Route>
