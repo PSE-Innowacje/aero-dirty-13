@@ -5,3 +5,6 @@ from app.models.user import User  # noqa: F401
 from app.models.helicopter import Helicopter  # noqa: F401
 from app.models.crew_member import CrewMember  # noqa: F401
 from app.models.landing_site import LandingSite  # noqa: F401
+from app.models.flight_operation import FlightOperation  # noqa: F401
+from app.models.operation_audit_log import OperationAuditLog  # noqa: F401
+from app.models.operation_comment import OperationComment  # noqa: F401
