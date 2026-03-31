@@ -35,6 +35,7 @@ interface CrewMemberOption {
   last_name: string;
   weight: number;
   role: string;
+  email: string;
 }
 
 interface HelicopterOption {
