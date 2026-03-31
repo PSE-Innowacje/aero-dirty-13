@@ -110,7 +110,6 @@ export function OperationFormPage() {
   const role = user?.system_role ?? "";
   const isPlanner = role === "Osoba planująca";
   const isSupervisor = role === "Osoba nadzorująca";
-  const canEdit = isPlanner || isSupervisor;
 
   // ── Form state ─────────────────────────────────────────────────
   const [orderNumber, setOrderNumber] = useState("");
@@ -339,6 +338,10 @@ export function OperationFormPage() {
   }
 
   const currentStatus = operation?.status ?? 1;
+
+  // PRD 6.5.d — Planner can edit in statuses 1-5 only; Supervisor in all statuses
+  const PLANNER_EDITABLE_STATUSES = [1, 2, 3, 4, 5];
+  const canEdit = isSupervisor || (isPlanner && PLANNER_EDITABLE_STATUSES.includes(currentStatus));
 
   return (
     <div>

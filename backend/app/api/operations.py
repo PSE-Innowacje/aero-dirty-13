@@ -318,6 +318,13 @@ async def update_operation(
             detail=f"Operation {operation_id} not found",
         )
 
+    # PRD 6.5.d — Planner can edit only in statuses 1,2,3,4,5
+    if current_user.system_role == "Osoba planująca" and op.status not in {1, 2, 3, 4, 5}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Osoba planująca cannot edit operation in status {op.status}",
+        )
+
     update_data = body.model_dump(exclude_unset=True)
 
     # Planner cannot modify locked fields — silently strip them
@@ -371,6 +378,13 @@ async def upload_kml(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Operation {operation_id} not found",
+        )
+
+    # PRD 6.5.d — Planner can edit only in statuses 1,2,3,4,5
+    if current_user.system_role == "Osoba planująca" and op.status not in {1, 2, 3, 4, 5}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Osoba planująca cannot modify operation in status {op.status}",
         )
 
     # Read file bytes
