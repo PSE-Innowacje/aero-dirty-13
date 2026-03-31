@@ -16,6 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { OrderMap } from "@/components/maps/OrderMap";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 
@@ -169,6 +177,10 @@ export function OrderFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // ── Confirm dialog state ───────────────────────────────────────
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showNotCompletedDialog, setShowNotCompletedDialog] = useState(false);
+
   // ── Data queries for create mode ───────────────────────────────
   const { data: helicopters = [] } = useQuery<HelicopterOption[]>({
     queryKey: ["helicopters"],
@@ -192,6 +204,21 @@ export function OrderFormPage() {
     queryKey: ["operations", "confirmed"],
     queryFn: () => apiFetch<OperationOption[]>("/operations?op_status=3"),
     enabled: isCreate,
+  });
+
+  // Fetch operation details for map preview in create mode
+  const { data: createModeOpDetails = [] } = useQuery<OperationDetailForMap[]>({
+    queryKey: ['order-create-operations-map', selectedOpIds],
+    queryFn: async () => {
+      if (selectedOpIds.length === 0) return [];
+      const results = await Promise.all(
+        selectedOpIds.map(opId =>
+          apiFetch<{ id: number; route_coordinates: [number, number][] | null }>(`/operations/${opId}`)
+        )
+      );
+      return results.map(r => ({ id: r.id, route_coordinates: r.route_coordinates }));
+    },
+    enabled: isCreate && selectedOpIds.length > 0,
   });
 
   // Active helicopters only
@@ -538,10 +565,10 @@ export function OrderFormPage() {
           isSupervisor={isSupervisor}
           onSubmit={() => submitMutation.mutate()}
           onAccept={() => acceptMutation.mutate()}
-          onReject={() => rejectMutation.mutate()}
+          onReject={() => setShowRejectDialog(true)}
           onCompletePartial={() => completePartialMutation.mutate()}
           onCompleteFull={() => completeFullMutation.mutate()}
-          onNotCompleted={() => notCompletedMutation.mutate()}
+          onNotCompleted={() => setShowNotCompletedDialog(true)}
           submitPending={submitMutation.isPending}
           acceptPending={acceptMutation.isPending}
           rejectPending={rejectMutation.isPending}
@@ -760,6 +787,37 @@ export function OrderFormPage() {
                 placeholder={t('orders.optional')}
               />
             </div>
+
+            {/* Create-mode map preview */}
+            {(() => {
+              const createMapOps = createModeOpDetails
+                .filter((op) => op.route_coordinates && op.route_coordinates.length > 0)
+                .map((op) => ({ id: op.id, route_coordinates: op.route_coordinates! }));
+              const createStartSite = landingSites.find((s) => s.id === Number(startSiteId));
+              const createEndSite = landingSites.find((s) => s.id === Number(endSiteId));
+              const hasMapData = createMapOps.length > 0 || createStartSite || createEndSite;
+              if (!hasMapData) return null;
+              return (
+                <div className="space-y-2">
+                  <Label>{t('orders.routeMap')}</Label>
+                  <div key={`${selectedOpIds.join(',')}-${startSiteId}-${endSiteId}`}>
+                    <OrderMap
+                      operations={createMapOps}
+                      startLandingSite={
+                        createStartSite
+                          ? { name: createStartSite.name, lat: createStartSite.latitude, lng: createStartSite.longitude }
+                          : null
+                      }
+                      endLandingSite={
+                        createEndSite
+                          ? { name: createEndSite.name, lat: createEndSite.latitude, lng: createEndSite.longitude }
+                          : null
+                      }
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={createMutation.isPending}>
@@ -1005,6 +1063,60 @@ export function OrderFormPage() {
           </div>
         </div>
       )}
+
+      {/* Reject confirm dialog */}
+      <Dialog open={showRejectDialog} onOpenChange={() => setShowRejectDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('orders.confirmReject')}</DialogTitle>
+            <DialogDescription>
+              {t('orders.confirmRejectDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                rejectMutation.mutate();
+                setShowRejectDialog(false);
+              }}
+              disabled={rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? t('orders.rejecting') : t('orders.reject')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Not completed confirm dialog */}
+      <Dialog open={showNotCompletedDialog} onOpenChange={() => setShowNotCompletedDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('orders.confirmNotCompleted')}</DialogTitle>
+            <DialogDescription>
+              {t('orders.confirmNotCompletedDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotCompletedDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                notCompletedMutation.mutate();
+                setShowNotCompletedDialog(false);
+              }}
+              disabled={notCompletedMutation.isPending}
+            >
+              {notCompletedMutation.isPending ? t('orders.processing') : t('orders.notCompleted')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

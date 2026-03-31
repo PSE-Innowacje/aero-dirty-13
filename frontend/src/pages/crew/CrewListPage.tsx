@@ -124,6 +124,7 @@ export function CrewListPage() {
               <TableHead>{t('crew.lastName')}</TableHead>
               <TableHead>{t('crew.role')}</TableHead>
               <TableHead>{t('crew.licenseNumber')}</TableHead>
+              <TableHead>{t('crew.pilotLicenseExpiry')}</TableHead>
               <TableHead>{t('crew.trainingDate')}</TableHead>
               {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
             </TableRow>
@@ -131,7 +132,7 @@ export function CrewListPage() {
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={isAdmin ? 7 : 6} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={isAdmin ? 8 : 7} className="text-center text-muted-foreground py-8">
                   {t('crew.noCrewMembers')}
                 </TableCell>
               </TableRow>
@@ -147,6 +148,7 @@ export function CrewListPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{c.pilot_license_number ?? "—"}</TableCell>
+                  <TableCell>{c.pilot_license_expiry ?? "—"}</TableCell>
                   <TableCell>{c.training_expiry}</TableCell>
                   {isAdmin && (
                     <TableCell className="text-right">
