@@ -20,6 +20,9 @@ from app.core.database import engine, async_session
 from app.core.init_db import init_db
 from app.api.auth import router as auth_router
 from app.api.users import router as users_router
+from app.api.helicopters import router as helicopters_router
+from app.api.crew_members import router as crew_members_router
+from app.api.landing_sites import router as landing_sites_router
 
 # Import models so Base.metadata sees all tables
 import app.models  # noqa: F401
@@ -74,6 +77,9 @@ def create_app() -> FastAPI:
     # Mount API routers
     application.include_router(auth_router)
     application.include_router(users_router)
+    application.include_router(helicopters_router)
+    application.include_router(crew_members_router)
+    application.include_router(landing_sites_router)
 
     return application
 
