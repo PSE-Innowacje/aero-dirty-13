@@ -45,7 +45,7 @@ const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-white",
+  2: "bg-amber-500 text-gray-900",
   3: "", // destructive handles red
   4: "bg-green-600 text-white",
   5: "bg-orange-500 text-gray-900",

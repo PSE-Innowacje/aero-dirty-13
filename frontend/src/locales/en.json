@@ -153,6 +153,7 @@
     "validationFirstNameRequired": "First name is required",
     "validationLastNameRequired": "Last name is required",
     "validationEmailRequired": "Email is required",
+    "validationEmailInvalid": "Invalid email format",
     "validationPasswordRequired": "Password is required",
     "validationPasswordMin": "Minimum 6 characters"
   },

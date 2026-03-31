@@ -106,6 +106,7 @@
     "validationFirstNameRequired": "Imię jest wymagane",
     "validationLastNameRequired": "Nazwisko jest wymagane",
     "validationEmailRequired": "Email jest wymagany",
+    "validationEmailInvalid": "Nieprawidłowy format adresu email",
     "validationWeightRange": "Musi być między 30 a 200",
     "validationTrainingRequired": "Data szkolenia jest wymagana",
     "validationLicenseRequired": "Nr licencji jest wymagany dla pilota",

@@ -35,7 +35,7 @@ class UserCreate(BaseModel):
     @classmethod
     def email_valid(cls, v: str) -> str:
         v = v.strip()
-        if not v or "@" not in v:
+        if not v or not EMAIL_RE.match(v):
             raise ValueError("must be a valid email address")
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")
