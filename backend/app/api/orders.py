@@ -39,6 +39,9 @@ PilotOrSupervisor = Annotated[
 ]
 SupervisorOnly = Annotated[User, Depends(require_role("Osoba nadzorująca"))]
 AnyAuthenticated = Annotated[User, Depends(get_current_user)]
+OrdersReader = Annotated[
+    User, Depends(require_role("Administrator", "Osoba nadzorująca", "Pilot"))
+]
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -155,8 +158,6 @@ async def _get_order_or_404(order_id: int, db: AsyncSession) -> FlightOrder:
 async def _validate_fk_entities(
     body: FlightOrderCreate | FlightOrderUpdate,
     db: AsyncSession,
-    *,
-    is_update: bool = False,
 ) -> tuple[
     Helicopter | None,
     list[CrewMember],
@@ -181,6 +182,11 @@ async def _validate_fk_entities(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Helicopter {helicopter_id} not found",
+            )
+        if helicopter.status != "aktywny":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Helicopter {helicopter_id} is not active",
             )
 
     crew_member_ids = getattr(body, "crew_member_ids", None)
@@ -209,7 +215,7 @@ async def _validate_fk_entities(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Operation {oid} not found",
                 )
-            if not is_update and op.status != 3:
+            if op.status != 3:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Operation {oid} is not in status 3 (confirmed), current status: {op.status}",
@@ -259,7 +265,7 @@ def _check_status_transition(
 
 @router.get("", response_model=list[FlightOrderListItem])
 async def list_orders(
-    _user: AnyAuthenticated,
+    _user: OrdersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
     order_status: int | None = None,
 ) -> list[dict]:
@@ -361,7 +367,7 @@ async def create_order(
 @router.get("/{order_id}", response_model=FlightOrderResponse)
 async def get_order(
     order_id: int,
-    _user: AnyAuthenticated,
+    _user: OrdersReader,
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> dict:
     """Get order detail with all relationships. All authenticated roles."""
@@ -382,13 +388,20 @@ async def update_order(
     """
     order = await _get_order_or_404(order_id, db)
 
+    # Block edits on terminal statuses (5, 6, 7) and submitted-for-approval (2)
+    if order.status in {2, 5, 6, 7}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot edit order in status {order.status}",
+        )
+
     update_data = body.model_dump(exclude_unset=True)
     if not update_data:
         return _serialize_order(order)
 
     # Validate FK entities if any references changed
     helicopter, crew_members, operations, _start, _end = await _validate_fk_entities(
-        body, db, is_update=True
+        body, db
     )
 
     # Apply simple field updates
@@ -508,6 +521,12 @@ async def accept_order(
     order = await _get_order_or_404(order_id, db)
     _check_status_transition(order, 2, "accept")
 
+    if order.planned_end_datetime <= order.planned_start_datetime:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="planned_end_datetime must be after planned_start_datetime",
+        )
+
     order.status = 4
     await db.flush()
     await db.refresh(order)
@@ -595,7 +614,6 @@ async def not_completed(
     """Not completed (status 4→7). Cascades operations back to status 3. Pilot only."""
     order = await _get_order_or_404(order_id, db)
     _check_status_transition(order, 4, "not-completed")
-    _check_settlement_prereqs(order)
 
     order.status = 7
     await _cascade_operations_status(order, 3, db)

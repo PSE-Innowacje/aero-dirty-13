@@ -41,7 +41,7 @@ PlannerOnly = Annotated[User, Depends(require_role("Osoba planująca"))]
 AnyAuthenticated = Annotated[User, Depends(get_current_user)]
 
 # Fields Planner cannot modify (only Supervisor can set these via confirm)
-PLANNER_LOCKED_FIELDS = {"planned_date_earliest", "planned_date_latest"}
+PLANNER_LOCKED_FIELDS = {"planned_date_earliest", "planned_date_latest", "post_realization_notes"}
 
 # Updatable fields for audit tracking
 AUDITABLE_FIELDS = {
@@ -219,6 +219,10 @@ def _serialize_operation(op: FlightOperation) -> dict:
             )
             for c in (op.comments or [])
         ],
+        "linked_orders": [
+            {"id": o.id, "status": o.status}
+            for o in (op.flight_orders or [])
+        ],
     }
 
 
@@ -232,7 +236,7 @@ async def list_operations(
     op_status: int | None = None,
 ) -> list[dict]:
     """List operations, optionally filtered by status. All authenticated roles."""
-    query = select(FlightOperation).order_by(FlightOperation.id.desc())
+    query = select(FlightOperation).order_by(FlightOperation.planned_date_earliest.asc().nullslast(), FlightOperation.id.desc())
     if op_status is not None:
         query = query.where(FlightOperation.status == op_status)
     result = await db.execute(query)
@@ -402,6 +406,13 @@ async def upload_kml(
             detail="Empty file",
         )
 
+    # Size limit: 5 MB
+    if len(kml_bytes) > 5_000_000:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="KML file too large (max 5 MB)",
+        )
+
     # Parse KML
     try:
         coordinates, total_km = parse_kml(kml_bytes)
@@ -409,6 +420,13 @@ async def upload_kml(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
+        )
+
+    # Point count limit: 5000 (PRD 6.5.a)
+    if len(coordinates) > 5000:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"KML file contains {len(coordinates)} points (max 5000)",
         )
 
     # Audit entries for KML upload
@@ -553,7 +571,18 @@ async def resign_operation(
         )
 
     changes: dict[str, tuple[Any, Any]] = {"status": (op.status, 7)}
+    old_status = op.status
     op.status = 7
+
+    # If resigning from status 4 (planned for order), unlink from any flight orders
+    if old_status == 4 and op.flight_orders:
+        for order in list(op.flight_orders):
+            await db.refresh(order, ["operations"])
+            order.operations = [o for o in order.operations if o.id != op.id]
+            logger.info(
+                "Operation #%d unlinked from order #%d on resign (4→7)",
+                op.id, order.id,
+            )
 
     _create_audit_entries(op.id, current_user.id, changes, db)
 

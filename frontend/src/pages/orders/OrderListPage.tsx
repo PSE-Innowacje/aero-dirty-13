@@ -45,10 +45,10 @@ const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 
 const STATUS_BADGE_CLASS: Record<number, string> = {
   1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-white",
+  2: "bg-amber-500 text-gray-900",
   3: "", // destructive handles red
   4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-white",
+  5: "bg-orange-500 text-gray-900",
   6: "bg-green-600 text-white",
   7: "", // secondary handles grey
 };
@@ -155,7 +155,9 @@ export function OrderListPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order) => (
+              [...orders]
+                .sort((a, b) => a.planned_start_datetime.localeCompare(b.planned_start_datetime))
+                .map((order) => (
                 <TableRow
                   key={order.id}
                   className="cursor-pointer hover:bg-muted/50"

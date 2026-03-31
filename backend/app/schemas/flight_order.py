@@ -8,13 +8,13 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 STATUS_LABELS: dict[int, str] = {
-    1: "Wprowadzona",
-    2: "Odrzucona",
-    3: "Zaakceptowana",
-    4: "Zaplanowana",
-    5: "Częściowo zrealizowana",
-    6: "Zrealizowana / Rozliczona",
-    7: "Rezygnacja",
+    1: "Wprowadzone",
+    2: "Przekazane do akceptacji",
+    3: "Odrzucone",
+    4: "Zaakceptowane",
+    5: "Zrealizowane w części",
+    6: "Zrealizowane w całości",
+    7: "Nie zrealizowane",
 }
 
 
@@ -52,7 +52,7 @@ class FlightOrderCreate(BaseModel):
     start_landing_site_id: int
     end_landing_site_id: int
     operation_ids: list[int]
-    estimated_route_km: Optional[int] = None
+    estimated_route_km: int
 
 
 class FlightOrderUpdate(BaseModel):

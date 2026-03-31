@@ -3,12 +3,16 @@
  * Surface-based sidebar sits against surface background content area.
  * No border between them — depth via tonal shift per "No-Line" rule.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 
 export function AppLayout() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('sidebar-collapsed') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', String(collapsed));
+  }, [collapsed]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface">

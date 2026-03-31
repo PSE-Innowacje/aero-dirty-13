@@ -24,3 +24,12 @@ class Settings(BaseSettings):
 
 
 settings = Settings()  # type: ignore[call-arg]
+
+# Warn if running with default SECRET_KEY
+import logging as _logging
+
+_cfg_logger = _logging.getLogger("aero.config")
+if settings.SECRET_KEY == "dev-secret-key-change-in-production":
+    _cfg_logger.warning(
+        "⚠️  Running with default SECRET_KEY — set SECRET_KEY env var in production!"
+    )

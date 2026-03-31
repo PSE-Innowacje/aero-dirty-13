@@ -85,15 +85,7 @@ function getMenuForRole(role: string): MenuGroup[] {
   const allowed = ROLE_ALLOWED_GROUPS[role as RoleKey];
   if (!allowed) return [];
 
-  return ALL_MENU_GROUPS.filter((g) => allowed.includes(g.id)).map((group) => {
-    if (group.id === "admin" && role !== "Administrator") {
-      return {
-        ...group,
-        items: group.items.filter((item) => item.id !== "users"),
-      };
-    }
-    return group;
-  });
+  return ALL_MENU_GROUPS.filter((g) => allowed.includes(g.id));
 }
 
 /* ── Sidebar component ────────────────────────────────────── */

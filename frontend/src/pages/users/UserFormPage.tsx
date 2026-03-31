@@ -125,6 +125,7 @@ export function UserFormPage() {
     if (!firstName.trim()) errors.first_name = t('users.validationFirstNameRequired');
     if (!lastName.trim()) errors.last_name = t('users.validationLastNameRequired');
     if (!email.trim()) errors.email = t('users.validationEmailRequired');
+    else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)) errors.email = t('users.validationEmailInvalid');
     if (!isEdit && !password) errors.password = t('users.validationPasswordRequired');
     if (password && password.length < 6) errors.password = t('users.validationPasswordMin');
 

@@ -12,6 +12,7 @@ import {
   useMap,
 } from "react-leaflet";
 import type { LatLngExpression, LatLngBoundsExpression } from "leaflet";
+import { useTranslation } from "react-i18next";
 import "leaflet/dist/leaflet.css";
 
 interface LandingSiteMarker {
@@ -75,6 +76,7 @@ export function OrderMap({
   startLandingSite,
   endLandingSite,
 }: OrderMapProps) {
+  const { t } = useTranslation();
   // Determine default center
   let center: LatLngExpression = [51.9, 19.1]; // Poland center fallback
   if (startLandingSite) {
@@ -121,7 +123,7 @@ export function OrderMap({
             }}
           >
             <Popup>
-              <strong>Start:</strong> {startLandingSite.name}
+              <strong>{t('orders.startLandingSite')}:</strong> {startLandingSite.name}
             </Popup>
           </CircleMarker>
         )}
@@ -139,7 +141,7 @@ export function OrderMap({
             }}
           >
             <Popup>
-              <strong>Lądowisko końcowe:</strong> {endLandingSite.name}
+              <strong>{t('orders.endLandingSite')}:</strong> {endLandingSite.name}
             </Popup>
           </CircleMarker>
         )}

@@ -16,6 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { OrderMap } from "@/components/maps/OrderMap";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
 
@@ -27,6 +35,7 @@ interface CrewMemberOption {
   last_name: string;
   weight: number;
   role: string;
+  email: string;
 }
 
 interface HelicopterOption {
@@ -169,6 +178,10 @@ export function OrderFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // ── Confirm dialog state ───────────────────────────────────────
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showNotCompletedDialog, setShowNotCompletedDialog] = useState(false);
+
   // ── Data queries for create mode ───────────────────────────────
   const { data: helicopters = [] } = useQuery<HelicopterOption[]>({
     queryKey: ["helicopters"],
@@ -194,6 +207,21 @@ export function OrderFormPage() {
     enabled: isCreate,
   });
 
+  // Fetch operation details for map preview in create mode
+  const { data: createModeOpDetails = [] } = useQuery<OperationDetailForMap[]>({
+    queryKey: ['order-create-operations-map', selectedOpIds],
+    queryFn: async () => {
+      if (selectedOpIds.length === 0) return [];
+      const results = await Promise.all(
+        selectedOpIds.map(opId =>
+          apiFetch<{ id: number; route_coordinates: [number, number][] | null }>(`/operations/${opId}`)
+        )
+      );
+      return results.map(r => ({ id: r.id, route_coordinates: r.route_coordinates }));
+    },
+    enabled: isCreate && selectedOpIds.length > 0,
+  });
+
   // Active helicopters only
   const activeHelicopters = useMemo(
     () => helicopters.filter((h) => h.status === "aktywny"),
@@ -215,10 +243,11 @@ export function OrderFormPage() {
 
   const totalCrewWeight = useMemo(() => {
     const crewWeight = selectedCrewMembers.reduce((sum, c) => sum + c.weight, 0);
-    // Pilot weight is auto-added by backend; show it here for display
-    // We'll estimate pilot weight from user's crew profile if available
-    return crewWeight;
-  }, [selectedCrewMembers]);
+    // Include pilot weight from their crew-member profile (matched by email)
+    const pilotMember = allCrew.find((c) => c.role === "Pilot" && c.email === user?.email);
+    const pilotWeight = pilotMember?.weight ?? 0;
+    return crewWeight + pilotWeight;
+  }, [selectedCrewMembers, allCrew, user]);
 
   // ── Fetch order for detail mode ────────────────────────────────
   const { data: order, isLoading: loadingOrder } = useQuery<FlightOrderDetail>({
@@ -278,9 +307,7 @@ export function OrderFormPage() {
         start_landing_site_id: Number(startSiteId),
         end_landing_site_id: Number(endSiteId),
         operation_ids: selectedOpIds,
-        estimated_route_km: estimatedRouteKm
-          ? Number(estimatedRouteKm)
-          : null,
+        estimated_route_km: Number(estimatedRouteKm),
       };
       return apiFetch<FlightOrderDetail>("/orders", {
         method: "POST",
@@ -535,12 +562,13 @@ export function OrderFormPage() {
           status={currentStatus}
           isPilot={isPilot}
           isSupervisor={isSupervisor}
+          hasActualTimes={!!order?.actual_start_datetime && !!order?.actual_end_datetime}
           onSubmit={() => submitMutation.mutate()}
           onAccept={() => acceptMutation.mutate()}
-          onReject={() => rejectMutation.mutate()}
+          onReject={() => setShowRejectDialog(true)}
           onCompletePartial={() => completePartialMutation.mutate()}
           onCompleteFull={() => completeFullMutation.mutate()}
-          onNotCompleted={() => notCompletedMutation.mutate()}
+          onNotCompleted={() => setShowNotCompletedDialog(true)}
           submitPending={submitMutation.isPending}
           acceptPending={acceptMutation.isPending}
           rejectPending={rejectMutation.isPending}
@@ -625,7 +653,9 @@ export function OrderFormPage() {
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
-                  {allCrew.map((c) => (
+                  {[...allCrew]
+                    .sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`))
+                    .map((c) => (
                     <label
                       key={c.id}
                       className="flex items-center gap-2 text-sm py-0.5"
@@ -718,7 +748,9 @@ export function OrderFormPage() {
                 </p>
               ) : (
                 <div className="rounded-md border p-3 max-h-48 overflow-y-auto space-y-1">
-                  {confirmedOps.map((op) => (
+                  {[...confirmedOps]
+                    .sort((a, b) => (a.planned_date_earliest || '').localeCompare(b.planned_date_earliest || ''))
+                    .map((op) => (
                     <label
                       key={op.id}
                       className="flex items-center gap-2 text-sm py-0.5"
@@ -749,16 +781,47 @@ export function OrderFormPage() {
 
             {/* Estimated route km */}
             <div className="space-y-2">
-              <Label htmlFor="routeKm">{t('orders.estimatedRouteKm')}</Label>
+              <Label htmlFor="routeKm">{t('orders.estimatedRouteKm')} *</Label>
               <Input
                 id="routeKm"
                 type="number"
-                min={0}
+                min={1}
                 value={estimatedRouteKm}
                 onChange={(e) => setEstimatedRouteKm(e.target.value)}
-                placeholder={t('orders.optional')}
+                required
               />
             </div>
+
+            {/* Create-mode map preview */}
+            {(() => {
+              const createMapOps = createModeOpDetails
+                .filter((op) => op.route_coordinates && op.route_coordinates.length > 0)
+                .map((op) => ({ id: op.id, route_coordinates: op.route_coordinates! }));
+              const createStartSite = landingSites.find((s) => s.id === Number(startSiteId));
+              const createEndSite = landingSites.find((s) => s.id === Number(endSiteId));
+              const hasMapData = createMapOps.length > 0 || createStartSite || createEndSite;
+              if (!hasMapData) return null;
+              return (
+                <div className="space-y-2">
+                  <Label>{t('orders.routeMap')}</Label>
+                  <div key={`${selectedOpIds.join(',')}-${startSiteId}-${endSiteId}`}>
+                    <OrderMap
+                      operations={createMapOps}
+                      startLandingSite={
+                        createStartSite
+                          ? { name: createStartSite.name, lat: createStartSite.latitude, lng: createStartSite.longitude }
+                          : null
+                      }
+                      endLandingSite={
+                        createEndSite
+                          ? { name: createEndSite.name, lat: createEndSite.latitude, lng: createEndSite.longitude }
+                          : null
+                      }
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={createMutation.isPending}>
@@ -958,7 +1021,7 @@ export function OrderFormPage() {
                     <li key={op.id} className="text-sm">
                       #{op.id} — {op.short_description ?? t('orders.noDescription')}{" "}
                       <Badge variant="outline" className="ml-1 text-xs">
-                        Status {op.status}
+                        {t(`operations.status${op.status}`, { defaultValue: `Status ${op.status}` })}
                       </Badge>
                     </li>
                   ))}
@@ -1004,6 +1067,60 @@ export function OrderFormPage() {
           </div>
         </div>
       )}
+
+      {/* Reject confirm dialog */}
+      <Dialog open={showRejectDialog} onOpenChange={() => setShowRejectDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('orders.confirmReject')}</DialogTitle>
+            <DialogDescription>
+              {t('orders.confirmRejectDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                rejectMutation.mutate();
+                setShowRejectDialog(false);
+              }}
+              disabled={rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? t('orders.rejecting') : t('orders.reject')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Not completed confirm dialog */}
+      <Dialog open={showNotCompletedDialog} onOpenChange={() => setShowNotCompletedDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('orders.confirmNotCompleted')}</DialogTitle>
+            <DialogDescription>
+              {t('orders.confirmNotCompletedDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotCompletedDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                notCompletedMutation.mutate();
+                setShowNotCompletedDialog(false);
+              }}
+              disabled={notCompletedMutation.isPending}
+            >
+              {notCompletedMutation.isPending ? t('orders.processing') : t('orders.notCompleted')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -1014,6 +1131,7 @@ function OrderStatusActions({
   status,
   isPilot,
   isSupervisor,
+  hasActualTimes,
   onSubmit,
   onAccept,
   onReject,
@@ -1030,6 +1148,7 @@ function OrderStatusActions({
   status: number;
   isPilot: boolean;
   isSupervisor: boolean;
+  hasActualTimes: boolean;
   onSubmit: () => void;
   onAccept: () => void;
   onReject: () => void;
@@ -1081,7 +1200,7 @@ function OrderStatusActions({
         <>
           <Button
             onClick={onCompletePartial}
-            disabled={completePartialPending}
+            disabled={completePartialPending || !hasActualTimes}
             className="bg-orange-500 hover:bg-orange-600"
           >
             {completePartialPending
@@ -1090,7 +1209,7 @@ function OrderStatusActions({
           </Button>
           <Button
             onClick={onCompleteFull}
-            disabled={completeFullPending}
+            disabled={completeFullPending || !hasActualTimes}
             className="bg-green-600 hover:bg-green-700"
           >
             {completeFullPending

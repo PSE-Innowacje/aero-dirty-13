@@ -54,6 +54,11 @@ interface CommentEntry {
   author_name: string;
 }
 
+interface LinkedOrder {
+  id: number;
+  status: number;
+}
+
 interface OperationDetail {
   id: number;
   order_number: string | null;
@@ -73,6 +78,7 @@ interface OperationDetail {
   created_by_email: string;
   audit_logs: AuditLogEntry[];
   comments: CommentEntry[];
+  linked_orders?: LinkedOrder[];
 }
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -123,6 +129,13 @@ export function OperationFormPage() {
   const [plannedDateLatest, setPlannedDateLatest] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // ── Post-realization notes state ───────────────────────────────
+  const [postRealizationNotes, setPostRealizationNotes] = useState("");
+
+  // ── Reject/Resign confirm dialog state ─────────────────────────
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [showResignDialog, setShowResignDialog] = useState(false);
+
   // ── KML upload state ───────────────────────────────────────────
   const [kmlFile, setKmlFile] = useState<File | null>(null);
   const [kmlUploading, setKmlUploading] = useState(false);
@@ -158,6 +171,7 @@ export function OperationFormPage() {
       setProposedDateLatest(operation.proposed_date_latest ?? "");
       setPlannedDateEarliest(operation.planned_date_earliest ?? "");
       setPlannedDateLatest(operation.planned_date_latest ?? "");
+      setPostRealizationNotes(operation.post_realization_notes ?? "");
     }
   }, [operation]);
 
@@ -183,6 +197,7 @@ export function OperationFormPage() {
       if (isSupervisor && !isCreate) {
         body.planned_date_earliest = plannedDateEarliest || null;
         body.planned_date_latest = plannedDateLatest || null;
+        body.post_realization_notes = postRealizationNotes || null;
       }
 
       if (isCreate) {
@@ -319,6 +334,21 @@ export function OperationFormPage() {
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    // Client-side validation for required fields
+    if (!orderNumber.trim()) {
+      setError(t('operations.validationOrderNumberRequired'));
+      return;
+    }
+    if (!shortDescription.trim()) {
+      setError(t('operations.validationShortDescriptionRequired'));
+      return;
+    }
+    if (activityTypes.length === 0) {
+      setError(t('operations.validationActivityTypeRequired'));
+      return;
+    }
+
     saveMutation.mutate();
   }
 
@@ -390,9 +420,13 @@ export function OperationFormPage() {
           status={currentStatus}
           isSupervisor={isSupervisor}
           isPlanner={isPlanner}
-          onConfirm={() => setShowConfirmDialog(true)}
-          onReject={() => rejectMutation.mutate()}
-          onResign={() => resignMutation.mutate()}
+          onConfirm={() => {
+            setConfirmPlannedEarliest(operation?.proposed_date_earliest ?? "");
+            setConfirmPlannedLatest(operation?.proposed_date_latest ?? "");
+            setShowConfirmDialog(true);
+          }}
+          onReject={() => setShowRejectDialog(true)}
+          onResign={() => setShowResignDialog(true)}
           rejectPending={rejectMutation.isPending}
           resignPending={resignMutation.isPending}
         />
@@ -403,7 +437,7 @@ export function OperationFormPage() {
         <div className="rounded-md bg-surface-container-low p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="orderNumber">{t('operations.orderNumber')}</Label>
+              <Label htmlFor="orderNumber">{t('operations.orderNumber')} *</Label>
               <Input
                 id="orderNumber"
                 value={orderNumber}
@@ -414,7 +448,7 @@ export function OperationFormPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="shortDescription">{t('operations.shortDescription')}</Label>
+              <Label htmlFor="shortDescription">{t('operations.shortDescription')} *</Label>
               <Input
                 id="shortDescription"
                 value={shortDescription}
@@ -426,7 +460,7 @@ export function OperationFormPage() {
 
             {/* Activity types checkboxes */}
             <div className="space-y-2">
-              <Label>{t('operations.activityTypesLabel')}</Label>
+              <Label>{t('operations.activityTypesLabel')} *</Label>
               <div className="flex flex-wrap gap-3">
                 {ACTIVITY_TYPE_OPTIONS.map((opt) => (
                   <label
@@ -459,6 +493,24 @@ export function OperationFormPage() {
                 disabled={!canEdit}
               />
             </div>
+
+            {/* Post-realization notes — editable by Supervisor only */}
+            {!isCreate && (
+              <div className="space-y-2">
+                <Label htmlFor="postRealizationNotes">{t('operations.postRealizationNotes')}</Label>
+                <Textarea
+                  id="postRealizationNotes"
+                  value={postRealizationNotes}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    setPostRealizationNotes(e.target.value)
+                  }
+                  placeholder={t('operations.postRealizationNotesPlaceholder')}
+                  maxLength={1000}
+                  rows={3}
+                  disabled={!isSupervisor}
+                />
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="contactEmails">
@@ -524,6 +576,14 @@ export function OperationFormPage() {
                     disabled={!isSupervisor}
                   />
                 </div>
+              </div>
+            )}
+
+            {isCreate && (
+              <div className="rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
+                <p className="text-sm text-blue-400">
+                  ℹ️ {t('operations.kmlUploadAfterCreate')}
+                </p>
               </div>
             )}
 
@@ -692,6 +752,29 @@ export function OperationFormPage() {
         </div>
       )}
 
+      {/* Linked orders (detail mode only) */}
+      {!isCreate && operation && (
+        <div className="mt-6 rounded-md bg-surface-container-low p-6">
+          <h2 className="text-lg font-semibold mb-3">{t('operations.linkedOrders')}</h2>
+          {operation.linked_orders && operation.linked_orders.length > 0 ? (
+            <ul className="space-y-1">
+              {operation.linked_orders.map((lo) => (
+                <li key={lo.id} className="text-sm">
+                  #{lo.id}{" "}
+                  <Badge variant="outline" className="ml-1 text-xs">
+                    {t(`orders.status${lo.status}`, { defaultValue: `Status ${lo.status}` })}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {t('operations.noLinkedOrders')}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Confirm dialog */}
       <Dialog
         open={showConfirmDialog}
@@ -740,6 +823,60 @@ export function OperationFormPage() {
               }
             >
               {confirmMutation.isPending ? t('operations.confirming') : t('operations.confirm')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject confirm dialog */}
+      <Dialog open={showRejectDialog} onOpenChange={() => setShowRejectDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('operations.confirmReject')}</DialogTitle>
+            <DialogDescription>
+              {t('operations.confirmRejectDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                rejectMutation.mutate();
+                setShowRejectDialog(false);
+              }}
+              disabled={rejectMutation.isPending}
+            >
+              {rejectMutation.isPending ? t('operations.rejecting') : t('operations.reject')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resign confirm dialog */}
+      <Dialog open={showResignDialog} onOpenChange={() => setShowResignDialog(false)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('operations.confirmResign')}</DialogTitle>
+            <DialogDescription>
+              {t('operations.confirmResignDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResignDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                resignMutation.mutate();
+                setShowResignDialog(false);
+              }}
+              disabled={resignMutation.isPending}
+            >
+              {resignMutation.isPending ? t('operations.resigning') : t('operations.resign')}
             </Button>
           </DialogFooter>
         </DialogContent>
