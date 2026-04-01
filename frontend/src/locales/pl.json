@@ -240,7 +240,9 @@
     "validationOrderNumberRequired": "Nr zlecenia jest wymagany",
     "validationShortDescriptionRequired": "Krótki opis jest wymagany",
     "validationActivityTypeRequired": "Wybierz co najmniej jeden rodzaj czynności",
-    "kmlUploadAfterCreate": "Plik KML (trasa) jest wymagany. Po utworzeniu operacji zostaniesz przekierowany do strony szczegółów, gdzie możesz przesłać plik KML."
+    "kmlUploadAfterCreate": "Plik KML (trasa) jest wymagany. Po utworzeniu operacji zostaniesz przekierowany do strony szczegółów, gdzie możesz przesłać plik KML.",
+    "validationProposedDateOrder": "Data 'do' nie może być wcześniejsza niż data 'od'",
+    "validationPlannedDateOrder": "Planowana data 'do' nie może być wcześniejsza niż data 'od'"
   },
   "orders": {
     "title": "Zlecenia lotnicze",
@@ -319,7 +321,9 @@
     "confirmNotCompleted": "Potwierdź brak realizacji",
     "confirmNotCompletedDesc": "Czy na pewno chcesz oznaczyć to zlecenie jako niezrealizowane?",
     "loadingError": "Błąd ładowania",
-    "unknownError": "Nieznany błąd"
+    "unknownError": "Nieznany błąd",
+    "validationPlannedEndBeforeStart": "Data końca musi być późniejsza niż data startu",
+    "validationActualEndBeforeStart": "Rzeczywisty koniec musi być późniejszy niż rzeczywisty start"
   },
   "theme": {
     "dark": "Ciemny",

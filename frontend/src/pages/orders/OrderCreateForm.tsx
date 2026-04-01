@@ -157,6 +157,8 @@ export function OrderCreateForm({
   const createEndSite = landingSites.find((s) => s.id === Number(endSiteId));
   const hasMapData = createMapOps.length > 0 || createStartSite || createEndSite;
 
+  const dateError = !!(plannedStart && plannedEnd && new Date(plannedEnd) <= new Date(plannedStart));
+
   return (
     <div className="rounded-md bg-surface-container-low p-6">
       <form onSubmit={onSubmit} className="space-y-5">
@@ -189,6 +191,9 @@ export function OrderCreateForm({
             />
           </div>
         </div>
+        {dateError && (
+          <p className="text-sm text-destructive-foreground">{t('orders.validationPlannedEndBeforeStart')}</p>
+        )}
 
         {/* Helicopter dropdown */}
         <div className="space-y-2">
@@ -393,7 +398,7 @@ export function OrderCreateForm({
         )}
 
         <div className="flex gap-3 pt-2">
-          <Button type="submit" disabled={isCreating}>
+          <Button type="submit" disabled={isCreating || dateError}>
             {isCreating
               ? t('orders.creating')
               : t('orders.createOrder')}

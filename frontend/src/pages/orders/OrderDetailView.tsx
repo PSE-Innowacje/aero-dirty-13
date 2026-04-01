@@ -93,6 +93,8 @@ export function OrderDetailView({
 }: OrderDetailViewProps) {
   const { t } = useTranslation();
 
+  const actualDateError = !!(actualStart && actualEnd && new Date(actualEnd) <= new Date(actualStart));
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Left: Order details */}
@@ -191,9 +193,12 @@ export function OrderDetailView({
                 />
               </div>
             </div>
+            {actualDateError && (
+              <p className="text-sm text-destructive-foreground">{t('orders.validationActualEndBeforeStart')}</p>
+            )}
             <Button
               onClick={onSaveActualTimes}
-              disabled={savingActualTimes}
+              disabled={savingActualTimes || actualDateError}
             >
               {savingActualTimes
                 ? t('orders.savingTimes')

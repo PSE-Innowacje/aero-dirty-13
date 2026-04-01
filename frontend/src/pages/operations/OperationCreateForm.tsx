@@ -67,6 +67,8 @@ export function OperationCreateForm({
 }: OperationCreateFormProps) {
   const { t } = useTranslation();
 
+  const proposedDateError = !!(proposedDateEarliest && proposedDateLatest && proposedDateLatest < proposedDateEarliest);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="rounded-md bg-surface-container-low p-6">
@@ -160,6 +162,9 @@ export function OperationCreateForm({
               />
             </div>
           </div>
+          {proposedDateError && (
+            <p className="text-sm text-destructive-foreground">{t('operations.validationProposedDateOrder')}</p>
+          )}
 
           <div className="rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
             <p className="text-sm text-blue-400">
@@ -168,7 +173,7 @@ export function OperationCreateForm({
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={isSaving}>
+            <Button type="submit" disabled={isSaving || proposedDateError}>
               {isSaving
                 ? t('operations.saving')
                 : t('operations.createOperation')}

@@ -239,7 +239,9 @@
     "validationOrderNumberRequired": "Order number is required",
     "validationShortDescriptionRequired": "Short description is required",
     "validationActivityTypeRequired": "Select at least one activity type",
-    "kmlUploadAfterCreate": "KML file (route) is required. After creating the operation you will be redirected to the detail page where you can upload the KML file."
+    "kmlUploadAfterCreate": "KML file (route) is required. After creating the operation you will be redirected to the detail page where you can upload the KML file.",
+    "validationProposedDateOrder": "'To' date must not be before 'from' date",
+    "validationPlannedDateOrder": "Planned 'to' date must not be before 'from' date"
   },
   "orders": {
     "title": "Flight Orders",
@@ -318,7 +320,9 @@
     "confirmNotCompleted": "Confirm not completed",
     "confirmNotCompletedDesc": "Are you sure you want to mark this order as not completed?",
     "loadingError": "Loading error",
-    "unknownError": "Unknown error"
+    "unknownError": "Unknown error",
+    "validationPlannedEndBeforeStart": "End date must be after start date",
+    "validationActualEndBeforeStart": "Actual end must be after actual start"
   },
   "theme": {
     "dark": "Dark",

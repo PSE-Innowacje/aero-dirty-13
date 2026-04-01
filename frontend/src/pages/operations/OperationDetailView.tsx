@@ -170,6 +170,9 @@ export function OperationDetailView({
 }: OperationDetailViewProps) {
   const { t } = useTranslation();
 
+  const proposedDateError = !!(proposedDateEarliest && proposedDateLatest && proposedDateLatest < proposedDateEarliest);
+  const plannedDateError = !!(plannedDateEarliest && plannedDateLatest && plannedDateLatest < plannedDateEarliest);
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -289,6 +292,10 @@ export function OperationDetailView({
               </div>
             </div>
 
+            {proposedDateError && (
+              <p className="text-sm text-destructive-foreground">{t('operations.validationProposedDateOrder')}</p>
+            )}
+
             {/* Planned dates — editable ONLY by Supervisor in detail mode */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -315,9 +322,13 @@ export function OperationDetailView({
               </div>
             </div>
 
+            {plannedDateError && (
+              <p className="text-sm text-destructive-foreground">{t('operations.validationPlannedDateOrder')}</p>
+            )}
+
             {canEdit && (
               <div className="flex gap-3 pt-2">
-                <Button type="submit" disabled={isSaving}>
+                <Button type="submit" disabled={isSaving || proposedDateError || plannedDateError}>
                   {isSaving
                     ? t('operations.saving')
                     : t('operations.saveChanges')}

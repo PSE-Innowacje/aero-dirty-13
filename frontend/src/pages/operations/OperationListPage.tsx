@@ -75,6 +75,7 @@ export function OperationListPage() {
   const [confirmOpId, setConfirmOpId] = useState<number | null>(null);
   const [confirmPlannedEarliest, setConfirmPlannedEarliest] = useState("");
   const [confirmPlannedLatest, setConfirmPlannedLatest] = useState("");
+  const confirmDateError = !!(confirmPlannedEarliest && confirmPlannedLatest && confirmPlannedLatest < confirmPlannedEarliest);
 
   const queryParams = statusFilter ? `?op_status=${statusFilter}` : "";
 
@@ -354,6 +355,9 @@ export function OperationListPage() {
               />
             </div>
           </div>
+          {confirmDateError && (
+            <p className="text-sm text-destructive-foreground">{t('operations.validationPlannedDateOrder')}</p>
+          )}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirmOpId(null)}>
               {t('common.cancel')}
@@ -364,7 +368,8 @@ export function OperationListPage() {
               disabled={
                 confirmMutation.isPending ||
                 !confirmPlannedEarliest ||
-                !confirmPlannedLatest
+                !confirmPlannedLatest ||
+                confirmDateError
               }
             >
               {confirmMutation.isPending
