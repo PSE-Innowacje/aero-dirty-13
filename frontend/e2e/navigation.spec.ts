@@ -22,8 +22,8 @@ test.describe('Sidebar menu items per role', () => {
     await expect(sidebar.getByText('Członkowie załogi')).toBeVisible();
     await expect(sidebar.getByText('Lądowiska planowe')).toBeVisible();
     await expect(sidebar.getByText('Użytkownicy')).toBeVisible();
-    await expect(sidebar.getByText('Lista operacji')).toBeVisible();
-    await expect(sidebar.getByText('Lista zleceń')).toBeVisible();
+    await expect(sidebar.getByText('Operacje lotnicze')).toBeVisible();
+    await expect(sidebar.getByText('Zlecenia lotnicze')).toBeVisible();
   });
 
   test('sidebar shows limited menu for planner', async ({ page, loginAs }) => {
@@ -33,14 +33,14 @@ test.describe('Sidebar menu items per role', () => {
     const sidebar = page.locator('aside');
 
     // Planner sees only the operations group
-    await expect(sidebar.getByText('Lista operacji')).toBeVisible();
+    await expect(sidebar.getByText('Operacje lotnicze')).toBeVisible();
 
     // Planner should NOT see admin-only items
     await expect(sidebar.getByText('Helikoptery')).not.toBeVisible();
     await expect(sidebar.getByText('Członkowie załogi')).not.toBeVisible();
     await expect(sidebar.getByText('Lądowiska planowe')).not.toBeVisible();
     await expect(sidebar.getByText('Użytkownicy')).not.toBeVisible();
-    await expect(sidebar.getByText('Lista zleceń')).not.toBeVisible();
+    await expect(sidebar.getByText('Zlecenia lotnicze')).not.toBeVisible();
   });
 });
 
