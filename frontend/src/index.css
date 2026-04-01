@@ -93,14 +93,12 @@
 /* Cockpit atmosphere */
 .cockpit-grid {
   background-image:
+    radial-gradient(ellipse 50% 80% at 0% 50%, rgba(72,162,206,0.06), transparent 70%),
     linear-gradient(rgba(72,162,206,0.12) 1px, transparent 1px),
     linear-gradient(90deg, rgba(72,162,206,0.12) 1px, transparent 1px),
     radial-gradient(circle 1.5px at center, rgba(72,162,206,0.15) 1.5px, transparent 1.5px);
-  background-size: 32px 32px, 32px 32px, 32px 32px;
+  background-size: 100% 100%, 32px 32px, 32px 32px, 32px 32px;
   animation: grid-breathe 8s ease-in-out infinite;
-}
-.cockpit-glow {
-  background: radial-gradient(ellipse 50% 80% at 0% 50%, rgba(72,162,206,0.06), transparent 70%);
 }
 @keyframes grid-breathe {
   0%, 100% { opacity: 0.6; }
@@ -119,11 +117,9 @@
 }
 .light .cockpit-grid {
   background-image:
+    radial-gradient(ellipse 50% 80% at 0% 50%, rgba(0,48,100,0.03), transparent 70%),
     linear-gradient(rgba(0,48,100,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0,48,100,0.05) 1px, transparent 1px),
-    radial-gradient(circle 1px at center, rgba(0,48,100,0.04) 1px, transparent 1px);
-  background-size: 32px 32px, 32px 32px, 32px 32px;
-}
-.light .cockpit-glow {
-  background: radial-gradient(ellipse 40% 80% at 0% 50%, rgba(0,48,100,0.02), transparent 70%);
+    radial-gradient(circle 1.5px at center, rgba(0,48,100,0.04) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 32px 32px, 32px 32px, 32px 32px;
 }
