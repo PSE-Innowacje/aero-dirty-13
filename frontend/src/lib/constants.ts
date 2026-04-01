@@ -108,25 +108,25 @@ export const OPERATION_STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 };
 
 export const OPERATION_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "",  // destructive variant handles red
-  3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-gray-900",
-  5: "bg-orange-500 text-gray-900",
-  6: "bg-green-600 text-white",
-  7: "",  // secondary variant handles grey
+  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
+  2: "",                              // destructive variant handles red
+  3: "bg-[#4C8832] text-white",     // PSE green — confirmed
+  4: "bg-[#F2C432] text-gray-900",  // PSE yellow — ordered
+  5: "bg-orange-500 text-gray-900", // in realization
+  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  7: "",                              // secondary variant handles grey
 };
 
 // ── Operation Form Status Badge Classes (without variant) ────────────
 
 export const OPERATION_FORM_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-red-500 text-white",
-  3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-white",
-  5: "bg-orange-500 text-white",
-  6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
+  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
+  2: "bg-[#C90019] text-white",     // PSE red — rejected
+  3: "bg-[#4C8832] text-white",     // PSE green — confirmed
+  4: "bg-[#F2C432] text-gray-900",  // PSE yellow — ordered
+  5: "bg-orange-500 text-white",     // in realization
+  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  7: "bg-gray-400 text-white",       // resigned
 };
 
 // ── Order Status Badge Mappings ──────────────────────────────────────
@@ -142,25 +142,25 @@ export const ORDER_STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 };
 
 export const ORDER_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-gray-900",
-  3: "", // destructive handles red
-  4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-gray-900",
-  6: "bg-green-600 text-white",
-  7: "", // secondary handles grey
+  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
+  2: "bg-[#F2C432] text-gray-900",  // PSE yellow — submitted
+  3: "",                              // destructive handles red
+  4: "bg-[#4C8832] text-white",     // PSE green — accepted
+  5: "bg-orange-500 text-gray-900", // in settlement
+  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  7: "",                              // secondary handles grey
 };
 
 // ── Order Form Status Badge Classes (without variant) ────────────────
 
 export const ORDER_FORM_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-white",
-  3: "bg-red-500 text-white",
-  4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-white",
-  6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
+  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
+  2: "bg-[#F2C432] text-gray-900",  // PSE yellow — submitted
+  3: "bg-[#C90019] text-white",     // PSE red — rejected
+  4: "bg-[#4C8832] text-white",     // PSE green — accepted
+  5: "bg-orange-500 text-white",     // in settlement
+  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  7: "bg-gray-400 text-white",       // not completed
 };
 
 // ── Helicopter Status Mappings ───────────────────────────────────────
