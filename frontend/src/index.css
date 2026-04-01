@@ -93,9 +93,10 @@
 /* Cockpit atmosphere */
 .cockpit-grid {
   background-image:
-    linear-gradient(rgba(72,162,206,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(72,162,206,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(72,162,206,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72,162,206,0.05) 1px, transparent 1px),
+    radial-gradient(circle 1px at center, rgba(72,162,206,0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px, 32px 32px;
   animation: grid-breathe 8s ease-in-out infinite;
 }
 .cockpit-glow {
@@ -118,9 +119,10 @@
 }
 .light .cockpit-grid {
   background-image:
-    linear-gradient(rgba(0,48,100,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,48,100,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(0,48,100,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,48,100,0.05) 1px, transparent 1px),
+    radial-gradient(circle 1px at center, rgba(0,48,100,0.04) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px, 32px 32px;
 }
 .light .cockpit-glow {
   background: radial-gradient(ellipse 40% 80% at 0% 50%, rgba(0,48,100,0.02), transparent 70%);

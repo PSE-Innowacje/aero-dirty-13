@@ -113,7 +113,7 @@ export function DataTable<T>({
       {filter && <div className="mb-4">{filter}</div>}
 
       {/* ---------- Table ---------- */}
-      <div className="rounded-md bg-surface-container-low shadow-[0_0_24px_rgba(0,20,41,0.3)] border border-accent/5">
+      <div className="rounded-md bg-surface-container-low border border-[#48A2CE]/15 shadow-[inset_0_0_12px_rgba(72,162,206,0.02),0_0_24px_rgba(0,20,41,0.3)]">
         <Table>
           <TableHeader>
             <TableRow>
