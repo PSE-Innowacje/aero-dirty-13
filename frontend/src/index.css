@@ -84,4 +84,44 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-surface); }
+  ::-webkit-scrollbar-thumb { background: var(--color-surface-container-highest); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+}
+
+/* Cockpit atmosphere */
+.cockpit-grid {
+  background-image:
+    linear-gradient(rgba(72,162,206,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72,162,206,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: grid-breathe 8s ease-in-out infinite;
+}
+.cockpit-glow {
+  background: radial-gradient(ellipse 40% 80% at 0% 50%, rgba(72,162,206,0.03), transparent 70%);
+}
+@keyframes grid-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes led-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px currentColor); }
+  50% { filter: drop-shadow(0 0 8px currentColor); }
+}
+.led-badge {
+  animation: led-pulse 2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cockpit-grid { animation: none; }
+  .led-badge { animation: none; }
+}
+.light .cockpit-grid {
+  background-image:
+    linear-gradient(rgba(0,48,100,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,48,100,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.light .cockpit-glow {
+  background: radial-gradient(ellipse 40% 80% at 0% 50%, rgba(0,48,100,0.02), transparent 70%);
 }
