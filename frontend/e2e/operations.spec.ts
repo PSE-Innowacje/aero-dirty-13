@@ -76,6 +76,56 @@ test.describe('Operation workflows', () => {
     await expect(dialog).not.toBeVisible();
   });
 
+  test('supervisor sees introduced operations by default', async ({ page, loginAs }) => {
+    await loginAs('supervisor');
+
+    await page.goto('/operations');
+    await page.waitForURL('/operations');
+
+    // Supervisor default filter should be status 1 (Introduced)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('1');
+
+    // Table should be visible with the default filter applied
+    await expect(page.locator('table')).toBeVisible();
+  });
+
+  test('planner sees introduced operations by default', async ({ page, loginAs }) => {
+    await loginAs('planner');
+
+    await page.goto('/operations');
+    await page.waitForURL('/operations');
+
+    // Planner default filter should be status 1 (Introduced)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('1');
+  });
+
+  test('back to list navigates to operations list after create', async ({ page, loginAs }) => {
+    await loginAs('planner');
+
+    // Create a new operation
+    await page.goto('/operations/new');
+    await page.waitForURL('/operations/new');
+
+    await page.getByLabel(/order.*no|nr.*zlecenia/i).fill('OP-NAV-TEST');
+    await page.getByLabel(/short description|krótki opis/i).fill('Navigation test');
+    const firstCheckbox = page.locator('input[type="checkbox"]').first();
+    await firstCheckbox.check();
+    await page.getByLabel(/proposed.*from|proponowana.*od/i).fill('2026-08-01');
+    await page.getByLabel(/proposed.*to|proponowana.*do/i).fill('2026-08-31');
+
+    await page.getByRole('button', { name: /create.*operation|utwórz.*operację/i }).click();
+    await page.waitForURL(/\/operations\/\d+/);
+
+    // Click "Back to list" — should go to /operations, NOT /operations/new
+    await page.getByRole('button', { name: /back.*list|powrót.*list/i }).click();
+    await page.waitForURL('/operations');
+
+    // Should be on the operations list page (not the create form)
+    await expect(page.locator('table')).toBeVisible();
+  });
+
   test('planner resigns from operation', async ({ page, loginAs }) => {
     await loginAs('planner');
 

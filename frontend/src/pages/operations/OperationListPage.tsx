@@ -37,6 +37,7 @@ import {
   OPERATION_STATUS_BADGE_VARIANT,
   OPERATION_STATUS_BADGE_CLASS,
   SYSTEM_ROLE,
+  OPERATION_DEFAULT_STATUS_FILTER,
 } from "@/lib/constants";
 
 interface OperationListItem {
@@ -64,10 +65,11 @@ export function OperationListPage() {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const statusFilter = searchParams.get("status") ?? "3";
   const [mutationError, setMutationError] = useState<string | null>(null);
 
   const role = user?.system_role ?? "";
+  const roleDefault = OPERATION_DEFAULT_STATUS_FILTER[role] ?? "";
+  const statusFilter = searchParams.get("status") ?? roleDefault;
   const isPlanner = role === SYSTEM_ROLE.PLANNER;
   const isSupervisor = role === SYSTEM_ROLE.SUPERVISOR;
   const canCreate = isPlanner || isSupervisor;

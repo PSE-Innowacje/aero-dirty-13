@@ -81,6 +81,31 @@ test.describe('Flight order workflows', () => {
     expect(redirected).toBeTruthy();
   });
 
+  test('pilot sees introduced orders by default', async ({ page, loginAs }) => {
+    await loginAs('pilot');
+
+    await page.goto('/orders');
+    await page.waitForURL('/orders');
+
+    // Pilot default filter should be status 1 (Introduced/Nowe)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('1');
+
+    // Table should be visible with the default filter applied
+    await expect(page.locator('table')).toBeVisible();
+  });
+
+  test('supervisor sees submitted orders by default', async ({ page, loginAs }) => {
+    await loginAs('supervisor');
+
+    await page.goto('/orders');
+    await page.waitForURL('/orders');
+
+    // Supervisor default filter should be status 2 (Submitted/Przekazane)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('2');
+  });
+
   test('pilot submits order for acceptance', async ({ page, loginAs }) => {
     await loginAs('pilot');
 

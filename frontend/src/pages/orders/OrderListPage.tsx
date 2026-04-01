@@ -2,8 +2,7 @@
  * OrderListPage — list flight orders with status filter and RBAC actions.
  * Default filter: status=2 (Przekazane do akceptacji) per PRD 6.6.g.
  */
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
@@ -25,6 +24,7 @@ import {
   ORDER_STATUS_BADGE_VARIANT,
   ORDER_STATUS_BADGE_CLASS,
   SYSTEM_ROLE,
+  ORDER_DEFAULT_STATUS_FILTER,
 } from "@/lib/constants";
 
 interface OrderListItem {
@@ -39,8 +39,11 @@ export function OrderListPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  // Default filter: status=2 per PRD 6.6.g
-  const [statusFilter, setStatusFilter] = useState<string>("2");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const role = user?.system_role ?? "";
+  const roleDefault = ORDER_DEFAULT_STATUS_FILTER[role] ?? "";
+  const statusFilter = searchParams.get("status") ?? roleDefault;
 
   const canCreate = user?.system_role === SYSTEM_ROLE.PILOT;
 
@@ -103,7 +106,14 @@ export function OrderListPage() {
         </label>
         <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val) {
+              setSearchParams({ status: val });
+            } else {
+              setSearchParams({});
+            }
+          }}
           className="w-56"
         >
           <option value="">{t('orders.allStatuses')}</option>
