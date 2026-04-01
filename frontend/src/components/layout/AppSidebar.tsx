@@ -8,7 +8,6 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import {
-  Plane,
   Settings,
   ClipboardList,
   FileText,
@@ -25,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SYSTEM_ROLE } from "@/lib/constants";
+import { PseLogo } from "@/components/ui/pse-logo";
 
 /* ── Menu structure per PRD 7.1 ────────────────────────────── */
 interface MenuItem {
@@ -120,10 +120,8 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
       <div className="flex h-16 items-center justify-between px-4">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-gradient-to-br from-primary to-primary-container">
-              <Plane className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-foreground">{t("sidebar.brand")}</span>
+            <span className="text-lg font-bold text-foreground">AERO</span>
+            <PseLogo height={20} id="sidebar-pse" />
           </div>
         )}
         <button

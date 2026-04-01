@@ -1,41 +1,41 @@
 @import "tailwindcss";
 
-/* ── AERO Design System: "Precision Aviator" ─────────────────
-   Dark cockpit palette with Aviation Orange accents.
+/* ── PSE Grid Sentinel Design System ──────────────────────────
+   Dark navy palette with PSE Red CTA accents.
+   Corporate identity: #003064 navy, #C90019 red, #48A2CE blue.
    Surface hierarchy creates depth without borders.
-   Light theme provides a professional daytime alternative.
-   See DESIGN.md for rationale. ──────────────────────────────── */
+   ───────────────────────────────────────────────────────────── */
 
 @theme {
-  /* ── Surface hierarchy (dark cockpit stack — default) ────── */
-  --color-surface:                #081425;
-  --color-surface-container-lowest: #040E1F;
-  --color-surface-container-low:  #111C2D;
-  --color-surface-container:      #152031;
-  --color-surface-container-high: #1F2A3C;
-  --color-surface-container-highest: #293548;
+  /* ── Surface hierarchy (dark navy stack — default) ─────────── */
+  --color-surface:                #001429;
+  --color-surface-container-lowest: #000F21;
+  --color-surface-container-low:  #041C35;
+  --color-surface-container:      #082139;
+  --color-surface-container-high: #152B44;
+  --color-surface-container-highest: #21364F;
 
   /* ── Semantic tokens mapped to surface hierarchy ─────────── */
-  --color-background: #081425;
-  --color-foreground: #E0E4EA;
-  --color-card: #111C2D;
-  --color-card-foreground: #E0E4EA;
-  --color-primary: #FFB599;
-  --color-primary-foreground: #081425;
-  --color-primary-container: #F66018;
-  --color-secondary: #293548;
-  --color-secondary-foreground: #E0E4EA;
-  --color-muted: #152031;
-  --color-muted-foreground: #8A9BB5;
+  --color-background: #001429;
+  --color-foreground: #D2E4FF;
+  --color-card: #041C35;
+  --color-card-foreground: #D2E4FF;
+  --color-primary: #FFB3AC;
+  --color-primary-foreground: #680008;
+  --color-primary-container: #C90019;
+  --color-secondary: #24497E;
+  --color-secondary-foreground: #D2E4FF;
+  --color-muted: #082139;
+  --color-muted-foreground: #9BB5CC;
   --color-destructive: #93000A;
   --color-destructive-foreground: #FFD9D6;
-  --color-accent: #2192FD;
-  --color-accent-foreground: #E0E4EA;
-  --color-border: rgba(90, 65, 56, 0.15);
-  --color-input: #040E1F;
-  --color-ring: #F66018;
-  --color-on-surface-variant: #8A9BB5;
-  --color-outline-variant: rgba(90, 65, 56, 0.15);
+  --color-accent: #48A2CE;
+  --color-accent-foreground: #D2E4FF;
+  --color-border: rgba(67, 71, 79, 0.25);
+  --color-input: #000F21;
+  --color-ring: #48A2CE;
+  --color-on-surface-variant: #C3C6D1;
+  --color-outline-variant: rgba(67, 71, 79, 0.30);
 
   /* ── Radius: industrial "machined" feel ──────────────────── */
   --radius: 0.375rem;
@@ -44,32 +44,32 @@
 
 /* ── Light theme overrides ─────────────────────────────────── */
 .light {
-  --color-surface:                #F5F6FA;
+  --color-surface:                #F0F4FA;
   --color-surface-container-lowest: #FFFFFF;
-  --color-surface-container-low:  #EFF1F5;
-  --color-surface-container:      #E8EAF0;
-  --color-surface-container-high: #DFE2E9;
-  --color-surface-container-highest: #D4D8E1;
+  --color-surface-container-low:  #E8ECF2;
+  --color-surface-container:      #DFE3EB;
+  --color-surface-container-high: #D4D9E3;
+  --color-surface-container-highest: #C8CED9;
 
-  --color-background: #F5F6FA;
-  --color-foreground: #111827;
-  --color-card: #EFF1F5;
-  --color-card-foreground: #111827;
-  --color-primary: #D45510;
+  --color-background: #F0F4FA;
+  --color-foreground: #001429;
+  --color-card: #E8ECF2;
+  --color-card-foreground: #001429;
+  --color-primary: #A3000F;
   --color-primary-foreground: #FFFFFF;
-  --color-primary-container: #F66018;
-  --color-secondary: #D4D8E1;
-  --color-secondary-foreground: #111827;
-  --color-muted: #E8EAF0;
-  --color-muted-foreground: #6B7280;
+  --color-primary-container: #C90019;
+  --color-secondary: #C8CED9;
+  --color-secondary-foreground: #001429;
+  --color-muted: #DFE3EB;
+  --color-muted-foreground: #5A6577;
   --color-destructive: #DC2626;
   --color-destructive-foreground: #FFFFFF;
-  --color-accent: #1A7CE0;
+  --color-accent: #1A6B9C;
   --color-accent-foreground: #FFFFFF;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-input: #FFFFFF;
-  --color-ring: #F66018;
-  --color-on-surface-variant: #6B7280;
+  --color-ring: #48A2CE;
+  --color-on-surface-variant: #5A6577;
   --color-outline-variant: rgba(0, 0, 0, 0.08);
 }
 

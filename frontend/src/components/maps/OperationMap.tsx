@@ -47,7 +47,7 @@ export function OperationMap({ coordinates }: OperationMapProps) {
         />
         <Polyline
           positions={coordinates}
-          pathOptions={{ color: "#2563eb", weight: 3 }}
+          pathOptions={{ color: "#48A2CE", weight: 3 }}
         />
         <FitBounds coordinates={coordinates} />
       </MapContainer>
