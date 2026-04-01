@@ -4,7 +4,7 @@
  * Sorted by id DESC (newest first). Status badges with color mapping.
  */
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
@@ -63,7 +63,8 @@ export function OperationListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const [statusFilter, setStatusFilter] = useState<string>("3");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusFilter = searchParams.get("status") ?? "3";
   const [mutationError, setMutationError] = useState<string | null>(null);
 
   const role = user?.system_role ?? "";
@@ -195,7 +196,14 @@ export function OperationListPage() {
         </label>
         <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val) {
+              setSearchParams({ status: val });
+            } else {
+              setSearchParams({});
+            }
+          }}
           className="w-56"
         >
           <option value="">{t('operations.allStatuses')}</option>
