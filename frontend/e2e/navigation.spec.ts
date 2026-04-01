@@ -10,7 +10,8 @@ import { test, expect } from './fixtures/auth';
 test.describe('Sidebar menu items per role', () => {
   test('sidebar shows correct menu items for admin', async ({ page, loginAs }) => {
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    // Dashboard is now the landing page (no redirect)
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const sidebar = page.locator('aside');
 
@@ -27,7 +28,7 @@ test.describe('Sidebar menu items per role', () => {
 
   test('sidebar shows limited menu for planner', async ({ page, loginAs }) => {
     await loginAs('planner');
-    await page.waitForURL('**/operations', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const sidebar = page.locator('aside');
 
@@ -46,7 +47,7 @@ test.describe('Sidebar menu items per role', () => {
 test.describe('Sidebar collapse/expand', () => {
   test('sidebar collapse/expand works', async ({ page, loginAs }) => {
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const sidebar = page.locator('aside');
 
@@ -80,7 +81,7 @@ test.describe('Sidebar collapse/expand', () => {
 test.describe('Page rendering', () => {
   test('each page loads without errors', async ({ page, loginAs }) => {
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     // Track console errors
     const consoleErrors: string[] = [];
@@ -89,6 +90,7 @@ test.describe('Page rendering', () => {
     });
 
     const pages = [
+      { path: '/', content: /panel operacyjny|operational panel/i },
       { path: '/users', content: /użytkownicy|users/i },
       { path: '/helicopters', content: /helikoptery|helicopters/i },
       { path: '/crew', content: /członkowie załogi|crew members/i },
@@ -121,7 +123,7 @@ test.describe('Page rendering', () => {
 test.describe('Theme toggle', () => {
   test('theme toggle switches between dark and light', async ({ page, loginAs }) => {
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const htmlElement = page.locator('html');
 
@@ -146,7 +148,7 @@ test.describe('Theme toggle', () => {
 test.describe('Language toggle', () => {
   test('language toggle switches between pl and en', async ({ page, loginAs }) => {
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const sidebar = page.locator('aside');
 

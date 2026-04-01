@@ -47,28 +47,28 @@ test.describe('Login page', () => {
 });
 
 test.describe('Role-based redirects after login', () => {
-  test('admin login redirects to /users', async ({ page, loginAs }) => {
+  test('admin login lands on dashboard', async ({ page, loginAs }) => {
     await loginAs('admin');
 
-    // Admin's DashboardPage redirects to /users
-    await page.waitForURL('**/users', { timeout: 10_000 });
-    await expect(page).toHaveURL(/\/users/);
+    // Admin lands on the dashboard page
+    await page.waitForURL('**/', { timeout: 10_000 });
+    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('planner login redirects to /operations', async ({ page, loginAs }) => {
+  test('planner login lands on dashboard', async ({ page, loginAs }) => {
     await loginAs('planner');
 
-    // Planner's DashboardPage redirects to /operations
-    await page.waitForURL('**/operations', { timeout: 10_000 });
-    await expect(page).toHaveURL(/\/operations/);
+    // Planner lands on the dashboard page
+    await page.waitForURL('**/', { timeout: 10_000 });
+    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
   });
 
-  test('pilot login redirects to /operations', async ({ page, loginAs }) => {
+  test('pilot login lands on dashboard', async ({ page, loginAs }) => {
     await loginAs('pilot');
 
-    // Pilot's DashboardPage redirects to /operations
-    await page.waitForURL('**/operations', { timeout: 10_000 });
-    await expect(page).toHaveURL(/\/operations/);
+    // Pilot lands on the dashboard page
+    await page.waitForURL('**/', { timeout: 10_000 });
+    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
   });
 });
 
@@ -76,7 +76,7 @@ test.describe('Logout', () => {
   test('logout returns to login page', async ({ page, loginAs }) => {
     // Login as admin first
     await loginAs('admin');
-    await page.waitForURL('**/users', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     // Find and click the logout button in the sidebar
     // Polish label: "Wyloguj"

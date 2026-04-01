@@ -78,7 +78,8 @@
     "validationMaxCrewRange": "Musi być między 1 a 10",
     "validationMaxPayloadRange": "Musi być między 1 a 1000",
     "validationRangeKmRange": "Musi być między 1 a 1000",
-    "validationInspectionRequired": "Data przeglądu jest wymagana dla aktywnych"
+    "validationInspectionRequired": "Data przeglądu jest wymagana dla aktywnych",
+    "inspectionsExpiring": "Przeglądy do odnowienia"
   },
   "crew": {
     "title": "Członkowie załogi",
@@ -111,7 +112,9 @@
     "validationWeightRange": "Musi być między 30 a 200",
     "validationTrainingRequired": "Data szkolenia jest wymagana",
     "validationLicenseRequired": "Nr licencji jest wymagany dla pilota",
-    "validationLicenseExpiryRequired": "Data ważności licencji jest wymagana dla pilota"
+    "validationLicenseExpiryRequired": "Data ważności licencji jest wymagana dla pilota",
+    "licensesExpiring": "licencji pilotów wygasa w ciągu 30 dni",
+    "trainingExpiring": "szkoleń wygasa w ciągu 30 dni"
   },
   "landingSites": {
     "title": "Lądowiska",
@@ -325,6 +328,27 @@
     "unknownError": "Nieznany błąd",
     "validationPlannedEndBeforeStart": "Data końca musi być późniejsza niż data startu",
     "validationActualEndBeforeStart": "Rzeczywisty koniec musi być późniejszy niż rzeczywisty start"
+  },
+  "dashboard": {
+    "title": "Panel operacyjny",
+    "subtitle": "Przegl\u0105d floty i operacji",
+    "helicopterFleet": "Flota helikopter\u00f3w",
+    "crewMembers": "Cz\u0142onkowie za\u0142ogi",
+    "flightOperations": "Operacje lotnicze",
+    "flightOrders": "Zlecenia lotnicze",
+    "active": "aktywnych",
+    "inactive": "nieaktywnych",
+    "inspectionsExpiring": "przegl\u0105dy wygasaj\u0105",
+    "certificatesExpiring": "certyfikaty wygasaj\u0105",
+    "safetyAlerts": "Alerty bezpiecze\u0144stwa",
+    "recentOperations": "Ostatnie operacje",
+    "expired": "Wygas\u0142o",
+    "expiringSoon": "Wygasa wkr\u00f3tce",
+    "noAlerts": "Brak alert\u00f3w",
+    "noRecentOperations": "Brak ostatnich operacji",
+    "helicopterInspection": "Przegl\u0105d techniczny",
+    "pilotLicense": "Licencja pilota",
+    "training": "Szkolenie okresowe"
   },
   "theme": {
     "dark": "Ciemny",

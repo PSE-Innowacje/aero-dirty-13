@@ -78,7 +78,8 @@
     "validationMaxCrewRange": "Must be between 1 and 10",
     "validationMaxPayloadRange": "Must be between 1 and 1000",
     "validationRangeKmRange": "Must be between 1 and 1000",
-    "validationInspectionRequired": "Inspection date is required for active helicopters"
+    "validationInspectionRequired": "Inspection date is required for active helicopters",
+    "inspectionsExpiring": "Inspections due for renewal"
   },
   "crew": {
     "title": "Crew members",
@@ -110,7 +111,9 @@
     "validationEmailInvalid": "Invalid email format",
     "validationTrainingRequired": "Training date is required",
     "validationLicenseRequired": "License number is required for pilots",
-    "validationLicenseExpiryRequired": "License expiry date is required for pilots"
+    "validationLicenseExpiryRequired": "License expiry date is required for pilots",
+    "licensesExpiring": "pilot licenses expiring within 30 days",
+    "trainingExpiring": "training certifications expiring within 30 days"
   },
   "landingSites": {
     "title": "Landing sites",
@@ -324,6 +327,27 @@
     "unknownError": "Unknown error",
     "validationPlannedEndBeforeStart": "End date must be after start date",
     "validationActualEndBeforeStart": "Actual end must be after actual start"
+  },
+  "dashboard": {
+    "title": "Operations Dashboard",
+    "subtitle": "Fleet and operations overview",
+    "helicopterFleet": "Helicopter Fleet",
+    "crewMembers": "Crew Members",
+    "flightOperations": "Flight Operations",
+    "flightOrders": "Flight Orders",
+    "active": "active",
+    "inactive": "inactive",
+    "inspectionsExpiring": "inspections expiring",
+    "certificatesExpiring": "certificates expiring",
+    "safetyAlerts": "Safety Alerts",
+    "recentOperations": "Recent Operations",
+    "expired": "Expired",
+    "expiringSoon": "Expiring soon",
+    "noAlerts": "No alerts",
+    "noRecentOperations": "No recent operations",
+    "helicopterInspection": "Technical inspection",
+    "pilotLicense": "Pilot license",
+    "training": "Periodic training"
   },
   "theme": {
     "dark": "Dark",
