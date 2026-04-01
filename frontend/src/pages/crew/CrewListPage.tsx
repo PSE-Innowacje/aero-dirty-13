@@ -94,16 +94,22 @@ export function CrewListPage() {
       key: "email",
       header: t('crew.email'),
       render: (c) => <span className="font-medium">{c.email}</span>,
+      sortable: true,
+      sortFn: (a, b) => a.email.localeCompare(b.email),
     },
     {
       key: "first_name",
       header: t('crew.firstName'),
       render: (c) => c.first_name,
+      sortable: true,
+      sortFn: (a, b) => a.first_name.localeCompare(b.first_name),
     },
     {
       key: "last_name",
       header: t('crew.lastName'),
       render: (c) => c.last_name,
+      sortable: true,
+      sortFn: (a, b) => a.last_name.localeCompare(b.last_name),
     },
     {
       key: "role",
@@ -113,6 +119,8 @@ export function CrewListPage() {
           {t(CREW_ROLE_DISPLAY_KEY[c.role] ?? c.role)}
         </Badge>
       ),
+      sortable: true,
+      sortFn: (a, b) => a.role.localeCompare(b.role),
     },
     {
       key: "license_number",
@@ -123,11 +131,20 @@ export function CrewListPage() {
       key: "license_expiry",
       header: t('crew.pilotLicenseExpiry'),
       render: (c) => c.pilot_license_expiry ?? "\u2014",
+      sortable: true,
+      sortFn: (a, b) => {
+        if (!a.pilot_license_expiry && !b.pilot_license_expiry) return 0;
+        if (!a.pilot_license_expiry) return 1;
+        if (!b.pilot_license_expiry) return -1;
+        return a.pilot_license_expiry.localeCompare(b.pilot_license_expiry);
+      },
     },
     {
       key: "training_expiry",
       header: t('crew.trainingDate'),
       render: (c) => c.training_expiry,
+      sortable: true,
+      sortFn: (a, b) => (a.training_expiry ?? "").localeCompare(b.training_expiry ?? ""),
     },
   ];
 
