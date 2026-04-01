@@ -419,6 +419,19 @@ async def update_order(
         if field in update_data:
             setattr(order, field, update_data[field])
 
+    # Post-merge date ordering validation
+    if order.planned_end_datetime <= order.planned_start_datetime:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="planned_end_datetime must be after planned_start_datetime",
+        )
+    if order.actual_start_datetime and order.actual_end_datetime:
+        if order.actual_end_datetime <= order.actual_start_datetime:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="actual_end_datetime must be after actual_start_datetime",
+            )
+
     # Update M:N relationships if provided (eagerly load first to avoid MissingGreenlet)
     if "crew_member_ids" in update_data or "operation_ids" in update_data:
         await db.refresh(order, ["operations", "crew_members"])

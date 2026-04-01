@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 VALID_ACTIVITY_TYPES = [
@@ -93,6 +93,18 @@ class OperationCreate(BaseModel):
                 raise ValueError(f"Invalid email: {email}")
         return v
 
+    @model_validator(mode="after")
+    def check_proposed_dates(self) -> OperationCreate:
+        if (
+            self.proposed_date_earliest is not None
+            and self.proposed_date_latest is not None
+            and self.proposed_date_latest < self.proposed_date_earliest
+        ):
+            raise ValueError(
+                "proposed_date_latest must not be before proposed_date_earliest"
+            )
+        return self
+
 
 class OperationUpdate(BaseModel):
     """Schema for updating a flight operation — all fields optional."""
@@ -171,6 +183,26 @@ class OperationUpdate(BaseModel):
                 raise ValueError(f"Invalid email: {email}")
         return v
 
+    @model_validator(mode="after")
+    def check_date_ordering(self) -> OperationUpdate:
+        if (
+            self.proposed_date_earliest is not None
+            and self.proposed_date_latest is not None
+            and self.proposed_date_latest < self.proposed_date_earliest
+        ):
+            raise ValueError(
+                "proposed_date_latest must not be before proposed_date_earliest"
+            )
+        if (
+            self.planned_date_earliest is not None
+            and self.planned_date_latest is not None
+            and self.planned_date_latest < self.planned_date_earliest
+        ):
+            raise ValueError(
+                "planned_date_latest must not be before planned_date_earliest"
+            )
+        return self
+
 
 # ── Response sub-models ─────────────────────────────────────────────
 
@@ -204,6 +236,14 @@ class ConfirmRequest(BaseModel):
 
     planned_date_earliest: datetime.date
     planned_date_latest: datetime.date
+
+    @model_validator(mode="after")
+    def check_planned_dates(self) -> ConfirmRequest:
+        if self.planned_date_latest < self.planned_date_earliest:
+            raise ValueError(
+                "planned_date_latest must not be before planned_date_earliest"
+            )
+        return self
 
 
 class CommentCreate(BaseModel):

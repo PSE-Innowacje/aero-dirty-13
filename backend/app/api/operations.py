@@ -352,6 +352,20 @@ async def update_operation(
     for field, new_val in update_data.items():
         setattr(op, field, new_val)
 
+    # Post-merge date ordering validation
+    if op.proposed_date_earliest and op.proposed_date_latest:
+        if op.proposed_date_latest < op.proposed_date_earliest:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="proposed_date_latest must not be before proposed_date_earliest",
+            )
+    if op.planned_date_earliest and op.planned_date_latest:
+        if op.planned_date_latest < op.planned_date_earliest:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="planned_date_latest must not be before planned_date_earliest",
+            )
+
     # Write audit log entries in same transaction
     _create_audit_entries(op.id, current_user.id, changes, db)
 

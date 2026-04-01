@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 STATUS_LABELS: dict[int, str] = {
     1: "Wprowadzone",
@@ -54,6 +54,14 @@ class FlightOrderCreate(BaseModel):
     operation_ids: list[int]
     estimated_route_km: int
 
+    @model_validator(mode="after")
+    def check_planned_dates(self) -> FlightOrderCreate:
+        if self.planned_end_datetime <= self.planned_start_datetime:
+            raise ValueError(
+                "planned_end_datetime must be after planned_start_datetime"
+            )
+        return self
+
 
 class FlightOrderUpdate(BaseModel):
     """Schema for updating a flight order — all fields optional."""
@@ -68,6 +76,26 @@ class FlightOrderUpdate(BaseModel):
     estimated_route_km: Optional[int] = None
     actual_start_datetime: Optional[datetime.datetime] = None
     actual_end_datetime: Optional[datetime.datetime] = None
+
+    @model_validator(mode="after")
+    def check_date_ordering(self) -> FlightOrderUpdate:
+        if (
+            self.planned_start_datetime is not None
+            and self.planned_end_datetime is not None
+            and self.planned_end_datetime <= self.planned_start_datetime
+        ):
+            raise ValueError(
+                "planned_end_datetime must be after planned_start_datetime"
+            )
+        if (
+            self.actual_start_datetime is not None
+            and self.actual_end_datetime is not None
+            and self.actual_end_datetime <= self.actual_start_datetime
+        ):
+            raise ValueError(
+                "actual_end_datetime must be after actual_start_datetime"
+            )
+        return self
 
 
 # ── Response ─────────────────────────────────────────────────────────
