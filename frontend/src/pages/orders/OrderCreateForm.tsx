@@ -407,6 +407,11 @@ export function OrderCreateForm({
           {fieldErrors.routeKm && (
             <p className="text-xs text-destructive">{fieldErrors.routeKm}</p>
           )}
+          {selectedHelicopter && estimatedRouteKm && Number(estimatedRouteKm) > selectedHelicopter.range_km && (
+            <p className="text-sm text-destructive-foreground font-bold">
+              {t('orders.routeExceeded', { route: estimatedRouteKm, range: selectedHelicopter.range_km })}
+            </p>
+          )}
         </div>
 
         {/* Create-mode map preview */}
