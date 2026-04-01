@@ -331,6 +331,13 @@ async def update_operation(
 
     update_data = body.model_dump(exclude_unset=True)
 
+    # Reject explicit null for required fields
+    if "order_number" in update_data and update_data["order_number"] is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="order_number cannot be cleared",
+        )
+
     # Planner cannot modify locked fields — silently strip them
     if current_user.system_role == "Osoba planująca":
         for field in PLANNER_LOCKED_FIELDS:
