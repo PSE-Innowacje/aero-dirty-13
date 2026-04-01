@@ -2,7 +2,7 @@
  * HelicopterListPage — List helicopters with RBAC-filtered actions.
  * Sorted by status (aktywny first) then registration_number.
  */
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -56,6 +56,29 @@ export function HelicopterListPage() {
     return a.registration_number.localeCompare(b.registration_number);
   });
 
+  // Summary stats computed from the existing helicopters data
+  const { activeCount, inactiveCount, inspectionsExpiring } = useMemo(() => {
+    const now = new Date();
+    const in30d = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    let active = 0;
+    let inactive = 0;
+    let expiring = 0;
+    for (const h of helicopters) {
+      if (h.status === "aktywny") {
+        active++;
+      } else {
+        inactive++;
+      }
+      if (h.inspection_date) {
+        const d = new Date(h.inspection_date);
+        if (d <= in30d && d >= now) {
+          expiring++;
+        }
+      }
+    }
+    return { activeCount: active, inactiveCount: inactive, inspectionsExpiring: expiring };
+  }, [helicopters]);
+
   const columns: DataTableColumn<Helicopter>[] = [
     {
       key: "registration_number",
@@ -90,6 +113,24 @@ export function HelicopterListPage() {
 
   return (
     <>
+      {/* Fleet Summary */}
+      {!isLoading && helicopters.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+          <div className="bg-surface-container-low rounded-md p-4 border-l-[3px] border-l-[#4C8832]">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('helicopters.statusActive')}</p>
+            <p className="text-2xl font-bold text-foreground">{activeCount}</p>
+          </div>
+          <div className="bg-surface-container-low rounded-md p-4 border-l-[3px] border-l-[#8899aa]">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('helicopters.statusInactive')}</p>
+            <p className="text-2xl font-bold text-foreground">{inactiveCount}</p>
+          </div>
+          <div className="bg-surface-container-low rounded-md p-4 border-l-[3px] border-l-[#F2C432]">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider">{t('helicopters.inspectionsExpiring')}</p>
+            <p className="text-2xl font-bold text-foreground">{inspectionsExpiring}</p>
+          </div>
+        </div>
+      )}
+
       <DataTable<Helicopter>
         title={t('helicopters.title')}
         subtitle={t('helicopters.subtitle')}
