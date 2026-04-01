@@ -96,6 +96,9 @@ export interface OrderCreateFormProps {
   isCreating: boolean;
   // Field-level validation errors
   fieldErrors: Record<string, string>;
+  // Optional override labels for edit mode
+  submitLabel?: string;
+  cancelLabel?: string;
 }
 
 export function OrderCreateForm({
@@ -130,6 +133,8 @@ export function OrderCreateForm({
   onCancel,
   isCreating,
   fieldErrors,
+  submitLabel,
+  cancelLabel,
 }: OrderCreateFormProps) {
   const { t } = useTranslation();
 
@@ -439,15 +444,15 @@ export function OrderCreateForm({
         <div className="flex gap-3 pt-2">
           <Button type="submit" disabled={isCreating || dateError}>
             {isCreating
-              ? t('orders.creating')
-              : t('orders.createOrder')}
+              ? t('common.saving')
+              : (submitLabel ?? t('orders.createOrder'))}
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
           >
-            {t('orders.cancel')}
+            {cancelLabel ?? t('orders.cancel')}
           </Button>
         </div>
       </form>
