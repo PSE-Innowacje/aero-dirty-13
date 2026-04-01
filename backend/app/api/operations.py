@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import json
 import logging
 from typing import Annotated, Any
 
@@ -353,10 +354,10 @@ async def update_operation(
         if field not in AUDITABLE_FIELDS:
             continue
         old_val = getattr(op, field, None)
-        # Normalize for comparison (dates, lists, etc.)
-        old_str = str(old_val) if old_val is not None else None
-        new_str = str(new_val) if new_val is not None else None
-        if old_str != new_str:
+        # Normalize for comparison (dates, lists, JSON columns, etc.)
+        old_norm = json.dumps(old_val, sort_keys=True, default=str) if old_val is not None else None
+        new_norm = json.dumps(new_val, sort_keys=True, default=str) if new_val is not None else None
+        if old_norm != new_norm:
             changes[field] = (old_val, new_val)
 
     # Apply changes

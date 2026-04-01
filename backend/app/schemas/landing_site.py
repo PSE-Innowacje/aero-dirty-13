@@ -23,15 +23,15 @@ class LandingSiteCreate(BaseModel):
     @field_validator("latitude")
     @classmethod
     def latitude_valid(cls, v: float) -> float:
-        if v < -90 or v > 90:
-            raise ValueError("must be between -90 and 90")
+        if v < 49.0 or v > 54.9:
+            raise ValueError("must be between 49.0 and 54.9 (Poland territory)")
         return v
 
     @field_validator("longitude")
     @classmethod
     def longitude_valid(cls, v: float) -> float:
-        if v < -180 or v > 180:
-            raise ValueError("must be between -180 and 180")
+        if v < 14.1 or v > 24.2:
+            raise ValueError("must be between 14.1 and 24.2 (Poland territory)")
         return v
 
 
@@ -59,8 +59,8 @@ class LandingSiteUpdate(BaseModel):
     def latitude_valid(cls, v: float | None) -> float | None:
         if v is None:
             return v
-        if v < -90 or v > 90:
-            raise ValueError("must be between -90 and 90")
+        if v < 49.0 or v > 54.9:
+            raise ValueError("must be between 49.0 and 54.9 (Poland territory)")
         return v
 
     @field_validator("longitude")
@@ -68,8 +68,8 @@ class LandingSiteUpdate(BaseModel):
     def longitude_valid(cls, v: float | None) -> float | None:
         if v is None:
             return v
-        if v < -180 or v > 180:
-            raise ValueError("must be between -180 and 180")
+        if v < 14.1 or v > 24.2:
+            raise ValueError("must be between 14.1 and 24.2 (Poland territory)")
         return v
 
 
