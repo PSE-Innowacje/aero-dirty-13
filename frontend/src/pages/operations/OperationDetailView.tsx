@@ -289,31 +289,33 @@ export function OperationDetailView({
               </div>
             </div>
 
-            {/* Planned dates — editable ONLY by Supervisor in detail mode */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="plannedDateEarliest">
-                  {t('operations.plannedDateFrom')}
-                </Label>
-                <Input
-                  id="plannedDateEarliest"
-                  type="date"
-                  value={plannedDateEarliest}
-                  onChange={(e) => onPlannedDateEarliestChange(e.target.value)}
-                  disabled={!isSupervisor}
-                />
+            {/* Planned dates — shown for Supervisor or when dates exist */}
+            {(isSupervisor || operation.planned_date_earliest || operation.planned_date_latest) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="plannedDateEarliest">
+                    {t('operations.plannedDateFrom')}
+                  </Label>
+                  <Input
+                    id="plannedDateEarliest"
+                    type="date"
+                    value={plannedDateEarliest}
+                    onChange={(e) => onPlannedDateEarliestChange(e.target.value)}
+                    disabled={!isSupervisor}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="plannedDateLatest">{t('operations.plannedDateTo')}</Label>
+                  <Input
+                    id="plannedDateLatest"
+                    type="date"
+                    value={plannedDateLatest}
+                    onChange={(e) => onPlannedDateLatestChange(e.target.value)}
+                    disabled={!isSupervisor}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="plannedDateLatest">{t('operations.plannedDateTo')}</Label>
-                <Input
-                  id="plannedDateLatest"
-                  type="date"
-                  value={plannedDateLatest}
-                  onChange={(e) => onPlannedDateLatestChange(e.target.value)}
-                  disabled={!isSupervisor}
-                />
-              </div>
-            </div>
+            )}
 
             {canEdit && (
               <div className="flex gap-3 pt-2">
