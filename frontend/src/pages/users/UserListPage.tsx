@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
-import type { User } from "@/lib/auth";
+import { useAuth, type User } from "@/lib/auth";
+import { SYSTEM_ROLE } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
@@ -16,6 +17,8 @@ import { SYSTEM_ROLE_BADGE_VARIANT, SYSTEM_ROLE_DISPLAY_KEY } from "@/lib/consta
 
 export function UserListPage() {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuth();
+  const isAdmin = currentUser?.system_role === SYSTEM_ROLE.ADMIN;
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
@@ -75,10 +78,10 @@ export function UserListPage() {
         loadingMessage={t('users.loading')}
         errorMessage={t('common.loadingError')}
         emptyMessage={t('users.noUsers')}
-        addButton={{ href: "/users/new", label: t('users.addUser') }}
+        addButton={isAdmin ? { href: "/users/new", label: t('users.addUser') } : undefined}
         rowKey={(u) => u.id}
-        actionsHeader={t('common.actions')}
-        actions={(u) => (
+        actionsHeader={isAdmin ? t('common.actions') : undefined}
+        actions={isAdmin ? (u) => (
           <div className="flex justify-end gap-1">
             <Link to={`/users/${u.id}/edit`} title={t('common.edit')}>
               <Button variant="ghost" size="icon">
@@ -94,7 +97,7 @@ export function UserListPage() {
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
-        )}
+        ) : undefined}
       />
 
       {/* Delete confirmation dialog */}

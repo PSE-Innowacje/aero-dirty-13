@@ -27,6 +27,8 @@
     "requiredField": "required field"
   },
   "sidebar": {
+    "dashboard": "Dashboard",
+    "dashboardLink": "Dashboard",
     "admin": "Administration",
     "operations": "Flight operations planning",
     "orders": "Flight orders",
@@ -34,8 +36,8 @@
     "crewMembers": "Crew members",
     "landingSites": "Planned landing sites",
     "users": "Users",
-    "operationsList": "Operations list",
-    "ordersList": "Orders list",
+    "operationsList": "Flight operations",
+    "ordersList": "Flight orders",
     "brand": "AERO",
     "logout": "Log out"
   },
@@ -332,7 +334,10 @@
     "validationStartSiteRequired": "Select start landing site",
     "validationEndSiteRequired": "Select end landing site",
     "validationOperationsRequired": "Select at least one operation",
-    "validationRouteKmRequired": "Enter estimated route (km)"
+    "validationRouteKmRequired": "Enter estimated route (km)",
+    "routeExceeded": "Route ({{route}} km) exceeds helicopter range ({{range}} km)!",
+    "editOrder": "Edit order",
+    "saveChanges": "Save changes"
   },
   "dashboard": {
     "title": "Operations Dashboard",

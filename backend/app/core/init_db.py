@@ -159,6 +159,7 @@ async def init_db(db: AsyncSession) -> None:
 
     # ── Flight Operations (4) ───────────────────────────────────────
     op1 = FlightOperation(
+        order_number="DE-25-12001",
         short_description="Inspekcja linii 400kV Warszawa-Radom",
         route_coordinates=[
             [52.23, 21.01],
@@ -176,6 +177,7 @@ async def init_db(db: AsyncSession) -> None:
         created_by_id=planner.id,
     )
     op2 = FlightOperation(
+        order_number="DE-25-12002",
         short_description="Skan 3D trasy Kraków-Tarnów",
         route_coordinates=[
             [50.06, 19.94],
@@ -193,6 +195,7 @@ async def init_db(db: AsyncSession) -> None:
         created_by_id=planner.id,
     )
     op3 = FlightOperation(
+        order_number="CJI-3201",
         short_description="Patrolowanie linii Wrocław-Opole",
         route_coordinates=[
             [51.10, 17.03],
@@ -207,6 +210,7 @@ async def init_db(db: AsyncSession) -> None:
         created_by_id=planner.id,
     )
     op4 = FlightOperation(
+        order_number="DE-25-12003",
         short_description="Lokalizacja awarii Gdańsk-Elbląg",
         route_coordinates=[
             [54.35, 18.60],

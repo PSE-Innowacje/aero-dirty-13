@@ -27,6 +27,8 @@
     "requiredField": "pole wymagane"
   },
   "sidebar": {
+    "dashboard": "Panel operacyjny",
+    "dashboardLink": "Panel operacyjny",
     "admin": "Administracja",
     "operations": "Planowanie operacji",
     "orders": "Zlecenia na lot",
@@ -34,8 +36,8 @@
     "crewMembers": "Członkowie załogi",
     "landingSites": "Lądowiska planowe",
     "users": "Użytkownicy",
-    "operationsList": "Lista operacji",
-    "ordersList": "Lista zleceń",
+    "operationsList": "Operacje lotnicze",
+    "ordersList": "Zlecenia lotnicze",
     "brand": "AERO",
     "logout": "Wyloguj"
   },
@@ -333,7 +335,10 @@
     "validationStartSiteRequired": "Wybierz lądowisko startowe",
     "validationEndSiteRequired": "Wybierz lądowisko końcowe",
     "validationOperationsRequired": "Wybierz co najmniej jedną operację",
-    "validationRouteKmRequired": "Podaj szacowaną trasę (km)"
+    "validationRouteKmRequired": "Podaj szacowaną trasę (km)",
+    "routeExceeded": "Trasa ({{route}} km) przekracza zasięg helikoptera ({{range}} km)!",
+    "editOrder": "Edytuj zlecenie",
+    "saveChanges": "Zapisz zmiany"
   },
   "dashboard": {
     "title": "Panel operacyjny",

@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { ORDER_FORM_STATUS_BADGE_CLASS, SYSTEM_ROLE } from "@/lib/constants";
 import { OrderStatusActions } from "./OrderStatusActions";
 import { OrderCreateForm } from "./OrderCreateForm";
@@ -179,36 +179,39 @@ export function OrderFormPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
+  // ── Edit mode state ────────────────────────────────────────────
+  const [isEditing, setIsEditing] = useState(false);
+
   // ── Confirm dialog state ───────────────────────────────────────
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showNotCompletedDialog, setShowNotCompletedDialog] = useState(false);
 
-  // ── Data queries for create mode ───────────────────────────────
+  // ── Data queries for create/edit mode ───────────────────────────
   const { data: helicopters = [] } = useQuery<HelicopterOption[]>({
     queryKey: ["helicopters"],
     queryFn: () => apiFetch<HelicopterOption[]>("/helicopters"),
-    enabled: isCreate,
+    enabled: isCreate || isEditing,
   });
 
   const { data: allCrew = [] } = useQuery<CrewMemberOption[]>({
     queryKey: ["crew-members"],
     queryFn: () => apiFetch<CrewMemberOption[]>("/crew-members"),
-    enabled: isCreate,
+    enabled: isCreate || isEditing,
   });
 
   const { data: landingSites = [] } = useQuery<LandingSiteOption[]>({
     queryKey: ["landing-sites"],
     queryFn: () => apiFetch<LandingSiteOption[]>("/landing-sites"),
-    enabled: isCreate,
+    enabled: isCreate || isEditing,
   });
 
   const { data: confirmedOps = [] } = useQuery<OperationOption[]>({
     queryKey: ["operations", "confirmed"],
     queryFn: () => apiFetch<OperationOption[]>("/operations?op_status=3"),
-    enabled: isCreate,
+    enabled: isCreate || isEditing,
   });
 
-  // Fetch operation details for map preview in create mode
+  // Fetch operation details for map preview in create/edit mode
   const { data: createModeOpDetails = [] } = useQuery<OperationDetailForMap[]>({
     queryKey: ['order-create-operations-map', selectedOpIds],
     queryFn: async () => {
@@ -220,7 +223,7 @@ export function OrderFormPage() {
       );
       return results.map(r => ({ id: r.id, route_coordinates: r.route_coordinates }));
     },
-    enabled: isCreate && selectedOpIds.length > 0,
+    enabled: (isCreate || isEditing) && selectedOpIds.length > 0,
   });
 
   // ── Fetch order for detail mode ────────────────────────────────
@@ -267,6 +270,24 @@ export function OrderFormPage() {
       setActualEndTime(toTimePart(order.actual_end_datetime));
     }
   }, [order]);
+
+  // Pre-populate create-form state when entering edit mode
+  useEffect(() => {
+    if (isEditing && order) {
+      setPlannedStartDate(toDatePart(order.planned_start_datetime));
+      setPlannedStartTime(toTimePart(order.planned_start_datetime));
+      setPlannedEndDate(toDatePart(order.planned_end_datetime));
+      setPlannedEndTime(toTimePart(order.planned_end_datetime));
+      setHelicopterId(String(order.helicopter_id));
+      setSelectedCrewIds(order.crew_members.map((c) => c.id));
+      setStartSiteId(String(order.start_landing_site_id));
+      setEndSiteId(String(order.end_landing_site_id));
+      setSelectedOpIds(order.operations.map((o) => o.id));
+      setEstimatedRouteKm(
+        order.estimated_route_km != null ? String(order.estimated_route_km) : ""
+      );
+    }
+  }, [isEditing, order]);
 
   // ── Create mutation ────────────────────────────────────────────
   const createMutation = useMutation({
@@ -332,6 +353,48 @@ export function OrderFormPage() {
         setValidationErrors(parseErrors(err.detail));
       } else {
         setError(err.message);
+      }
+    },
+  });
+
+  // ── Edit mutation (full field update) ───────────────────────────
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      const body = {
+        planned_start_datetime: plannedStartDate
+          ? new Date(composeDatetime(plannedStartDate, plannedStartTime)).toISOString()
+          : "",
+        planned_end_datetime: plannedEndDate
+          ? new Date(composeDatetime(plannedEndDate, plannedEndTime)).toISOString()
+          : "",
+        helicopter_id: Number(helicopterId),
+        crew_member_ids: selectedCrewIds,
+        start_landing_site_id: Number(startSiteId),
+        end_landing_site_id: Number(endSiteId),
+        operation_ids: selectedOpIds,
+        estimated_route_km: Number(estimatedRouteKm),
+      };
+      return apiFetch<FlightOrderDetail>(`/orders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(body),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      setIsEditing(false);
+      setError(null);
+      setValidationErrors([]);
+      setFieldErrors({});
+    },
+    onError: (err: Error) => {
+      if (err instanceof ApiError) {
+        const errors = parseErrors(err.detail);
+        setValidationErrors(errors);
+        setError(null);
+      } else {
+        setError(err.message);
+        setValidationErrors([]);
       }
     },
   });
@@ -470,6 +533,26 @@ export function OrderFormPage() {
     createMutation.mutate();
   }
 
+  function handleEditSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setValidationErrors([]);
+
+    // Client-side validation for required fields (same as create)
+    const errors: Record<string, string> = {};
+    if (!plannedStartDate) errors.plannedStart = t('orders.validationFieldRequired');
+    if (!plannedEndDate) errors.plannedEnd = t('orders.validationFieldRequired');
+    if (!helicopterId) errors.helicopter = t('orders.validationHelicopterRequired');
+    if (!startSiteId) errors.startSite = t('orders.validationStartSiteRequired');
+    if (!endSiteId) errors.endSite = t('orders.validationEndSiteRequired');
+    if (selectedOpIds.length === 0) errors.operations = t('orders.validationOperationsRequired');
+    if (!estimatedRouteKm) errors.routeKm = t('orders.validationRouteKmRequired');
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    editMutation.mutate();
+  }
+
   // ── Loading ────────────────────────────────────────────────────
   if (!isCreate && loadingOrder) {
     return (
@@ -511,12 +594,24 @@ export function OrderFormPage() {
         </Button>
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-foreground">
-            {isCreate ? t('orders.newOrder') : t('orders.orderNumber', { id: order?.id })}
+            {isCreate
+              ? t('orders.newOrder')
+              : isEditing
+                ? t('orders.editOrder')
+                : t('orders.orderNumber', { id: order?.id })}
           </h1>
-          {!isCreate && (
+          {!isCreate && !isEditing && (
             <Badge className={ORDER_FORM_STATUS_BADGE_CLASS[currentStatus] ?? ""}>
               {t(`orders.status${currentStatus}`, { defaultValue: `Status ${currentStatus}` })}
             </Badge>
+          )}
+          {!isCreate && !isEditing &&
+            ((isPilot && currentStatus === 1) ||
+             (isSupervisor && currentStatus >= 1 && currentStatus <= 4)) && (
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              {t('common.edit')}
+            </Button>
           )}
         </div>
         {!isCreate && order && (
@@ -547,7 +642,7 @@ export function OrderFormPage() {
         </div>
       )}
 
-      {/* Render create form OR detail view + status actions */}
+      {/* Render create form, edit form, OR detail view + status actions */}
       {isCreate ? (
         <OrderCreateForm
           userFullName={user ? `${user.first_name} ${user.last_name}` : ""}
@@ -581,6 +676,42 @@ export function OrderFormPage() {
           onCancel={() => navigate("/orders")}
           isCreating={createMutation.isPending}
           fieldErrors={fieldErrors}
+        />
+      ) : isEditing && order ? (
+        <OrderCreateForm
+          userFullName={order.pilot_name}
+          userEmail={user?.email ?? ""}
+          plannedStartDate={plannedStartDate}
+          plannedStartTime={plannedStartTime}
+          plannedEndDate={plannedEndDate}
+          plannedEndTime={plannedEndTime}
+          helicopterId={helicopterId}
+          selectedCrewIds={selectedCrewIds}
+          startSiteId={startSiteId}
+          endSiteId={endSiteId}
+          selectedOpIds={selectedOpIds}
+          estimatedRouteKm={estimatedRouteKm}
+          helicopters={helicopters}
+          allCrew={allCrew}
+          landingSites={landingSites}
+          confirmedOps={confirmedOps}
+          createModeOpDetails={createModeOpDetails}
+          onPlannedStartDateChange={setPlannedStartDate}
+          onPlannedStartTimeChange={setPlannedStartTime}
+          onPlannedEndDateChange={setPlannedEndDate}
+          onPlannedEndTimeChange={setPlannedEndTime}
+          onHelicopterIdChange={setHelicopterId}
+          onCrewToggle={handleCrewToggle}
+          onStartSiteIdChange={setStartSiteId}
+          onEndSiteIdChange={setEndSiteId}
+          onOpToggle={handleOpToggle}
+          onEstimatedRouteKmChange={setEstimatedRouteKm}
+          onSubmit={handleEditSubmit}
+          onCancel={() => setIsEditing(false)}
+          isCreating={editMutation.isPending}
+          fieldErrors={fieldErrors}
+          submitLabel={t('orders.saveChanges')}
+          cancelLabel={t('common.cancel')}
         />
       ) : order ? (
         <>
