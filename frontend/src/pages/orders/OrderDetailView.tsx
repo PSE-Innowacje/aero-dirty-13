@@ -65,10 +65,14 @@ export interface OrderDetailViewProps {
   isPilot: boolean;
   currentStatus: number;
   // Actual times (editable in status=4 by pilot)
-  actualStart: string;
-  actualEnd: string;
-  onActualStartChange: (v: string) => void;
-  onActualEndChange: (v: string) => void;
+  actualStartDate: string;
+  actualStartTime: string;
+  actualEndDate: string;
+  actualEndTime: string;
+  onActualStartDateChange: (v: string) => void;
+  onActualStartTimeChange: (v: string) => void;
+  onActualEndDateChange: (v: string) => void;
+  onActualEndTimeChange: (v: string) => void;
   onSaveActualTimes: () => void;
   savingActualTimes: boolean;
   // Map data
@@ -81,10 +85,14 @@ export function OrderDetailView({
   order,
   isPilot,
   currentStatus,
-  actualStart,
-  actualEnd,
-  onActualStartChange,
-  onActualEndChange,
+  actualStartDate,
+  actualStartTime,
+  actualEndDate,
+  actualEndTime,
+  onActualStartDateChange,
+  onActualStartTimeChange,
+  onActualEndDateChange,
+  onActualEndTimeChange,
   onSaveActualTimes,
   savingActualTimes,
   mapOperations,
@@ -93,7 +101,13 @@ export function OrderDetailView({
 }: OrderDetailViewProps) {
   const { t } = useTranslation();
 
-  const actualDateError = !!(actualStart && actualEnd && new Date(actualEnd) <= new Date(actualStart));
+  function composeDT(date: string, time: string): string {
+    if (!date) return "";
+    return `${date}T${time || "00:00"}`;
+  }
+  const composedActualStart = composeDT(actualStartDate, actualStartTime);
+  const composedActualEnd = composeDT(actualEndDate, actualEndTime);
+  const actualDateError = !!(composedActualStart && composedActualEnd && new Date(composedActualEnd) <= new Date(composedActualStart));
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -175,22 +189,18 @@ export function OrderDetailView({
             </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="actualStart">{t('orders.actualStart')}</Label>
-                <Input
-                  id="actualStart"
-                  type="datetime-local"
-                  value={actualStart}
-                  onChange={(e) => onActualStartChange(e.target.value)}
-                />
+                <Label htmlFor="actualStartDate">{t('orders.actualStart')}</Label>
+                <div className="flex gap-2">
+                  <Input id="actualStartDate" type="date" value={actualStartDate} onChange={(e) => onActualStartDateChange(e.target.value)} />
+                  <Input id="actualStartTime" type="time" value={actualStartTime} onChange={(e) => onActualStartTimeChange(e.target.value)} />
+                </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="actualEnd">{t('orders.actualEnd')}</Label>
-                <Input
-                  id="actualEnd"
-                  type="datetime-local"
-                  value={actualEnd}
-                  onChange={(e) => onActualEndChange(e.target.value)}
-                />
+                <Label htmlFor="actualEndDate">{t('orders.actualEnd')}</Label>
+                <div className="flex gap-2">
+                  <Input id="actualEndDate" type="date" value={actualEndDate} onChange={(e) => onActualEndDateChange(e.target.value)} />
+                  <Input id="actualEndTime" type="time" value={actualEndTime} onChange={(e) => onActualEndTimeChange(e.target.value)} />
+                </div>
               </div>
             </div>
             {actualDateError && (

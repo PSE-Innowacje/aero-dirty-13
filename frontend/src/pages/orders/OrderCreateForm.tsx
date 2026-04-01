@@ -63,8 +63,10 @@ export interface OrderCreateFormProps {
   userFullName: string;
   userEmail: string;
   // Form values
-  plannedStart: string;
-  plannedEnd: string;
+  plannedStartDate: string;
+  plannedStartTime: string;
+  plannedEndDate: string;
+  plannedEndTime: string;
   helicopterId: string;
   selectedCrewIds: number[];
   startSiteId: string;
@@ -78,8 +80,10 @@ export interface OrderCreateFormProps {
   confirmedOps: OperationOption[];
   createModeOpDetails: OperationDetailForMap[];
   // Change handlers
-  onPlannedStartChange: (v: string) => void;
-  onPlannedEndChange: (v: string) => void;
+  onPlannedStartDateChange: (v: string) => void;
+  onPlannedStartTimeChange: (v: string) => void;
+  onPlannedEndDateChange: (v: string) => void;
+  onPlannedEndTimeChange: (v: string) => void;
   onHelicopterIdChange: (v: string) => void;
   onCrewToggle: (crewId: number) => void;
   onStartSiteIdChange: (v: string) => void;
@@ -95,8 +99,10 @@ export interface OrderCreateFormProps {
 export function OrderCreateForm({
   userFullName,
   userEmail,
-  plannedStart,
-  plannedEnd,
+  plannedStartDate,
+  plannedStartTime,
+  plannedEndDate,
+  plannedEndTime,
   helicopterId,
   selectedCrewIds,
   startSiteId,
@@ -108,8 +114,10 @@ export function OrderCreateForm({
   landingSites,
   confirmedOps,
   createModeOpDetails,
-  onPlannedStartChange,
-  onPlannedEndChange,
+  onPlannedStartDateChange,
+  onPlannedStartTimeChange,
+  onPlannedEndDateChange,
+  onPlannedEndTimeChange,
   onHelicopterIdChange,
   onCrewToggle,
   onStartSiteIdChange,
@@ -158,7 +166,13 @@ export function OrderCreateForm({
   const createEndSite = landingSites.find((s) => s.id === Number(endSiteId));
   const hasMapData = createMapOps.length > 0 || createStartSite || createEndSite;
 
-  const dateError = !!(plannedStart && plannedEnd && new Date(plannedEnd) <= new Date(plannedStart));
+  function composeDT(date: string, time: string): string {
+    if (!date) return "";
+    return `${date}T${time || "00:00"}`;
+  }
+  const composedStart = composeDT(plannedStartDate, plannedStartTime);
+  const composedEnd = composeDT(plannedEndDate, plannedEndTime);
+  const dateError = !!(composedStart && composedEnd && new Date(composedEnd) <= new Date(composedStart));
 
   return (
     <div className="rounded-md bg-surface-container-low p-6">
@@ -173,24 +187,18 @@ export function OrderCreateForm({
         {/* Planned dates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')} *</Label>
-            <Input
-              id="plannedStart"
-              type="datetime-local"
-              value={plannedStart}
-              onChange={(e) => onPlannedStartChange(e.target.value)}
-              required
-            />
+            <Label htmlFor="plannedStartDate">{t('orders.plannedStartLabel')} *</Label>
+            <div className="flex gap-2">
+              <Input id="plannedStartDate" type="date" value={plannedStartDate} onChange={(e) => onPlannedStartDateChange(e.target.value)} required />
+              <Input id="plannedStartTime" type="time" value={plannedStartTime} onChange={(e) => onPlannedStartTimeChange(e.target.value)} required />
+            </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="plannedEnd">{t('orders.plannedEndLabel')} *</Label>
-            <Input
-              id="plannedEnd"
-              type="datetime-local"
-              value={plannedEnd}
-              onChange={(e) => onPlannedEndChange(e.target.value)}
-              required
-            />
+            <Label htmlFor="plannedEndDate">{t('orders.plannedEndLabel')} *</Label>
+            <div className="flex gap-2">
+              <Input id="plannedEndDate" type="date" value={plannedEndDate} onChange={(e) => onPlannedEndDateChange(e.target.value)} required />
+              <Input id="plannedEndTime" type="time" value={plannedEndTime} onChange={(e) => onPlannedEndTimeChange(e.target.value)} required />
+            </div>
           </div>
         </div>
         {dateError && (

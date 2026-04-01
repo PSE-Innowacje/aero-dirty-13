@@ -15,11 +15,13 @@ test.describe('Flight order workflows', () => {
     await page.getByRole('link', { name: /add order|dodaj zlecenie/i }).click();
     await page.waitForURL('/orders/new');
 
-    // Fill planned start datetime
-    await page.getByLabel(/planned start|planowany.*start|planowany.*początek/i).fill('2026-07-15T08:00');
+    // Fill planned start date & time
+    await page.locator('#plannedStartDate').fill('2026-07-15');
+    await page.locator('#plannedStartTime').fill('08:00');
 
-    // Fill planned end datetime
-    await page.getByLabel(/planned end|planowany.*koniec/i).fill('2026-07-15T16:00');
+    // Fill planned end date & time
+    await page.locator('#plannedEndDate').fill('2026-07-15');
+    await page.locator('#plannedEndTime').fill('16:00');
 
     // Select helicopter from dropdown (first available active helicopter)
     const helicopterSelect = page.getByLabel(/helicopter|helikopter/i);
