@@ -16,6 +16,7 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface">
+      <div className="pointer-events-none fixed inset-0 cockpit-grid cockpit-glow" />
       <AppSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

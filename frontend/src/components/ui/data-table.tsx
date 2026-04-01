@@ -95,6 +95,7 @@ export function DataTable<T>({
       {/* ---------- Page header ---------- */}
       <div className="mb-6 flex items-center justify-between">
         <div>
+          <div className="h-1 w-12 bg-[#C00017] mb-2" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
@@ -112,7 +113,7 @@ export function DataTable<T>({
       {filter && <div className="mb-4">{filter}</div>}
 
       {/* ---------- Table ---------- */}
-      <div className="rounded-md bg-surface-container-low">
+      <div className="rounded-md bg-surface-container-low shadow-[0_0_24px_rgba(0,20,41,0.3)] border border-accent/5">
         <Table>
           <TableHeader>
             <TableRow>

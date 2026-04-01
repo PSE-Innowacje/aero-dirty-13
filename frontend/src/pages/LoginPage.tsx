@@ -174,7 +174,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="group flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#C00017] to-[#690008] py-4 font-bold text-white shadow-[0_4px_20px_-5px_rgba(201,0,25,0.4)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="group flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-r from-[#C00017] to-[#690008] py-4 font-bold text-white shadow-[0_4px_20px_-5px_rgba(201,0,25,0.4)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed hover:-translate-y-0.5 hover:shadow-[0_6px_20px_-5px_rgba(201,0,25,0.5)]"
           >
             {submitting ? t("auth.signingIn") : t("auth.signIn")}
           </button>
