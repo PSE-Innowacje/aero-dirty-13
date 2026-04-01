@@ -28,7 +28,7 @@ test.describe('Sidebar menu items per role', () => {
 
   test('sidebar shows limited menu for planner', async ({ page, loginAs }) => {
     await loginAs('planner');
-    await page.waitForURL('**/operations', { timeout: 10_000 });
+    await page.waitForURL('**/', { timeout: 10_000 });
 
     const sidebar = page.locator('aside');
 
