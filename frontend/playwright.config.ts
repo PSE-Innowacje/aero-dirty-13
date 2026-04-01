@@ -13,10 +13,9 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    /* Use nginx (port 80) which serves both frontend and proxies /api to backend.
-       Vite dev server (port 5173) proxy doesn't work when backend runs in Docker
-       because port 8000 is not exposed to host. */
-    baseURL: 'http://localhost',
+    /* Local: nginx on port 80 (docker-compose serves frontend + proxies /api)
+       CI: Vite on port 5173 (proxies /api to uvicorn on port 8000) */
+    baseURL: process.env.CI ? 'http://localhost:5173' : 'http://localhost',
     trace: 'on-first-retry',
   },
 
@@ -27,6 +26,16 @@ export default defineConfig({
     },
   ],
 
-  /* No webServer — tests run against docker-compose stack (nginx on port 80).
-     Start with: docker-compose up -d */
+  /* In CI, Playwright starts Vite dev server automatically.
+     Locally, tests run against docker-compose stack (nginx on port 80). */
+  ...(process.env.CI
+    ? {
+        webServer: {
+          command: 'npm run dev',
+          url: 'http://localhost:5173',
+          reuseExistingServer: false,
+          timeout: 30_000,
+        },
+      }
+    : {}),
 });

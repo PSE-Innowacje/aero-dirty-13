@@ -92,24 +92,8 @@ jobs:
             sleep 1
           done
 
-      - name: Start frontend (vite dev)
-        working-directory: frontend
-        run: |
-          npm run dev &
-          echo "Waiting for frontend at http://localhost:5173 ..."
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:5173 > /dev/null 2>&1; then
-              echo "Frontend ready after ~${i}s"
-              break
-            fi
-            if [ "$i" -eq 30 ]; then
-              echo "ERROR: Frontend failed to start within 30s"
-              exit 1
-            fi
-            sleep 1
-          done
-
       # ── Run E2E tests ─────────────────────────────────────
+      # Playwright starts Vite automatically via webServer config (CI mode)
       - name: Run Playwright tests
         working-directory: frontend
         run: npx playwright test
