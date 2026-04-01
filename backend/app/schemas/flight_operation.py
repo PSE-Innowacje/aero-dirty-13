@@ -139,6 +139,8 @@ class OperationUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        if not v:
+            raise ValueError("order_number must not be empty")
         if len(v) > 30:
             raise ValueError("must be 30 characters or fewer")
         return v
