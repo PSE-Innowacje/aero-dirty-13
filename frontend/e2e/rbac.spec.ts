@@ -20,10 +20,10 @@ test.describe('Role-based access control', () => {
     await expect(sidebar.getByRole('link', { name: /landing.*sites|lądowisk/i })).not.toBeVisible();
 
     // Orders should also NOT be visible for planner
-    await expect(sidebar.getByRole('link', { name: /orders.*list|lista.*zleceń/i })).not.toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /flight.*orders|zlecenia.*lotnicze/i })).not.toBeVisible();
 
     // Operations should be visible
-    await expect(sidebar.getByRole('link', { name: /operations.*list|lista.*operacji/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /flight.*operations|operacje.*lotnicze/i })).toBeVisible();
   });
 
   test('planner redirected from /users', async ({ page, loginAs }) => {
@@ -51,10 +51,10 @@ test.describe('Role-based access control', () => {
     await expect(sidebar.getByRole('link', { name: /users|użytkownicy/i })).toBeVisible();
 
     // Operations group
-    await expect(sidebar.getByRole('link', { name: /operations.*list|lista.*operacji/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /flight.*operations|operacje.*lotnicze/i })).toBeVisible();
 
     // Orders group
-    await expect(sidebar.getByRole('link', { name: /orders.*list|lista.*zleceń/i })).toBeVisible();
+    await expect(sidebar.getByRole('link', { name: /flight.*orders|zlecenia.*lotnicze/i })).toBeVisible();
   });
 
   test('pilot sees add order button', async ({ page, loginAs }) => {
