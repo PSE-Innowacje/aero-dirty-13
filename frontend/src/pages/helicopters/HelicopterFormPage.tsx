@@ -6,7 +6,8 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { parseApiFieldErrors } from "@/lib/form-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,27 +93,9 @@ export function HelicopterFormPage() {
       navigate("/helicopters");
     },
     onError: (err: Error) => {
-      if (err instanceof ApiError) {
-        try {
-          const detail = JSON.parse(err.detail);
-          if (Array.isArray(detail)) {
-            const errors: Record<string, string> = {};
-            for (const item of detail) {
-              const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? t('common.invalidValue');
-            }
-            setFieldErrors(errors);
-            setError(null);
-            return;
-          }
-        } catch {
-          // Not JSON array
-        }
-        setError(err.detail);
-      } else {
-        setError(err.message);
-      }
-      setFieldErrors({});
+      const result = parseApiFieldErrors(err, t('common.invalidValue'));
+      setError(result.error);
+      setFieldErrors(result.fieldErrors);
     },
   });
 

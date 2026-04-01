@@ -17,14 +17,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 interface LandingSite {
@@ -145,30 +138,19 @@ export function LandingSiteListPage() {
       </div>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
-            <DialogDescription>
-              {t('landingSites.confirmDeleteMsg')}{" "}
-              <strong>{deleteTarget?.name}</strong>?
-              {" "}{t('common.cannotUndo')}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isPending={deleteMutation.isPending}
+        description={
+          <>
+            {t('landingSites.confirmDeleteMsg')}{" "}
+            <strong>{deleteTarget?.name}</strong>?
+            {" "}{t('common.cannotUndo')}
+          </>
+        }
+      />
     </div>
   );
 }
