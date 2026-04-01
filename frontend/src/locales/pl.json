@@ -23,7 +23,8 @@
     "saveChanges": "Zapisz zmiany",
     "invalidValue": "Nieprawidłowa wartość",
     "loadingError": "Błąd ładowania",
-    "unknownError": "Nieznany błąd"
+    "unknownError": "Nieznany błąd",
+    "requiredField": "pole wymagane"
   },
   "sidebar": {
     "admin": "Administracja",
