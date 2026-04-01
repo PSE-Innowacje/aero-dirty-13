@@ -9,37 +9,10 @@ import { apiFetch } from "@/lib/api";
 import type { User } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-
-const roleBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
-  Administrator: "default",
-  "Osoba planująca": "secondary",
-  "Osoba nadzorująca": "outline",
-  Pilot: "secondary",
-};
-
-const roleDisplayKey: Record<string, string> = {
-  Administrator: "users.roleAdmin",
-  "Osoba planująca": "users.rolePlanner",
-  "Osoba nadzorująca": "users.roleSupervisor",
-  Pilot: "users.rolePilot",
-};
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { Pencil, Trash2 } from "lucide-react";
+import { SYSTEM_ROLE_BADGE_VARIANT, SYSTEM_ROLE_DISPLAY_KEY } from "@/lib/constants";
 
 export function UserListPage() {
   const { t } = useTranslation();
@@ -63,121 +36,83 @@ export function UserListPage() {
   // Sort by email (alphabetical)
   const sorted = [...users].sort((a, b) => a.email.localeCompare(b.email));
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('users.loading')}</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4">
-        <p className="text-sm text-destructive-foreground">
-          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
-        </p>
-      </div>
-    );
-  }
+  const columns: DataTableColumn<User>[] = [
+    {
+      key: "email",
+      header: t('users.email'),
+      render: (u) => <span className="font-medium">{u.email}</span>,
+    },
+    {
+      key: "first_name",
+      header: t('users.firstName'),
+      render: (u) => u.first_name,
+    },
+    {
+      key: "last_name",
+      header: t('users.lastName'),
+      render: (u) => u.last_name,
+    },
+    {
+      key: "role",
+      header: t('users.role'),
+      render: (u) => (
+        <Badge variant={SYSTEM_ROLE_BADGE_VARIANT[u.system_role] ?? "secondary"}>
+          {t(SYSTEM_ROLE_DISPLAY_KEY[u.system_role] ?? u.system_role)}
+        </Badge>
+      ),
+    },
+  ];
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('users.title')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('users.subtitle')}
-          </p>
-        </div>
-        <Link to="/users/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            {t('users.addUser')}
-          </Button>
-        </Link>
-      </div>
-
-      <div className="rounded-md bg-surface-container-low">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('users.email')}</TableHead>
-              <TableHead>{t('users.firstName')}</TableHead>
-              <TableHead>{t('users.lastName')}</TableHead>
-              <TableHead>{t('users.role')}</TableHead>
-              <TableHead className="text-right">{t('common.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  {t('users.noUsers')}
-                </TableCell>
-              </TableRow>
-            ) : (
-              sorted.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">{u.email}</TableCell>
-                  <TableCell>{u.first_name}</TableCell>
-                  <TableCell>{u.last_name}</TableCell>
-                  <TableCell>
-                    <Badge variant={roleBadgeVariant[u.system_role] ?? "secondary"}>
-                      {t(roleDisplayKey[u.system_role] ?? u.system_role)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Link to={`/users/${u.id}/edit`} title={t('common.edit')}>
-                        <Button variant="ghost" size="icon">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setDeleteTarget(u)}
-                        title={t('common.delete')}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+    <>
+      <DataTable<User>
+        title={t('users.title')}
+        subtitle={t('users.subtitle')}
+        columns={columns}
+        data={sorted}
+        isLoading={isLoading}
+        error={error}
+        loadingMessage={t('users.loading')}
+        errorMessage={t('common.loadingError')}
+        emptyMessage={t('users.noUsers')}
+        addButton={{ href: "/users/new", label: t('users.addUser') }}
+        rowKey={(u) => u.id}
+        actionsHeader={t('common.actions')}
+        actions={(u) => (
+          <div className="flex justify-end gap-1">
+            <Link to={`/users/${u.id}/edit`} title={t('common.edit')}>
+              <Button variant="ghost" size="icon">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteTarget(u)}
+              title={t('common.delete')}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+        )}
+      />
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
-            <DialogDescription>
-              {t('users.confirmDeleteMsg')}{" "}
-              <strong>
-                {deleteTarget?.first_name} {deleteTarget?.last_name}
-              </strong>{" "}
-              ({deleteTarget?.email})? {t('common.cannotUndo')}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isPending={deleteMutation.isPending}
+        description={
+          <>
+            {t('users.confirmDeleteMsg')}{" "}
+            <strong>
+              {deleteTarget?.first_name} {deleteTarget?.last_name}
+            </strong>{" "}
+            ({deleteTarget?.email})? {t('common.cannotUndo')}
+          </>
+        }
+      />
+    </>
   );
 }

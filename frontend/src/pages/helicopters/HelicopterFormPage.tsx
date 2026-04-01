@@ -6,12 +6,14 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { parseApiFieldErrors } from "@/lib/form-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
+import { HELICOPTER_STATUSES, HELICOPTER_STATUS_DISPLAY_KEY } from "@/lib/constants";
 
 interface Helicopter {
   id: number;
@@ -25,13 +27,6 @@ interface Helicopter {
   range_km: number;
 }
 
-const STATUSES = ["aktywny", "nieaktywny"];
-
-const statusDisplayKey: Record<string, string> = {
-  aktywny: "helicopters.statusActive",
-  nieaktywny: "helicopters.statusInactive",
-};
-
 export function HelicopterFormPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -44,7 +39,7 @@ export function HelicopterFormPage() {
   const [description, setDescription] = useState("");
   const [maxCrew, setMaxCrew] = useState("1");
   const [maxPayloadWeight, setMaxPayloadWeight] = useState("1");
-  const [status, setStatus] = useState(STATUSES[0]!);
+  const [status, setStatus] = useState<string>(HELICOPTER_STATUSES[0]!);
   const [inspectionDate, setInspectionDate] = useState("");
   const [rangeKm, setRangeKm] = useState("1");
   const [error, setError] = useState<string | null>(null);
@@ -98,27 +93,9 @@ export function HelicopterFormPage() {
       navigate("/helicopters");
     },
     onError: (err: Error) => {
-      if (err instanceof ApiError) {
-        try {
-          const detail = JSON.parse(err.detail);
-          if (Array.isArray(detail)) {
-            const errors: Record<string, string> = {};
-            for (const item of detail) {
-              const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? t('common.invalidValue');
-            }
-            setFieldErrors(errors);
-            setError(null);
-            return;
-          }
-        } catch {
-          // Not JSON array
-        }
-        setError(err.detail);
-      } else {
-        setError(err.message);
-      }
-      setFieldErrors({});
+      const result = parseApiFieldErrors(err, t('common.invalidValue'));
+      setError(result.error);
+      setFieldErrors(result.fieldErrors);
     },
   });
 
@@ -248,9 +225,9 @@ export function HelicopterFormPage() {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              {STATUSES.map((s) => (
+              {HELICOPTER_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {t(statusDisplayKey[s] ?? s)}
+                  {t(HELICOPTER_STATUS_DISPLAY_KEY[s] ?? s)}
                 </option>
               ))}
             </Select>

@@ -6,27 +6,15 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { parseApiFieldErrors } from "@/lib/form-utils";
 import type { User } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
-
-const ROLES = [
-  "Administrator",
-  "Osoba planująca",
-  "Osoba nadzorująca",
-  "Pilot",
-];
-
-const roleDisplayKey: Record<string, string> = {
-  Administrator: "users.roleAdmin",
-  "Osoba planująca": "users.rolePlanner",
-  "Osoba nadzorująca": "users.roleSupervisor",
-  Pilot: "users.rolePilot",
-};
+import { SYSTEM_ROLES, SYSTEM_ROLE_DISPLAY_KEY, EMAIL_REGEX } from "@/lib/constants";
 
 export function UserFormPage() {
   const { t } = useTranslation();
@@ -39,7 +27,7 @@ export function UserFormPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [systemRole, setSystemRole] = useState(ROLES[0]!);
+  const [systemRole, setSystemRole] = useState<string>(SYSTEM_ROLES[0]!);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -90,28 +78,9 @@ export function UserFormPage() {
       navigate("/users");
     },
     onError: (err: Error) => {
-      if (err instanceof ApiError) {
-        // Try to parse validation errors from 422 response
-        try {
-          const detail = JSON.parse(err.detail);
-          if (Array.isArray(detail)) {
-            const errors: Record<string, string> = {};
-            for (const item of detail) {
-              const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? t('common.invalidValue');
-            }
-            setFieldErrors(errors);
-            setError(null);
-            return;
-          }
-        } catch {
-          // Not JSON array — use raw detail
-        }
-        setError(err.detail);
-      } else {
-        setError(err.message);
-      }
-      setFieldErrors({});
+      const result = parseApiFieldErrors(err, t('common.invalidValue'));
+      setError(result.error);
+      setFieldErrors(result.fieldErrors);
     },
   });
 
@@ -125,7 +94,7 @@ export function UserFormPage() {
     if (!firstName.trim()) errors.first_name = t('users.validationFirstNameRequired');
     if (!lastName.trim()) errors.last_name = t('users.validationLastNameRequired');
     if (!email.trim()) errors.email = t('users.validationEmailRequired');
-    else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)) errors.email = t('users.validationEmailInvalid');
+    else if (!EMAIL_REGEX.test(email)) errors.email = t('users.validationEmailInvalid');
     if (!isEdit && !password) errors.password = t('users.validationPasswordRequired');
     if (password && password.length < 6) errors.password = t('users.validationPasswordMin');
 
@@ -226,9 +195,9 @@ export function UserFormPage() {
               value={systemRole}
               onChange={(e) => setSystemRole(e.target.value)}
             >
-              {ROLES.map((r) => (
+              {SYSTEM_ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {t(roleDisplayKey[r] ?? r)}
+                  {t(SYSTEM_ROLE_DISPLAY_KEY[r] ?? r)}
                 </option>
               ))}
             </Select>

@@ -31,6 +31,13 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus, CheckCircle, XCircle, Ban } from "lucide-react";
+import {
+  OPERATION_STATUS,
+  OPERATION_STATUS_KEYS,
+  OPERATION_STATUS_BADGE_VARIANT,
+  OPERATION_STATUS_BADGE_CLASS,
+  SYSTEM_ROLE,
+} from "@/lib/constants";
 
 interface OperationListItem {
   id: number;
@@ -44,30 +51,6 @@ interface OperationListItem {
   status: number;
   route_km: number | null;
 }
-
-const STATUS_KEYS = [1, 2, 3, 4, 5, 6, 7];
-
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
-
-const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
-  1: "default",
-  2: "destructive",
-  3: "default",
-  4: "outline",
-  5: "outline",
-  6: "default",
-  7: "secondary",
-};
-
-const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "",  // destructive variant handles red
-  3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-gray-900",
-  5: "bg-orange-500 text-gray-900",
-  6: "bg-green-600 text-white",
-  7: "",  // secondary variant handles grey
-};
 
 function formatDateRange(earliest: string | null, latest: string | null): string {
   if (!earliest && !latest) return "—";
@@ -84,8 +67,8 @@ export function OperationListPage() {
   const [mutationError, setMutationError] = useState<string | null>(null);
 
   const role = user?.system_role ?? "";
-  const isPlanner = role === "Osoba planująca";
-  const isSupervisor = role === "Osoba nadzorująca";
+  const isPlanner = role === SYSTEM_ROLE.PLANNER;
+  const isSupervisor = role === SYSTEM_ROLE.SUPERVISOR;
   const canCreate = isPlanner || isSupervisor;
 
   // ── Confirm dialog state ─────────────────────────────────────
@@ -149,8 +132,8 @@ export function OperationListPage() {
 
   /** Check if any action buttons should appear for this row */
   function hasActions(opStatus: number): boolean {
-    if (isSupervisor && opStatus === 1) return true;
-    if (isPlanner && [1, 3, 4].includes(opStatus)) return true;
+    if (isSupervisor && opStatus === OPERATION_STATUS.INTRODUCED) return true;
+    if (isPlanner && ([OPERATION_STATUS.INTRODUCED, OPERATION_STATUS.CONFIRMED, OPERATION_STATUS.ORDERED] as number[]).includes(opStatus)) return true;
     return false;
   }
 
@@ -215,7 +198,7 @@ export function OperationListPage() {
           className="w-56"
         >
           <option value="">{t('operations.allStatuses')}</option>
-          {STATUS_KEYS.map((val) => (
+          {OPERATION_STATUS_KEYS.map((val) => (
             <option key={val} value={val}>
               {t(`operations.status${val}`)}
             </option>
@@ -275,8 +258,8 @@ export function OperationListPage() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={STATUS_BADGE_VARIANT[op.status] ?? "secondary"}
-                      className={STATUS_BADGE_CLASS[op.status] ?? ""}
+                      variant={OPERATION_STATUS_BADGE_VARIANT[op.status] ?? "secondary"}
+                      className={OPERATION_STATUS_BADGE_CLASS[op.status] ?? ""}
                     >
                       {t(`operations.status${op.status}`, { defaultValue: `Status ${op.status}` })}
                     </Badge>
@@ -291,7 +274,7 @@ export function OperationListPage() {
                         onClick={(e) => e.stopPropagation()}
                       >
                         {/* PRD 6.5.f — Supervisor: Confirm (1→3) */}
-                        {isSupervisor && op.status === 1 && (
+                        {isSupervisor && op.status === OPERATION_STATUS.INTRODUCED && (
                           <Button
                             size="sm"
                             className="bg-green-600 hover:bg-green-700"
@@ -306,7 +289,7 @@ export function OperationListPage() {
                           </Button>
                         )}
                         {/* PRD 6.5.f — Supervisor: Reject (1→2) */}
-                        {isSupervisor && op.status === 1 && (
+                        {isSupervisor && op.status === OPERATION_STATUS.INTRODUCED && (
                           <Button
                             size="sm"
                             variant="destructive"
@@ -318,7 +301,7 @@ export function OperationListPage() {
                           </Button>
                         )}
                         {/* PRD 6.5.g — Planner: Resign (1,3,4→7) */}
-                        {isPlanner && [1, 3, 4].includes(op.status) && (
+                        {isPlanner && ([OPERATION_STATUS.INTRODUCED, OPERATION_STATUS.CONFIRMED, OPERATION_STATUS.ORDERED] as number[]).includes(op.status) && (
                           <Button
                             size="sm"
                             variant="outline"

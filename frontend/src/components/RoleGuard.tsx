@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
+import { SYSTEM_ROLE } from "@/lib/constants";
 
 interface RoleGuardProps {
   allowedRoles: string[];
@@ -25,7 +26,7 @@ export function RoleGuard({ allowedRoles }: RoleGuardProps) {
 
   if (!allowedRoles.includes(role)) {
     // Planner lands on /operations; everyone else goes to /
-    const fallback = role === "Osoba planująca" ? "/operations" : "/";
+    const fallback = role === SYSTEM_ROLE.PLANNER ? "/operations" : "/";
     return <Navigate to={fallback} replace />;
   }
 

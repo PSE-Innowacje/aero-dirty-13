@@ -9,23 +9,9 @@ import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
+import { Pencil, Trash2 } from "lucide-react";
 
 interface LandingSite {
   id: number;
@@ -58,117 +44,72 @@ export function LandingSiteListPage() {
   // Sort by name
   const sorted = [...sites].sort((a, b) => a.name.localeCompare(b.name));
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('landingSites.loading')}</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4">
-        <p className="text-sm text-destructive-foreground">
-          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
-        </p>
-      </div>
-    );
-  }
+  const columns: DataTableColumn<LandingSite>[] = [
+    {
+      key: "name",
+      header: t('landingSites.name'),
+      render: (s) => <span className="font-medium">{s.name}</span>,
+    },
+    {
+      key: "latitude",
+      header: t('landingSites.latitude'),
+      render: (s) => s.latitude,
+    },
+    {
+      key: "longitude",
+      header: t('landingSites.longitude'),
+      render: (s) => s.longitude,
+    },
+  ];
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('landingSites.title')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('landingSites.subtitle')}
-          </p>
-        </div>
-        {isAdmin && (
-          <Link to="/landing-sites/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('landingSites.addLandingSite')}
+    <>
+      <DataTable<LandingSite>
+        title={t('landingSites.title')}
+        subtitle={t('landingSites.subtitle')}
+        columns={columns}
+        data={sorted}
+        isLoading={isLoading}
+        error={error}
+        loadingMessage={t('landingSites.loading')}
+        errorMessage={t('common.loadingError')}
+        emptyMessage={t('landingSites.noLandingSites')}
+        addButton={isAdmin ? { href: "/landing-sites/new", label: t('landingSites.addLandingSite') } : undefined}
+        rowKey={(s) => s.id}
+        actionsHeader={t('common.actions')}
+        actions={isAdmin ? (s) => (
+          <div className="flex justify-end gap-1">
+            <Link to={`/landing-sites/${s.id}/edit`} title={t('common.edit')}>
+              <Button variant="ghost" size="icon">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteTarget(s)}
+              title={t('common.delete')}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
-          </Link>
-        )}
-      </div>
-
-      <div className="rounded-md bg-surface-container-low">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('landingSites.name')}</TableHead>
-              <TableHead>{t('landingSites.latitude')}</TableHead>
-              <TableHead>{t('landingSites.longitude')}</TableHead>
-              {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={isAdmin ? 4 : 3} className="text-center text-muted-foreground py-8">
-                  {t('landingSites.noLandingSites')}
-                </TableCell>
-              </TableRow>
-            ) : (
-              sorted.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-medium">{s.name}</TableCell>
-                  <TableCell>{s.latitude}</TableCell>
-                  <TableCell>{s.longitude}</TableCell>
-                  {isAdmin && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link to={`/landing-sites/${s.id}/edit`} title={t('common.edit')}>
-                          <Button variant="ghost" size="icon">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteTarget(s)}
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+        ) : undefined}
+      />
 
       {/* Delete confirmation dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('common.confirmDelete')}</DialogTitle>
-            <DialogDescription>
-              {t('landingSites.confirmDeleteMsg')}{" "}
-              <strong>{deleteTarget?.name}</strong>?
-              {" "}{t('common.cannotUndo')}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? t('common.deleting') : t('common.delete')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      <DeleteConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+        isPending={deleteMutation.isPending}
+        description={
+          <>
+            {t('landingSites.confirmDeleteMsg')}{" "}
+            <strong>{deleteTarget?.name}</strong>?
+            {" "}{t('common.cannotUndo')}
+          </>
+        }
+      />
+    </>
   );
 }

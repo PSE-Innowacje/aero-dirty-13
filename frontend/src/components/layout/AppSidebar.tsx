@@ -24,6 +24,7 @@ import {
   Moon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SYSTEM_ROLE } from "@/lib/constants";
 
 /* ── Menu structure per PRD 7.1 ────────────────────────────── */
 interface MenuItem {
@@ -72,13 +73,13 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
 ];
 
 /* ── RBAC filtering per PRD 7.2 — uses stable group ids ────── */
-type RoleKey = "Administrator" | "Osoba planująca" | "Osoba nadzorująca" | "Pilot";
+type RoleKey = typeof SYSTEM_ROLE[keyof typeof SYSTEM_ROLE];
 
 const ROLE_ALLOWED_GROUPS: Record<RoleKey, string[]> = {
-  "Administrator": ["admin", "operations", "orders"],
-  "Osoba planująca": ["operations"],
-  "Osoba nadzorująca": ["admin", "operations", "orders"],
-  "Pilot": ["admin", "operations", "orders"],
+  [SYSTEM_ROLE.ADMIN]: ["admin", "operations", "orders"],
+  [SYSTEM_ROLE.PLANNER]: ["operations"],
+  [SYSTEM_ROLE.SUPERVISOR]: ["admin", "operations", "orders"],
+  [SYSTEM_ROLE.PILOT]: ["admin", "operations", "orders"],
 };
 
 function getMenuForRole(role: string): MenuGroup[] {

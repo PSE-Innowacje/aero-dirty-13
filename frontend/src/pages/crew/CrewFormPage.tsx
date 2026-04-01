@@ -6,12 +6,14 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
+import { parseApiFieldErrors } from "@/lib/form-utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
+import { CREW_ROLES, CREW_ROLE, CREW_ROLE_DISPLAY_KEY, EMAIL_REGEX } from "@/lib/constants";
 
 interface CrewMember {
   id: number;
@@ -25,15 +27,6 @@ interface CrewMember {
   training_expiry: string;
 }
 
-const ROLES = ["Pilot", "Obserwator", "Mechanik", "Operator"];
-
-const roleDisplayKey: Record<string, string> = {
-  Pilot: "crew.rolePilot",
-  Obserwator: "crew.roleObserver",
-  Mechanik: "crew.roleMechanic",
-  Operator: "crew.roleOperator",
-};
-
 export function CrewFormPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -45,7 +38,7 @@ export function CrewFormPage() {
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [weight, setWeight] = useState("70");
-  const [role, setRole] = useState(ROLES[0]!);
+  const [role, setRole] = useState<string>(CREW_ROLES[0]!);
   const [pilotLicenseNumber, setPilotLicenseNumber] = useState("");
   const [pilotLicenseExpiry, setPilotLicenseExpiry] = useState("");
   const [trainingExpiry, setTrainingExpiry] = useState("");
@@ -82,7 +75,7 @@ export function CrewFormPage() {
         training_expiry: trainingExpiry,
       };
 
-      if (role === "Pilot") {
+      if (role === CREW_ROLE.PILOT) {
         body.pilot_license_number = pilotLicenseNumber || null;
         body.pilot_license_expiry = pilotLicenseExpiry || null;
       } else {
@@ -106,27 +99,9 @@ export function CrewFormPage() {
       navigate("/crew");
     },
     onError: (err: Error) => {
-      if (err instanceof ApiError) {
-        try {
-          const detail = JSON.parse(err.detail);
-          if (Array.isArray(detail)) {
-            const errors: Record<string, string> = {};
-            for (const item of detail) {
-              const field = item.loc?.[item.loc.length - 1] ?? "unknown";
-              errors[field] = item.msg ?? t('common.invalidValue');
-            }
-            setFieldErrors(errors);
-            setError(null);
-            return;
-          }
-        } catch {
-          // Not JSON array
-        }
-        setError(err.detail);
-      } else {
-        setError(err.message);
-      }
-      setFieldErrors({});
+      const result = parseApiFieldErrors(err, t('common.invalidValue'));
+      setError(result.error);
+      setFieldErrors(result.fieldErrors);
     },
   });
 
@@ -139,11 +114,11 @@ export function CrewFormPage() {
     if (!firstName.trim()) errors.first_name = t('crew.validationFirstNameRequired');
     if (!lastName.trim()) errors.last_name = t('crew.validationLastNameRequired');
     if (!email.trim()) errors.email = t('crew.validationEmailRequired');
-    else if (!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)) errors.email = t('crew.validationEmailInvalid');
+    else if (!EMAIL_REGEX.test(email)) errors.email = t('crew.validationEmailInvalid');
     const w = Number(weight);
     if (isNaN(w) || w < 30 || w > 200) errors.weight = t('crew.validationWeightRange');
     if (!trainingExpiry) errors.training_expiry = t('crew.validationTrainingRequired');
-    if (role === "Pilot") {
+    if (role === CREW_ROLE.PILOT) {
       if (!pilotLicenseNumber.trim()) errors.pilot_license_number = t('crew.validationLicenseRequired');
       if (!pilotLicenseExpiry) errors.pilot_license_expiry = t('crew.validationLicenseExpiryRequired');
     }
@@ -244,15 +219,15 @@ export function CrewFormPage() {
               value={role}
               onChange={(e) => setRole(e.target.value)}
             >
-              {ROLES.map((r) => (
+              {CREW_ROLES.map((r) => (
                 <option key={r} value={r}>
-                  {t(roleDisplayKey[r] ?? r)}
+                  {t(CREW_ROLE_DISPLAY_KEY[r] ?? r)}
                 </option>
               ))}
             </Select>
           </div>
 
-          {role === "Pilot" && (
+          {role === CREW_ROLE.PILOT && (
             <>
               <div className="space-y-2">
                 <Label htmlFor="pilotLicenseNumber">{t('crew.pilotLicenseNumber')} *</Label>
