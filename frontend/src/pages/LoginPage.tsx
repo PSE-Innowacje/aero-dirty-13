@@ -42,11 +42,14 @@ export function LoginPage() {
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#001429] md:flex-row">
       {/* ---------- Left Hero Panel ---------- */}
       <section className="relative hidden h-full w-3/5 overflow-hidden md:block">
-        {/* CSS gradient simulating dusk sky — no external image */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#001429] via-[#082139] to-[#152B44]" />
-
-        {/* Subtle radial glow for atmosphere */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_30%_80%,rgba(192,0,23,0.08),transparent)]" />
+        {/* Hero image: utility helicopter patrolling power transmission lines */}
+        <img
+          src="/images/hero-helicopter.png"
+          alt="Utility helicopter flying along transmission towers"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        {/* CSS gradient fallback behind image */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#001429] via-[#082139] to-[#152B44]" />
 
         {/* Depth overlays matching Stitch mockup */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#001429]/40 via-transparent to-[#001429]/80" />
@@ -72,7 +75,12 @@ export function LoginPage() {
 
       {/* ---------- Mobile Hero (stacked above form) ---------- */}
       <div className="relative block h-48 w-full flex-shrink-0 md:hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#001429] via-[#082139] to-[#152B44]" />
+        <img
+          src="/images/hero-helicopter.png"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#001429] via-[#082139] to-[#152B44]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#001429] to-transparent opacity-60" />
         <div className="absolute bottom-4 left-4">
           <div className="flex items-center gap-2">
