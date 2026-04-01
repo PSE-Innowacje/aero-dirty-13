@@ -1,11 +1,13 @@
 /**
- * OperationFormPage — dual create/detail-edit page for flight operations.
+ * OperationFormPage — dual create/detail-edit orchestrator for flight operations.
  *
- * Create mode:  /operations/new  — form with editable fields, redirect after create.
- * Detail mode:  /operations/:id  — shows all fields, role-dependent editing,
- *   KML upload, map, status buttons, audit trail, comments.
+ * Create mode:  /operations/new  — renders <OperationCreateForm />
+ * Detail mode:  /operations/:id  — renders <OperationStatusActions /> + <OperationDetailView />
+ *
+ * All state, queries, mutations, and dialogs live here. Child components
+ * receive data and handlers via props.
  */
-import { useState, useEffect, type FormEvent, type ChangeEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -15,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -24,46 +25,17 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ArrowLeft } from "lucide-react";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import { OperationMap } from "@/components/maps/OperationMap";
-import { ArrowLeft, Upload, CheckCircle, XCircle, LogOut } from "lucide-react";
-import {
-  OPERATION_STATUS,
   OPERATION_FORM_STATUS_BADGE_CLASS,
   SYSTEM_ROLE,
   PLANNER_EDITABLE_STATUSES,
 } from "@/lib/constants";
+import { OperationStatusActions } from "./OperationStatusActions";
+import { OperationCreateForm } from "./OperationCreateForm";
+import { OperationDetailView } from "./OperationDetailView";
 
 // ── Types ──────────────────────────────────────────────────────────
-
-interface AuditLogEntry {
-  id: number;
-  field_name: string;
-  old_value: string | null;
-  new_value: string | null;
-  changed_at: string;
-  changed_by_email: string;
-}
-
-interface CommentEntry {
-  id: number;
-  content: string;
-  created_at: string;
-  author_email: string;
-  author_name: string;
-}
-
-interface LinkedOrder {
-  id: number;
-  status: number;
-}
 
 interface OperationDetail {
   id: number;
@@ -82,22 +54,23 @@ interface OperationDetail {
   post_realization_notes: string | null;
   created_at: string | null;
   created_by_email: string;
-  audit_logs: AuditLogEntry[];
-  comments: CommentEntry[];
-  linked_orders?: LinkedOrder[];
+  audit_logs: {
+    id: number;
+    field_name: string;
+    old_value: string | null;
+    new_value: string | null;
+    changed_at: string;
+    changed_by_email: string;
+  }[];
+  comments: {
+    id: number;
+    content: string;
+    created_at: string;
+    author_email: string;
+    author_name: string;
+  }[];
+  linked_orders?: { id: number; status: number }[];
 }
-
-// ── Constants ──────────────────────────────────────────────────────
-
-const ACTIVITY_TYPE_OPTIONS = [
-  { value: "oględziny wizualne", labelKey: "operations.activityTypeVisualInspection" },
-  { value: "skan 3D", labelKey: "operations.activityType3dScan" },
-  { value: "lokalizacja awarii", labelKey: "operations.activityTypeFaultLocation" },
-  { value: "zdjęcia", labelKey: "operations.activityTypePhotos" },
-  { value: "patrolowanie", labelKey: "operations.activityTypePatrolling" },
-];
-
-// Status labels now use t('operations.statusN') via i18n
 
 // ── Main Component ─────────────────────────────────────────────────
 
@@ -397,7 +370,7 @@ export function OperationFormPage() {
           <p className="text-sm text-muted-foreground mt-1">
             {t('operations.createdBy', { email: operation.created_by_email })}
             {operation.created_at &&
-              ` • ${new Date(operation.created_at).toLocaleString("pl-PL")}`}
+              ` \u2022 ${new Date(operation.created_at).toLocaleString("pl-PL")}`}
           </p>
         )}
       </div>
@@ -409,366 +382,82 @@ export function OperationFormPage() {
         </div>
       )}
 
-      {/* Status action buttons */}
-      {!isCreate && (
-        <StatusActions
-          status={currentStatus}
-          isSupervisor={isSupervisor}
-          isPlanner={isPlanner}
-          onConfirm={() => {
-            setConfirmPlannedEarliest(operation?.proposed_date_earliest ?? "");
-            setConfirmPlannedLatest(operation?.proposed_date_latest ?? "");
-            setShowConfirmDialog(true);
-          }}
-          onReject={() => setShowRejectDialog(true)}
-          onResign={() => setShowResignDialog(true)}
-          rejectPending={rejectMutation.isPending}
-          resignPending={resignMutation.isPending}
+      {/* Render create form OR detail view + status actions */}
+      {isCreate ? (
+        <OperationCreateForm
+          orderNumber={orderNumber}
+          shortDescription={shortDescription}
+          activityTypes={activityTypes}
+          additionalInfo={additionalInfo}
+          contactEmails={contactEmails}
+          proposedDateEarliest={proposedDateEarliest}
+          proposedDateLatest={proposedDateLatest}
+          onOrderNumberChange={setOrderNumber}
+          onShortDescriptionChange={setShortDescription}
+          onActivityToggle={handleActivityToggle}
+          onAdditionalInfoChange={setAdditionalInfo}
+          onContactEmailsChange={setContactEmails}
+          onProposedDateEarliestChange={setProposedDateEarliest}
+          onProposedDateLatestChange={setProposedDateLatest}
+          onSubmit={handleSubmit}
+          onCancel={() => navigate("/operations")}
+          isSaving={saveMutation.isPending}
         />
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Form fields */}
-        <div className="rounded-md bg-surface-container-low p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="orderNumber">{t('operations.orderNumber')} *</Label>
-              <Input
-                id="orderNumber"
-                value={orderNumber}
-                onChange={(e) => setOrderNumber(e.target.value)}
-                maxLength={30}
-                disabled={!canEdit}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="shortDescription">{t('operations.shortDescription')} *</Label>
-              <Input
-                id="shortDescription"
-                value={shortDescription}
-                onChange={(e) => setShortDescription(e.target.value)}
-                maxLength={100}
-                disabled={!canEdit}
-              />
-            </div>
-
-            {/* Activity types checkboxes */}
-            <div className="space-y-2">
-              <Label>{t('operations.activityTypesLabel')} *</Label>
-              <div className="flex flex-wrap gap-3">
-                {ACTIVITY_TYPE_OPTIONS.map((opt) => (
-                  <label
-                    key={opt.value}
-                    className="flex items-center gap-1.5 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={activityTypes.includes(opt.value)}
-                      onChange={() => handleActivityToggle(opt.value)}
-                      disabled={!canEdit}
-                      className="rounded border-input"
-                    />
-                    {t(opt.labelKey)}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="additionalInfo">{t('operations.additionalInfo')}</Label>
-              <Textarea
-                id="additionalInfo"
-                value={additionalInfo}
-                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                  setAdditionalInfo(e.target.value)
-                }
-                maxLength={500}
-                rows={3}
-                disabled={!canEdit}
-              />
-            </div>
-
-            {/* Post-realization notes — editable by Supervisor only */}
-            {!isCreate && (
-              <div className="space-y-2">
-                <Label htmlFor="postRealizationNotes">{t('operations.postRealizationNotes')}</Label>
-                <Textarea
-                  id="postRealizationNotes"
-                  value={postRealizationNotes}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                    setPostRealizationNotes(e.target.value)
-                  }
-                  placeholder={t('operations.postRealizationNotesPlaceholder')}
-                  maxLength={1000}
-                  rows={3}
-                  disabled={!isSupervisor}
-                />
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="contactEmails">
-                {t('operations.contactEmails')}
-              </Label>
-              <Input
-                id="contactEmails"
-                value={contactEmails}
-                onChange={(e) => setContactEmails(e.target.value)}
-                placeholder="jan@example.com, anna@example.com"
-                disabled={!canEdit}
-              />
-            </div>
-
-            {/* Proposed dates — editable by Planner and Supervisor */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="proposedDateEarliest">
-                  {t('operations.proposedDateFrom')}
-                </Label>
-                <Input
-                  id="proposedDateEarliest"
-                  type="date"
-                  value={proposedDateEarliest}
-                  onChange={(e) => setProposedDateEarliest(e.target.value)}
-                  disabled={!canEdit}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="proposedDateLatest">{t('operations.proposedDateTo')}</Label>
-                <Input
-                  id="proposedDateLatest"
-                  type="date"
-                  value={proposedDateLatest}
-                  onChange={(e) => setProposedDateLatest(e.target.value)}
-                  disabled={!canEdit}
-                />
-              </div>
-            </div>
-
-            {/* Planned dates — editable ONLY by Supervisor in detail mode */}
-            {!isCreate && (
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="plannedDateEarliest">
-                    {t('operations.plannedDateFrom')}
-                  </Label>
-                  <Input
-                    id="plannedDateEarliest"
-                    type="date"
-                    value={plannedDateEarliest}
-                    onChange={(e) => setPlannedDateEarliest(e.target.value)}
-                    disabled={!isSupervisor}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="plannedDateLatest">{t('operations.plannedDateTo')}</Label>
-                  <Input
-                    id="plannedDateLatest"
-                    type="date"
-                    value={plannedDateLatest}
-                    onChange={(e) => setPlannedDateLatest(e.target.value)}
-                    disabled={!isSupervisor}
-                  />
-                </div>
-              </div>
-            )}
-
-            {isCreate && (
-              <div className="rounded-md bg-blue-500/10 border border-blue-500/30 p-3">
-                <p className="text-sm text-blue-400">
-                  ℹ️ {t('operations.kmlUploadAfterCreate')}
-                </p>
-              </div>
-            )}
-
-            {canEdit && (
-              <div className="flex gap-3 pt-2">
-                <Button type="submit" disabled={saveMutation.isPending}>
-                  {saveMutation.isPending
-                    ? t('operations.saving')
-                    : isCreate
-                      ? t('operations.createOperation')
-                      : t('operations.saveChanges')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/operations")}
-                >
-                  {t('operations.cancel')}
-                </Button>
-              </div>
-            )}
-          </form>
-        </div>
-
-        {/* Right: KML upload + Map (detail mode only) */}
-        {!isCreate && (
-          <div className="space-y-6">
-            {/* KML Upload */}
-            {canEdit && (
-              <div className="rounded-md bg-surface-container-low p-6">
-                <h2 className="text-lg font-semibold mb-3">{t('operations.kmlFile')}</h2>
-                {operation?.route_km != null && (
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {t('operations.currentRouteText')} <strong>{operation.route_km} km</strong>
-                  </p>
-                )}
-                <div className="flex items-center gap-3">
-                  <Input
-                    type="file"
-                    accept=".kml"
-                    onChange={(e) =>
-                      setKmlFile(e.target.files?.[0] ?? null)
-                    }
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handleKmlUpload}
-                    disabled={!kmlFile || kmlUploading}
-                    variant="outline"
-                  >
-                    <Upload className="mr-2 h-4 w-4" />
-                    {kmlUploading ? t('operations.uploading') : t('operations.uploadKml')}
-                  </Button>
-                </div>
-                {kmlError && (
-                  <p className="text-xs text-destructive mt-2">{kmlError}</p>
-                )}
-              </div>
-            )}
-
-            {/* Map */}
-            {operation?.route_coordinates &&
-              operation.route_coordinates.length > 0 && (
-                <div className="rounded-md bg-surface-container-low p-6">
-                  <h2 className="text-lg font-semibold mb-3">
-                    {t('operations.routeMap')}
-                    {operation.route_km != null &&
-                      ` (${operation.route_km} km)`}
-                  </h2>
-                  <OperationMap
-                    coordinates={
-                      operation.route_coordinates as [number, number][]
-                    }
-                  />
-                </div>
-              )}
-          </div>
-        )}
-      </div>
-
-      {/* Audit Trail (detail mode only) */}
-      {!isCreate && operation && operation.audit_logs.length > 0 && (
-        <div className="mt-6 rounded-md bg-surface-container-low p-6">
-          <h2 className="text-lg font-semibold mb-3">{t('operations.auditTrail')}</h2>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('operations.auditField')}</TableHead>
-                  <TableHead>{t('operations.auditOldValue')}</TableHead>
-                  <TableHead>{t('operations.auditNewValue')}</TableHead>
-                  <TableHead>{t('operations.auditDate')}</TableHead>
-                  <TableHead>{t('operations.auditPerson')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {operation.audit_logs.map((log) => (
-                  <TableRow key={log.id}>
-                    <TableCell className="font-medium">
-                      {log.field_name}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {log.old_value ?? "—"}
-                    </TableCell>
-                    <TableCell>{log.new_value ?? "—"}</TableCell>
-                    <TableCell>
-                      {new Date(log.changed_at).toLocaleString("pl-PL")}
-                    </TableCell>
-                    <TableCell>{log.changed_by_email}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      )}
-
-      {/* Comments (detail mode only) */}
-      {!isCreate && operation && (
-        <div className="mt-6 rounded-md bg-surface-container-low p-6">
-          <h2 className="text-lg font-semibold mb-3">{t('operations.comments')}</h2>
-
-          {operation.comments.length === 0 ? (
-            <p className="text-sm text-muted-foreground mb-4">
-              {t('operations.noComments')}
-            </p>
-          ) : (
-            <div className="space-y-3 mb-4">
-              {operation.comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="rounded-md border p-3 bg-muted/30"
-                >
-                  <div className="flex justify-between items-start">
-                    <p className="text-sm font-medium">{c.author_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(c.created_at).toLocaleString("pl-PL")}
-                    </p>
-                  </div>
-                  <p className="text-sm mt-1">{c.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Add comment form */}
-          <div className="flex gap-3">
-            <Textarea
-              value={commentText}
-              onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-                setCommentText(e.target.value)
-              }
-              placeholder={t('operations.addCommentPlaceholder')}
-              maxLength={500}
-              rows={2}
-              className="flex-1"
-            />
-            <Button
-              onClick={() => commentMutation.mutate()}
-              disabled={!commentText.trim() || commentMutation.isPending}
-              className="self-end"
-            >
-              {commentMutation.isPending ? t('operations.adding') : t('operations.addComment')}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Linked orders (detail mode only) */}
-      {!isCreate && operation && (
-        <div className="mt-6 rounded-md bg-surface-container-low p-6">
-          <h2 className="text-lg font-semibold mb-3">{t('operations.linkedOrders')}</h2>
-          {operation.linked_orders && operation.linked_orders.length > 0 ? (
-            <ul className="space-y-1">
-              {operation.linked_orders.map((lo) => (
-                <li key={lo.id} className="text-sm">
-                  #{lo.id}{" "}
-                  <Badge variant="outline" className="ml-1 text-xs">
-                    {t(`orders.status${lo.status}`, { defaultValue: `Status ${lo.status}` })}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t('operations.noLinkedOrders')}
-            </p>
-          )}
-        </div>
-      )}
+      ) : operation ? (
+        <>
+          <OperationStatusActions
+            status={currentStatus}
+            isSupervisor={isSupervisor}
+            isPlanner={isPlanner}
+            onConfirm={() => {
+              setConfirmPlannedEarliest(operation.proposed_date_earliest ?? "");
+              setConfirmPlannedLatest(operation.proposed_date_latest ?? "");
+              setShowConfirmDialog(true);
+            }}
+            onReject={() => setShowRejectDialog(true)}
+            onResign={() => setShowResignDialog(true)}
+            rejectPending={rejectMutation.isPending}
+            resignPending={resignMutation.isPending}
+          />
+          <OperationDetailView
+            operation={operation}
+            canEdit={canEdit}
+            isSupervisor={isSupervisor}
+            orderNumber={orderNumber}
+            shortDescription={shortDescription}
+            activityTypes={activityTypes}
+            additionalInfo={additionalInfo}
+            contactEmails={contactEmails}
+            proposedDateEarliest={proposedDateEarliest}
+            proposedDateLatest={proposedDateLatest}
+            plannedDateEarliest={plannedDateEarliest}
+            plannedDateLatest={plannedDateLatest}
+            postRealizationNotes={postRealizationNotes}
+            onOrderNumberChange={setOrderNumber}
+            onShortDescriptionChange={setShortDescription}
+            onActivityToggle={handleActivityToggle}
+            onAdditionalInfoChange={setAdditionalInfo}
+            onContactEmailsChange={setContactEmails}
+            onProposedDateEarliestChange={setProposedDateEarliest}
+            onProposedDateLatestChange={setProposedDateLatest}
+            onPlannedDateEarliestChange={setPlannedDateEarliest}
+            onPlannedDateLatestChange={setPlannedDateLatest}
+            onPostRealizationNotesChange={setPostRealizationNotes}
+            onSubmit={handleSubmit}
+            onCancel={() => navigate("/operations")}
+            isSaving={saveMutation.isPending}
+            kmlFile={kmlFile}
+            onKmlFileChange={setKmlFile}
+            onKmlUpload={handleKmlUpload}
+            kmlUploading={kmlUploading}
+            kmlError={kmlError}
+            commentText={commentText}
+            onCommentTextChange={setCommentText}
+            onAddComment={() => commentMutation.mutate()}
+            commentPending={commentMutation.isPending}
+          />
+        </>
+      ) : null}
 
       {/* Confirm dialog */}
       <Dialog
@@ -876,65 +565,6 @@ export function OperationFormPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-// ── StatusActions sub-component ─────────────────────────────────────
-
-function StatusActions({
-  status,
-  isSupervisor,
-  isPlanner,
-  onConfirm,
-  onReject,
-  onResign,
-  rejectPending,
-  resignPending,
-}: {
-  status: number;
-  isSupervisor: boolean;
-  isPlanner: boolean;
-  onConfirm: () => void;
-  onReject: () => void;
-  onResign: () => void;
-  rejectPending: boolean;
-  resignPending: boolean;
-}) {
-  const { t } = useTranslation();
-  const showSupervisorActions = isSupervisor && status === OPERATION_STATUS.INTRODUCED;
-  const showResign = isPlanner && ([OPERATION_STATUS.INTRODUCED, OPERATION_STATUS.CONFIRMED, OPERATION_STATUS.ORDERED] as number[]).includes(status);
-
-  if (!showSupervisorActions && !showResign) return null;
-
-  return (
-    <div className="mb-6 flex gap-3">
-      {showSupervisorActions && (
-        <>
-          <Button onClick={onConfirm} className="bg-green-600 hover:bg-green-700">
-            <CheckCircle className="mr-2 h-4 w-4" />
-            {t('operations.confirm')}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={onReject}
-            disabled={rejectPending}
-          >
-            <XCircle className="mr-2 h-4 w-4" />
-            {rejectPending ? t('operations.rejecting') : t('operations.reject')}
-          </Button>
-        </>
-      )}
-      {showResign && (
-        <Button
-          variant="outline"
-          onClick={onResign}
-          disabled={resignPending}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {resignPending ? t('operations.resigning') : t('operations.resign')}
-        </Button>
-      )}
     </div>
   );
 }

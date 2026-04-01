@@ -10,16 +10,9 @@ import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { DeleteConfirmDialog } from "@/components/ui/delete-confirm-dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { CREW_ROLE_BADGE_VARIANT, CREW_ROLE_DISPLAY_KEY, SYSTEM_ROLE } from "@/lib/constants";
 
 interface CrewMember {
@@ -58,103 +51,81 @@ export function CrewListPage() {
   // Sort by email
   const sorted = [...crew].sort((a, b) => a.email.localeCompare(b.email));
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">{t('crew.loading')}</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4">
-        <p className="text-sm text-destructive-foreground">
-          {t('common.loadingError')}: {error instanceof Error ? error.message : t('common.unknownError')}
-        </p>
-      </div>
-    );
-  }
+  const columns: DataTableColumn<CrewMember>[] = [
+    {
+      key: "email",
+      header: t('crew.email'),
+      render: (c) => <span className="font-medium">{c.email}</span>,
+    },
+    {
+      key: "first_name",
+      header: t('crew.firstName'),
+      render: (c) => c.first_name,
+    },
+    {
+      key: "last_name",
+      header: t('crew.lastName'),
+      render: (c) => c.last_name,
+    },
+    {
+      key: "role",
+      header: t('crew.role'),
+      render: (c) => (
+        <Badge variant={CREW_ROLE_BADGE_VARIANT[c.role] ?? "secondary"}>
+          {t(CREW_ROLE_DISPLAY_KEY[c.role] ?? c.role)}
+        </Badge>
+      ),
+    },
+    {
+      key: "license_number",
+      header: t('crew.licenseNumber'),
+      render: (c) => c.pilot_license_number ?? "\u2014",
+    },
+    {
+      key: "license_expiry",
+      header: t('crew.pilotLicenseExpiry'),
+      render: (c) => c.pilot_license_expiry ?? "\u2014",
+    },
+    {
+      key: "training_expiry",
+      header: t('crew.trainingDate'),
+      render: (c) => c.training_expiry,
+    },
+  ];
 
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t('crew.title')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('crew.subtitle')}
-          </p>
-        </div>
-        {isAdmin && (
-          <Link to="/crew/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('crew.addCrewMember')}
+    <>
+      <DataTable<CrewMember>
+        title={t('crew.title')}
+        subtitle={t('crew.subtitle')}
+        columns={columns}
+        data={sorted}
+        isLoading={isLoading}
+        error={error}
+        loadingMessage={t('crew.loading')}
+        errorMessage={t('common.loadingError')}
+        emptyMessage={t('crew.noCrewMembers')}
+        addButton={isAdmin ? { href: "/crew/new", label: t('crew.addCrewMember') } : undefined}
+        rowKey={(c) => c.id}
+        actionsHeader={t('common.actions')}
+        actions={isAdmin ? (c) => (
+          <div className="flex justify-end gap-1">
+            <Link to={`/crew/${c.id}/edit`} title={t('common.edit')}>
+              <Button variant="ghost" size="icon">
+                <Pencil className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setDeleteTarget(c)}
+              title={t('common.delete')}
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
-          </Link>
-        )}
-      </div>
-
-      <div className="rounded-md bg-surface-container-low">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('crew.email')}</TableHead>
-              <TableHead>{t('crew.firstName')}</TableHead>
-              <TableHead>{t('crew.lastName')}</TableHead>
-              <TableHead>{t('crew.role')}</TableHead>
-              <TableHead>{t('crew.licenseNumber')}</TableHead>
-              <TableHead>{t('crew.pilotLicenseExpiry')}</TableHead>
-              <TableHead>{t('crew.trainingDate')}</TableHead>
-              {isAdmin && <TableHead className="text-right">{t('common.actions')}</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={isAdmin ? 8 : 7} className="text-center text-muted-foreground py-8">
-                  {t('crew.noCrewMembers')}
-                </TableCell>
-              </TableRow>
-            ) : (
-              sorted.map((c) => (
-                <TableRow key={c.id}>
-                  <TableCell className="font-medium">{c.email}</TableCell>
-                  <TableCell>{c.first_name}</TableCell>
-                  <TableCell>{c.last_name}</TableCell>
-                  <TableCell>
-                    <Badge variant={CREW_ROLE_BADGE_VARIANT[c.role] ?? "secondary"}>
-                      {t(CREW_ROLE_DISPLAY_KEY[c.role] ?? c.role)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{c.pilot_license_number ?? "—"}</TableCell>
-                  <TableCell>{c.pilot_license_expiry ?? "—"}</TableCell>
-                  <TableCell>{c.training_expiry}</TableCell>
-                  {isAdmin && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Link to={`/crew/${c.id}/edit`} title={t('common.edit')}>
-                          <Button variant="ghost" size="icon">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteTarget(c)}
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          </div>
+        ) : undefined}
+      />
 
       {/* Delete confirmation dialog */}
       <DeleteConfirmDialog
@@ -172,6 +143,6 @@ export function CrewListPage() {
           </>
         }
       />
-    </div>
+    </>
   );
 }
