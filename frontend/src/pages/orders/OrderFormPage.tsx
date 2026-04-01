@@ -111,10 +111,18 @@ interface OperationDetailForMap {
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
-function toDatetimeLocal(iso: string | null | undefined): string {
+function toDatePart(iso: string | null | undefined): string {
   if (!iso) return "";
-  // ISO string -> datetime-local input format (YYYY-MM-DDTHH:mm)
-  return iso.slice(0, 16);
+  return iso.slice(0, 10);
+}
+function toTimePart(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const t = iso.slice(11, 16);
+  return t || "";
+}
+function composeDatetime(date: string, time: string): string {
+  if (!date) return "";
+  return `${date}T${time || "00:00"}`;
 }
 
 function parseErrors(detail: string): string[] {
@@ -153,18 +161,23 @@ export function OrderFormPage() {
   const isSupervisor = role === SYSTEM_ROLE.SUPERVISOR;
 
   // ── Form state ─────────────────────────────────────────────────
-  const [plannedStart, setPlannedStart] = useState("");
-  const [plannedEnd, setPlannedEnd] = useState("");
+  const [plannedStartDate, setPlannedStartDate] = useState("");
+  const [plannedStartTime, setPlannedStartTime] = useState("");
+  const [plannedEndDate, setPlannedEndDate] = useState("");
+  const [plannedEndTime, setPlannedEndTime] = useState("");
   const [helicopterId, setHelicopterId] = useState<string>("");
   const [selectedCrewIds, setSelectedCrewIds] = useState<number[]>([]);
   const [startSiteId, setStartSiteId] = useState<string>("");
   const [endSiteId, setEndSiteId] = useState<string>("");
   const [selectedOpIds, setSelectedOpIds] = useState<number[]>([]);
   const [estimatedRouteKm, setEstimatedRouteKm] = useState<string>("");
-  const [actualStart, setActualStart] = useState("");
-  const [actualEnd, setActualEnd] = useState("");
+  const [actualStartDate, setActualStartDate] = useState("");
+  const [actualStartTime, setActualStartTime] = useState("");
+  const [actualEndDate, setActualEndDate] = useState("");
+  const [actualEndTime, setActualEndTime] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // ── Confirm dialog state ───────────────────────────────────────
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -248,8 +261,10 @@ export function OrderFormPage() {
   // Populate form from fetched order
   useEffect(() => {
     if (order) {
-      setActualStart(toDatetimeLocal(order.actual_start_datetime));
-      setActualEnd(toDatetimeLocal(order.actual_end_datetime));
+      setActualStartDate(toDatePart(order.actual_start_datetime));
+      setActualStartTime(toTimePart(order.actual_start_datetime));
+      setActualEndDate(toDatePart(order.actual_end_datetime));
+      setActualEndTime(toTimePart(order.actual_end_datetime));
     }
   }, [order]);
 
@@ -257,11 +272,11 @@ export function OrderFormPage() {
   const createMutation = useMutation({
     mutationFn: async () => {
       const body = {
-        planned_start_datetime: plannedStart
-          ? new Date(plannedStart).toISOString()
+        planned_start_datetime: plannedStartDate
+          ? new Date(composeDatetime(plannedStartDate, plannedStartTime)).toISOString()
           : "",
-        planned_end_datetime: plannedEnd
-          ? new Date(plannedEnd).toISOString()
+        planned_end_datetime: plannedEndDate
+          ? new Date(composeDatetime(plannedEndDate, plannedEndTime)).toISOString()
           : "",
         helicopter_id: Number(helicopterId),
         crew_member_ids: selectedCrewIds,
@@ -295,10 +310,12 @@ export function OrderFormPage() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       const body: Record<string, unknown> = {};
-      if (actualStart)
-        body.actual_start_datetime = new Date(actualStart).toISOString();
-      if (actualEnd)
-        body.actual_end_datetime = new Date(actualEnd).toISOString();
+      const composedActualStart = composeDatetime(actualStartDate, actualStartTime);
+      const composedActualEnd = composeDatetime(actualEndDate, actualEndTime);
+      if (composedActualStart)
+        body.actual_start_datetime = new Date(composedActualStart).toISOString();
+      if (composedActualEnd)
+        body.actual_end_datetime = new Date(composedActualEnd).toISOString();
       return apiFetch<FlightOrderDetail>(`/orders/${id}`, {
         method: "PUT",
         body: JSON.stringify(body),
@@ -437,6 +454,19 @@ export function OrderFormPage() {
     e.preventDefault();
     setError(null);
     setValidationErrors([]);
+
+    // Client-side validation for required fields
+    const errors: Record<string, string> = {};
+    if (!plannedStartDate) errors.plannedStart = t('orders.validationFieldRequired');
+    if (!plannedEndDate) errors.plannedEnd = t('orders.validationFieldRequired');
+    if (!helicopterId) errors.helicopter = t('orders.validationHelicopterRequired');
+    if (!startSiteId) errors.startSite = t('orders.validationStartSiteRequired');
+    if (!endSiteId) errors.endSite = t('orders.validationEndSiteRequired');
+    if (selectedOpIds.length === 0) errors.operations = t('orders.validationOperationsRequired');
+    if (!estimatedRouteKm) errors.routeKm = t('orders.validationRouteKmRequired');
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     createMutation.mutate();
   }
 
@@ -522,8 +552,10 @@ export function OrderFormPage() {
         <OrderCreateForm
           userFullName={user ? `${user.first_name} ${user.last_name}` : ""}
           userEmail={user?.email ?? ""}
-          plannedStart={plannedStart}
-          plannedEnd={plannedEnd}
+          plannedStartDate={plannedStartDate}
+          plannedStartTime={plannedStartTime}
+          plannedEndDate={plannedEndDate}
+          plannedEndTime={plannedEndTime}
           helicopterId={helicopterId}
           selectedCrewIds={selectedCrewIds}
           startSiteId={startSiteId}
@@ -535,8 +567,10 @@ export function OrderFormPage() {
           landingSites={landingSites}
           confirmedOps={confirmedOps}
           createModeOpDetails={createModeOpDetails}
-          onPlannedStartChange={setPlannedStart}
-          onPlannedEndChange={setPlannedEnd}
+          onPlannedStartDateChange={setPlannedStartDate}
+          onPlannedStartTimeChange={setPlannedStartTime}
+          onPlannedEndDateChange={setPlannedEndDate}
+          onPlannedEndTimeChange={setPlannedEndTime}
           onHelicopterIdChange={setHelicopterId}
           onCrewToggle={handleCrewToggle}
           onStartSiteIdChange={setStartSiteId}
@@ -546,6 +580,7 @@ export function OrderFormPage() {
           onSubmit={handleSubmit}
           onCancel={() => navigate("/orders")}
           isCreating={createMutation.isPending}
+          fieldErrors={fieldErrors}
         />
       ) : order ? (
         <>
@@ -571,10 +606,14 @@ export function OrderFormPage() {
             order={order}
             isPilot={isPilot}
             currentStatus={currentStatus}
-            actualStart={actualStart}
-            actualEnd={actualEnd}
-            onActualStartChange={setActualStart}
-            onActualEndChange={setActualEnd}
+            actualStartDate={actualStartDate}
+            actualStartTime={actualStartTime}
+            actualEndDate={actualEndDate}
+            actualEndTime={actualEndTime}
+            onActualStartDateChange={setActualStartDate}
+            onActualStartTimeChange={setActualStartTime}
+            onActualEndDateChange={setActualEndDate}
+            onActualEndTimeChange={setActualEndTime}
             onSaveActualTimes={() => updateMutation.mutate()}
             savingActualTimes={updateMutation.isPending}
             mapOperations={mapOperations}

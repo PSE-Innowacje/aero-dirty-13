@@ -15,11 +15,13 @@ test.describe('Flight order workflows', () => {
     await page.getByRole('link', { name: /add order|dodaj zlecenie/i }).click();
     await page.waitForURL('/orders/new');
 
-    // Fill planned start datetime
-    await page.getByLabel(/planned start|planowany.*start|planowany.*początek/i).fill('2026-07-15T08:00');
+    // Fill planned start date & time
+    await page.locator('#plannedStartDate').fill('2026-07-15');
+    await page.locator('#plannedStartTime').fill('08:00');
 
-    // Fill planned end datetime
-    await page.getByLabel(/planned end|planowany.*koniec/i).fill('2026-07-15T16:00');
+    // Fill planned end date & time
+    await page.locator('#plannedEndDate').fill('2026-07-15');
+    await page.locator('#plannedEndTime').fill('16:00');
 
     // Select helicopter from dropdown (first available active helicopter)
     const helicopterSelect = page.getByLabel(/helicopter|helikopter/i);
@@ -77,6 +79,31 @@ test.describe('Flight order workflows', () => {
 
     // Verify we left the /orders/new page (either to detail or list with error)
     expect(redirected).toBeTruthy();
+  });
+
+  test('pilot sees introduced orders by default', async ({ page, loginAs }) => {
+    await loginAs('pilot');
+
+    await page.goto('/orders');
+    await page.waitForURL('/orders');
+
+    // Pilot default filter should be status 1 (Introduced/Nowe)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('1');
+
+    // Table should be visible with the default filter applied
+    await expect(page.locator('table')).toBeVisible();
+  });
+
+  test('supervisor sees submitted orders by default', async ({ page, loginAs }) => {
+    await loginAs('supervisor');
+
+    await page.goto('/orders');
+    await page.waitForURL('/orders');
+
+    // Supervisor default filter should be status 2 (Submitted/Przekazane)
+    const statusFilter = page.getByRole('combobox').first();
+    await expect(statusFilter).toHaveValue('2');
   });
 
   test('pilot submits order for acceptance', async ({ page, loginAs }) => {

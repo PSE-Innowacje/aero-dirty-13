@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { OrderMap } from "@/components/maps/OrderMap";
+import { FormLegend } from "@/components/ui/FormLegend";
 import { CREW_ROLE } from "@/lib/constants";
 
 // ---- Types for props ------------------------------------------------
@@ -62,8 +63,10 @@ export interface OrderCreateFormProps {
   userFullName: string;
   userEmail: string;
   // Form values
-  plannedStart: string;
-  plannedEnd: string;
+  plannedStartDate: string;
+  plannedStartTime: string;
+  plannedEndDate: string;
+  plannedEndTime: string;
   helicopterId: string;
   selectedCrewIds: number[];
   startSiteId: string;
@@ -77,8 +80,10 @@ export interface OrderCreateFormProps {
   confirmedOps: OperationOption[];
   createModeOpDetails: OperationDetailForMap[];
   // Change handlers
-  onPlannedStartChange: (v: string) => void;
-  onPlannedEndChange: (v: string) => void;
+  onPlannedStartDateChange: (v: string) => void;
+  onPlannedStartTimeChange: (v: string) => void;
+  onPlannedEndDateChange: (v: string) => void;
+  onPlannedEndTimeChange: (v: string) => void;
   onHelicopterIdChange: (v: string) => void;
   onCrewToggle: (crewId: number) => void;
   onStartSiteIdChange: (v: string) => void;
@@ -89,13 +94,17 @@ export interface OrderCreateFormProps {
   onSubmit: (e: FormEvent) => void;
   onCancel: () => void;
   isCreating: boolean;
+  // Field-level validation errors
+  fieldErrors: Record<string, string>;
 }
 
 export function OrderCreateForm({
   userFullName,
   userEmail,
-  plannedStart,
-  plannedEnd,
+  plannedStartDate,
+  plannedStartTime,
+  plannedEndDate,
+  plannedEndTime,
   helicopterId,
   selectedCrewIds,
   startSiteId,
@@ -107,8 +116,10 @@ export function OrderCreateForm({
   landingSites,
   confirmedOps,
   createModeOpDetails,
-  onPlannedStartChange,
-  onPlannedEndChange,
+  onPlannedStartDateChange,
+  onPlannedStartTimeChange,
+  onPlannedEndDateChange,
+  onPlannedEndTimeChange,
   onHelicopterIdChange,
   onCrewToggle,
   onStartSiteIdChange,
@@ -118,6 +129,7 @@ export function OrderCreateForm({
   onSubmit,
   onCancel,
   isCreating,
+  fieldErrors,
 }: OrderCreateFormProps) {
   const { t } = useTranslation();
 
@@ -157,11 +169,18 @@ export function OrderCreateForm({
   const createEndSite = landingSites.find((s) => s.id === Number(endSiteId));
   const hasMapData = createMapOps.length > 0 || createStartSite || createEndSite;
 
-  const dateError = !!(plannedStart && plannedEnd && new Date(plannedEnd) <= new Date(plannedStart));
+  function composeDT(date: string, time: string): string {
+    if (!date) return "";
+    return `${date}T${time || "00:00"}`;
+  }
+  const composedStart = composeDT(plannedStartDate, plannedStartTime);
+  const composedEnd = composeDT(plannedEndDate, plannedEndTime);
+  const dateError = !!(composedStart && composedEnd && new Date(composedEnd) <= new Date(composedStart));
 
   return (
     <div className="rounded-md bg-surface-container-low p-6">
       <form onSubmit={onSubmit} className="space-y-5">
+        <FormLegend />
         {/* Pilot -- auto-filled, read-only */}
         <div className="space-y-2">
           <Label>{t('orders.pilotAutoFilled')}</Label>
@@ -171,33 +190,33 @@ export function OrderCreateForm({
         {/* Planned dates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')}</Label>
-            <Input
-              id="plannedStart"
-              type="datetime-local"
-              value={plannedStart}
-              onChange={(e) => onPlannedStartChange(e.target.value)}
-              required
-            />
+            <Label htmlFor="plannedStartDate">{t('orders.plannedStartLabel')} *</Label>
+            <div className="flex gap-2">
+              <Input id="plannedStartDate" type="date" value={plannedStartDate} onChange={(e) => onPlannedStartDateChange(e.target.value)} required />
+              <Input id="plannedStartTime" type="time" value={plannedStartTime} onChange={(e) => onPlannedStartTimeChange(e.target.value)} required />
+            </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="plannedEnd">{t('orders.plannedEndLabel')}</Label>
-            <Input
-              id="plannedEnd"
-              type="datetime-local"
-              value={plannedEnd}
-              onChange={(e) => onPlannedEndChange(e.target.value)}
-              required
-            />
+            <Label htmlFor="plannedEndDate">{t('orders.plannedEndLabel')} *</Label>
+            <div className="flex gap-2">
+              <Input id="plannedEndDate" type="date" value={plannedEndDate} onChange={(e) => onPlannedEndDateChange(e.target.value)} required />
+              <Input id="plannedEndTime" type="time" value={plannedEndTime} onChange={(e) => onPlannedEndTimeChange(e.target.value)} required />
+            </div>
           </div>
         </div>
         {dateError && (
           <p className="text-sm text-destructive-foreground">{t('orders.validationPlannedEndBeforeStart')}</p>
         )}
+        {fieldErrors.plannedStart && (
+          <p className="text-xs text-destructive">{fieldErrors.plannedStart}</p>
+        )}
+        {fieldErrors.plannedEnd && (
+          <p className="text-xs text-destructive">{fieldErrors.plannedEnd}</p>
+        )}
 
         {/* Helicopter dropdown */}
         <div className="space-y-2">
-          <Label htmlFor="helicopter">{t('orders.helicopterLabel')}</Label>
+          <Label htmlFor="helicopter">{t('orders.helicopterLabel')} *</Label>
           {activeHelicopters.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t('orders.noActiveHelicopters')}
@@ -216,6 +235,9 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+          )}
+          {fieldErrors.helicopter && (
+            <p className="text-xs text-destructive">{fieldErrors.helicopter}</p>
           )}
         </div>
 
@@ -285,7 +307,7 @@ export function OrderCreateForm({
         {/* Landing sites */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="startSite">{t('orders.startLandingSite')}</Label>
+            <Label htmlFor="startSite">{t('orders.startLandingSite')} *</Label>
             <Select
               id="startSite"
               value={startSiteId}
@@ -299,9 +321,12 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+            {fieldErrors.startSite && (
+              <p className="text-xs text-destructive">{fieldErrors.startSite}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endSite">{t('orders.endLandingSite')}</Label>
+            <Label htmlFor="endSite">{t('orders.endLandingSite')} *</Label>
             <Select
               id="endSite"
               value={endSiteId}
@@ -315,12 +340,15 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+            {fieldErrors.endSite && (
+              <p className="text-xs text-destructive">{fieldErrors.endSite}</p>
+            )}
           </div>
         </div>
 
         {/* Operations multi-select */}
         <div className="space-y-2">
-          <Label>{t('orders.operationsConfirmed')}</Label>
+          <Label>{t('orders.operationsConfirmed')} *</Label>
           {confirmedOps.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t('orders.noConfirmedOperations')}
@@ -360,6 +388,9 @@ export function OrderCreateForm({
                 ))}
             </div>
           )}
+          {fieldErrors.operations && (
+            <p className="text-xs text-destructive">{fieldErrors.operations}</p>
+          )}
         </div>
 
         {/* Estimated route km */}
@@ -373,6 +404,9 @@ export function OrderCreateForm({
             onChange={(e) => onEstimatedRouteKmChange(e.target.value)}
             required
           />
+          {fieldErrors.routeKm && (
+            <p className="text-xs text-destructive">{fieldErrors.routeKm}</p>
+          )}
         </div>
 
         {/* Create-mode map preview */}

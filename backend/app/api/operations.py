@@ -43,6 +43,10 @@ AnyAuthenticated = Annotated[User, Depends(get_current_user)]
 # Fields Planner cannot modify (only Supervisor can set these via confirm)
 PLANNER_LOCKED_FIELDS = {"planned_date_earliest", "planned_date_latest", "post_realization_notes"}
 
+# Poland bounding box (PRD 6.5.a — "teren Polski")
+POLAND_LAT_MIN, POLAND_LAT_MAX = 49.0, 54.9
+POLAND_LON_MIN, POLAND_LON_MAX = 14.1, 24.2
+
 # Updatable fields for audit tracking
 AUDITABLE_FIELDS = {
     "order_number",
@@ -449,6 +453,21 @@ async def upload_kml(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"KML file contains {len(coordinates)} points (max 5000)",
         )
+
+    # Poland boundary validation (PRD 6.5.a — "teren Polski")
+    for coord in coordinates:
+        lat, lon = coord[0], coord[1]
+        if not (POLAND_LAT_MIN <= lat <= POLAND_LAT_MAX
+                and POLAND_LON_MIN <= lon <= POLAND_LON_MAX):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"KML coordinates outside Poland "
+                    f"(lat {POLAND_LAT_MIN}\u2013{POLAND_LAT_MAX}, "
+                    f"lon {POLAND_LON_MIN}\u2013{POLAND_LON_MAX}). "
+                    f"Found point at lat={lat}, lon={lon}"
+                ),
+            )
 
     # Audit entries for KML upload
     changes: dict[str, tuple[Any, Any]] = {}

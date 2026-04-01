@@ -187,6 +187,29 @@ export const PLANNER_EDITABLE_STATUSES = [
   OPERATION_STATUS.IN_REALIZATION,
 ] as const;
 
+// ── Role-Based Default Filters ──────────────────────────────────────
+
+/**
+ * Default operation list status filter per role.
+ * "" means show all statuses (no filter applied).
+ */
+export const OPERATION_DEFAULT_STATUS_FILTER: Record<string, string> = {
+  [SYSTEM_ROLE.ADMIN]: "",
+  [SYSTEM_ROLE.PLANNER]: String(OPERATION_STATUS.INTRODUCED),    // "1"
+  [SYSTEM_ROLE.SUPERVISOR]: String(OPERATION_STATUS.INTRODUCED),  // "1"
+  [SYSTEM_ROLE.PILOT]: String(OPERATION_STATUS.CONFIRMED),        // "3"
+};
+
+/**
+ * Default order list status filter per role.
+ * "" means show all statuses (no filter applied).
+ */
+export const ORDER_DEFAULT_STATUS_FILTER: Record<string, string> = {
+  [SYSTEM_ROLE.ADMIN]: "",
+  [SYSTEM_ROLE.PILOT]: String(ORDER_STATUS.INTRODUCED),           // "1"
+  [SYSTEM_ROLE.SUPERVISOR]: String(ORDER_STATUS.SUBMITTED),       // "2"
+};
+
 // ── Email Validation Regex ───────────────────────────────────────────
 
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;

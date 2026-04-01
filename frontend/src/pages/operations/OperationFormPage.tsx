@@ -348,7 +348,7 @@ export function OperationFormPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/operations")}
           className="mb-2"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
