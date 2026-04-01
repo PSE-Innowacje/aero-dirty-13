@@ -335,7 +335,9 @@
     "validationEndSiteRequired": "Select end landing site",
     "validationOperationsRequired": "Select at least one operation",
     "validationRouteKmRequired": "Enter estimated route (km)",
-    "routeExceeded": "Route ({{route}} km) exceeds helicopter range ({{range}} km)!"
+    "routeExceeded": "Route ({{route}} km) exceeds helicopter range ({{range}} km)!",
+    "editOrder": "Edit order",
+    "saveChanges": "Save changes"
   },
   "dashboard": {
     "title": "Operations Dashboard",

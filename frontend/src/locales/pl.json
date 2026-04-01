@@ -336,7 +336,9 @@
     "validationEndSiteRequired": "Wybierz lądowisko końcowe",
     "validationOperationsRequired": "Wybierz co najmniej jedną operację",
     "validationRouteKmRequired": "Podaj szacowaną trasę (km)",
-    "routeExceeded": "Trasa ({{route}} km) przekracza zasięg helikoptera ({{range}} km)!"
+    "routeExceeded": "Trasa ({{route}} km) przekracza zasięg helikoptera ({{range}} km)!",
+    "editOrder": "Edytuj zlecenie",
+    "saveChanges": "Zapisz zmiany"
   },
   "dashboard": {
     "title": "Panel operacyjny",
