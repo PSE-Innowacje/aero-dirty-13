@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { OperationMap } from "@/components/maps/OperationMap";
 import { Upload } from "lucide-react";
+import { FormLegend } from "@/components/ui/FormLegend";
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -176,6 +177,7 @@ export function OperationDetailView({
         {/* Left: Form fields */}
         <div className="rounded-md bg-surface-container-low p-6">
           <form onSubmit={onSubmit} className="space-y-4">
+            <FormLegend />
             <div className="space-y-2">
               <Label htmlFor="orderNumber">{t('operations.orderNumber')} *</Label>
               <Input

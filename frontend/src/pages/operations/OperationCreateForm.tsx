@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { FormLegend } from "@/components/ui/FormLegend";
 
 // ── Constants ──────────────────────────────────────────────────────
 
@@ -71,6 +72,7 @@ export function OperationCreateForm({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="rounded-md bg-surface-container-low p-6">
         <form onSubmit={onSubmit} className="space-y-4">
+          <FormLegend />
           <div className="space-y-2">
             <Label htmlFor="orderNumber">{t('operations.orderNumber')} *</Label>
             <Input
