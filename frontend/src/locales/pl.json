@@ -27,6 +27,8 @@
     "requiredField": "pole wymagane"
   },
   "sidebar": {
+    "dashboard": "Panel operacyjny",
+    "dashboardLink": "Panel operacyjny",
     "admin": "Administracja",
     "operations": "Planowanie operacji",
     "orders": "Zlecenia na lot",

@@ -52,7 +52,7 @@ test.describe('Role-based redirects after login', () => {
 
     // Admin lands on the dashboard page
     await page.waitForURL('**/', { timeout: 10_000 });
-    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('main h1', { hasText: /panel operacyjny/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test('planner login lands on dashboard', async ({ page, loginAs }) => {
@@ -60,7 +60,7 @@ test.describe('Role-based redirects after login', () => {
 
     // Planner lands on the dashboard page
     await page.waitForURL('**/', { timeout: 10_000 });
-    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('main h1', { hasText: /panel operacyjny/i })).toBeVisible({ timeout: 10_000 });
   });
 
   test('pilot login lands on dashboard', async ({ page, loginAs }) => {
@@ -68,7 +68,7 @@ test.describe('Role-based redirects after login', () => {
 
     // Pilot lands on the dashboard page
     await page.waitForURL('**/', { timeout: 10_000 });
-    await expect(page.getByText(/panel operacyjny/i)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('main h1', { hasText: /panel operacyjny/i })).toBeVisible({ timeout: 10_000 });
   });
 });
 

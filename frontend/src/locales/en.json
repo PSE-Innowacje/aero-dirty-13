@@ -27,6 +27,8 @@
     "requiredField": "required field"
   },
   "sidebar": {
+    "dashboard": "Dashboard",
+    "dashboardLink": "Dashboard",
     "admin": "Administration",
     "operations": "Flight operations planning",
     "orders": "Flight orders",

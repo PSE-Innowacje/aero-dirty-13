@@ -21,6 +21,7 @@ import {
   Globe,
   Sun,
   Moon,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SYSTEM_ROLE } from "@/lib/constants";
@@ -43,6 +44,14 @@ interface MenuGroup {
 
 /** Static menu structure — labels are translation keys, resolved at render time. */
 const ALL_MENU_GROUPS: MenuGroup[] = [
+  {
+    id: "dashboard",
+    labelKey: "sidebar.dashboard",
+    icon: LayoutDashboard,
+    items: [
+      { id: "dashboard", labelKey: "sidebar.dashboardLink", href: "/", icon: LayoutDashboard },
+    ],
+  },
   {
     id: "admin",
     labelKey: "sidebar.admin",
@@ -76,10 +85,10 @@ const ALL_MENU_GROUPS: MenuGroup[] = [
 type RoleKey = typeof SYSTEM_ROLE[keyof typeof SYSTEM_ROLE];
 
 const ROLE_ALLOWED_GROUPS: Record<RoleKey, string[]> = {
-  [SYSTEM_ROLE.ADMIN]: ["admin", "operations", "orders"],
-  [SYSTEM_ROLE.PLANNER]: ["operations"],
-  [SYSTEM_ROLE.SUPERVISOR]: ["admin", "operations", "orders"],
-  [SYSTEM_ROLE.PILOT]: ["admin", "operations", "orders"],
+  [SYSTEM_ROLE.ADMIN]: ["dashboard", "admin", "operations", "orders"],
+  [SYSTEM_ROLE.PLANNER]: ["dashboard", "operations"],
+  [SYSTEM_ROLE.SUPERVISOR]: ["dashboard", "admin", "operations", "orders"],
+  [SYSTEM_ROLE.PILOT]: ["dashboard", "admin", "operations", "orders"],
 };
 
 function getMenuForRole(role: string): MenuGroup[] {
@@ -151,7 +160,9 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen = false, onMobileCl
             )}
             <ul className="space-y-1">
               {group.items.map((item) => {
-                const isActive = location.pathname.startsWith(item.href);
+                const isActive = item.href === "/"
+                  ? location.pathname === "/"
+                  : location.pathname.startsWith(item.href);
                 return (
                   <li key={item.href}>
                     <Link
