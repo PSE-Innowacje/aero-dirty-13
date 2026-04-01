@@ -34,8 +34,8 @@
     "crewMembers": "Crew members",
     "landingSites": "Planned landing sites",
     "users": "Users",
-    "operationsList": "Operations list",
-    "ordersList": "Orders list",
+    "operationsList": "Flight operations",
+    "ordersList": "Flight orders",
     "brand": "AERO",
     "logout": "Log out"
   },
