@@ -157,7 +157,7 @@ class TestOrderAcceptDateValidation:
     async def test_accept_rejects_end_before_start(
         self, client: AsyncClient, auth_headers: dict
     ):
-        """Order with end_datetime <= start_datetime → accept returns 400."""
+        """Order with end_datetime <= start_datetime → create returns 422."""
         pilot_h = auth_headers["Pilot"]
         supervisor_h = auth_headers["Supervisor"]
         planner_h = auth_headers["Planner"]
@@ -170,7 +170,7 @@ class TestOrderAcceptDateValidation:
         op_id = await _create_operation(client, planner_h)
         await _confirm_operation(client, supervisor_h, op_id)
 
-        # Create order with end BEFORE start (invalid dates)
+        # Create order with end BEFORE start — schema validator rejects immediately
         resp = await client.post(
             "/api/orders",
             json={
@@ -185,17 +185,7 @@ class TestOrderAcceptDateValidation:
             },
             headers=pilot_h,
         )
-        assert resp.status_code == 201, f"Order create should succeed (validation is on accept): {resp.text}"
-        order_id = resp.json()["id"]
-
-        # Submit order (1→2)
-        resp = await client.post(f"/api/orders/{order_id}/submit", headers=pilot_h)
-        assert resp.status_code == 200, resp.text
-
-        # Accept order (2→4) should be rejected due to bad dates
-        resp = await client.post(f"/api/orders/{order_id}/accept", headers=supervisor_h)
-        assert resp.status_code == 400
-        assert "planned_end_datetime must be after planned_start_datetime" in resp.json()["detail"]
+        assert resp.status_code == 422, f"Should reject invalid dates on create: {resp.text}"
 
     async def test_accept_passes_valid_dates(
         self, client: AsyncClient, auth_headers: dict

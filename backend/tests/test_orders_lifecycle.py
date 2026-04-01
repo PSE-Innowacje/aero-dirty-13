@@ -162,18 +162,21 @@ class TestOrderAccept:
     async def test_accept_rejects_end_before_start(
         self, client: AsyncClient, auth_headers: dict
     ):
-        """Accept order with end <= start datetime → 400."""
+        """Create order with end <= start datetime → 422 (schema validation)."""
         env = await _setup_order_env(client, auth_headers, heli_reg="SP-ACC3")
-        oid = await _create_order(
-            client, auth_headers, env,
-            start_dt="2027-01-20T10:00:00Z",
-            end_dt="2027-01-19T08:00:00Z",  # end < start
-        )
-
-        await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
-        resp = await client.post(f"/api/orders/{oid}/accept", headers=auth_headers["Supervisor"])
-        assert resp.status_code == 400
-        assert "planned_end_datetime" in resp.json()["detail"]
+        # Schema validator now rejects invalid dates at create time
+        payload = {
+            "planned_start_datetime": "2027-01-20T10:00:00Z",
+            "planned_end_datetime": "2027-01-19T08:00:00Z",  # end < start
+            "helicopter_id": env["heli_id"],
+            "crew_member_ids": [],
+            "start_landing_site_id": env["site_a"],
+            "end_landing_site_id": env["site_b"],
+            "operation_ids": [env["op_id"]],
+            "estimated_route_km": 50,
+        }
+        resp = await client.post("/api/orders", json=payload, headers=auth_headers["Pilot"])
+        assert resp.status_code == 422, f"Should reject invalid dates on create: {resp.text}"
 
 
 # ── Settlement Tests ────────────────────────────────────────────────
