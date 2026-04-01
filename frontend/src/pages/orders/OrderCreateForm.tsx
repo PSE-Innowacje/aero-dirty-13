@@ -169,7 +169,7 @@ export function OrderCreateForm({
         </div>
 
         {/* Planned dates */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')}</Label>
             <Input
@@ -283,7 +283,7 @@ export function OrderCreateForm({
         </div>
 
         {/* Landing sites */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="startSite">{t('orders.startLandingSite')}</Label>
             <Select

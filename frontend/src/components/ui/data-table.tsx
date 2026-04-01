@@ -93,7 +93,7 @@ export function DataTable<T>({
   return (
     <div>
       {/* ---------- Page header ---------- */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="h-1 w-12 bg-[#C00017] mb-2" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>

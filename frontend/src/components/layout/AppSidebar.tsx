@@ -94,9 +94,11 @@ function getMenuForRole(role: string): MenuGroup[] {
 interface AppSidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
+export function AppSidebar({ collapsed, onToggle, mobileOpen = false, onMobileClose }: AppSidebarProps) {
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
   const { theme, toggleTheme } = useTheme();
@@ -112,8 +114,10 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
   return (
     <aside
       className={cn(
-        "flex h-screen flex-col bg-surface-container-low text-on-surface-variant transition-all duration-200 shadow-[1px_0_0_0_rgba(72,162,206,0.08),4px_0_24px_-4px_rgba(0,20,41,0.5)] border-r border-r-[#48A2CE]/20",
-        collapsed ? "w-16" : "w-64"
+        "fixed inset-y-0 left-0 z-40 flex flex-col bg-surface-container-low text-on-surface-variant transition-all duration-200 shadow-[1px_0_0_0_rgba(72,162,206,0.08),4px_0_24px_-4px_rgba(0,20,41,0.5)] border-r border-r-[#48A2CE]/20",
+        "md:relative md:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        collapsed && !mobileOpen ? "w-16" : "w-64"
       )}
     >
       {/* Header */}
@@ -126,7 +130,7 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
         )}
         <button
           onClick={onToggle}
-          className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-surface-container-high hover:text-foreground"
+          className="flex h-10 w-10 md:h-8 md:w-8 items-center justify-center rounded-sm text-muted-foreground hover:bg-surface-container-high hover:text-foreground"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -153,8 +157,9 @@ export function AppSidebar({ collapsed, onToggle }: AppSidebarProps) {
                     <Link
                       to={item.href}
                       title={collapsed ? t(item.labelKey) : undefined}
+                      onClick={() => onMobileClose?.()}
                       className={cn(
-                        "flex items-center gap-3 rounded-sm px-2 py-2 text-sm font-medium transition-colors",
+                        "flex items-center gap-3 rounded-sm px-2 py-3 text-sm font-medium transition-colors",
                         isActive
                           ? "bg-accent/10 text-foreground relative before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-4 before:w-[3px] before:rounded-full before:bg-accent border-l-2 border-l-accent shadow-[0_0_8px_rgba(72,162,206,0.15)]"
                           : "text-on-surface-variant hover:bg-surface-container/50 hover:text-foreground",
