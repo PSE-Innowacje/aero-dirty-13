@@ -15,10 +15,10 @@ export function AppLayout() {
   }, [collapsed]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface">
-      <div className="pointer-events-none fixed inset-0 cockpit-grid cockpit-glow" />
+    <div className="flex h-screen overflow-hidden">
+      <div className="pointer-events-none fixed inset-0 z-0 cockpit-grid" />
       <AppSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <main className="flex-1 overflow-y-auto">
+      <main className="relative z-10 flex-1 overflow-y-auto bg-transparent">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <Outlet />
         </div>
