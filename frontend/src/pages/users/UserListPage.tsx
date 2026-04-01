@@ -26,20 +26,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-
-const roleBadgeVariant: Record<string, "default" | "secondary" | "outline"> = {
-  Administrator: "default",
-  "Osoba planująca": "secondary",
-  "Osoba nadzorująca": "outline",
-  Pilot: "secondary",
-};
-
-const roleDisplayKey: Record<string, string> = {
-  Administrator: "users.roleAdmin",
-  "Osoba planująca": "users.rolePlanner",
-  "Osoba nadzorująca": "users.roleSupervisor",
-  Pilot: "users.rolePilot",
-};
+import { SYSTEM_ROLE_BADGE_VARIANT, SYSTEM_ROLE_DISPLAY_KEY } from "@/lib/constants";
 
 export function UserListPage() {
   const { t } = useTranslation();
@@ -123,8 +110,8 @@ export function UserListPage() {
                   <TableCell>{u.first_name}</TableCell>
                   <TableCell>{u.last_name}</TableCell>
                   <TableCell>
-                    <Badge variant={roleBadgeVariant[u.system_role] ?? "secondary"}>
-                      {t(roleDisplayKey[u.system_role] ?? u.system_role)}
+                    <Badge variant={SYSTEM_ROLE_BADGE_VARIANT[u.system_role] ?? "secondary"}>
+                      {t(SYSTEM_ROLE_DISPLAY_KEY[u.system_role] ?? u.system_role)}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

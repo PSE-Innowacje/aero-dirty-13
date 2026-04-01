@@ -34,6 +34,12 @@ import {
 } from "@/components/ui/table";
 import { OperationMap } from "@/components/maps/OperationMap";
 import { ArrowLeft, Upload, CheckCircle, XCircle, LogOut } from "lucide-react";
+import {
+  OPERATION_STATUS,
+  OPERATION_FORM_STATUS_BADGE_CLASS,
+  SYSTEM_ROLE,
+  PLANNER_EDITABLE_STATUSES,
+} from "@/lib/constants";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -93,16 +99,6 @@ const ACTIVITY_TYPE_OPTIONS = [
 
 // Status labels now use t('operations.statusN') via i18n
 
-const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-red-500 text-white",
-  3: "bg-green-600 text-white",
-  4: "bg-amber-500 text-white",
-  5: "bg-orange-500 text-white",
-  6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
-};
-
 // ── Main Component ─────────────────────────────────────────────────
 
 export function OperationFormPage() {
@@ -114,8 +110,8 @@ export function OperationFormPage() {
   const { t } = useTranslation();
 
   const role = user?.system_role ?? "";
-  const isPlanner = role === "Osoba planująca";
-  const isSupervisor = role === "Osoba nadzorująca";
+  const isPlanner = role === SYSTEM_ROLE.PLANNER;
+  const isSupervisor = role === SYSTEM_ROLE.SUPERVISOR;
 
   // ── Form state ─────────────────────────────────────────────────
   const [orderNumber, setOrderNumber] = useState("");
@@ -370,8 +366,7 @@ export function OperationFormPage() {
   const currentStatus = operation?.status ?? 1;
 
   // PRD 6.5.d — Planner can edit in statuses 1-5 only; Supervisor in all statuses
-  const PLANNER_EDITABLE_STATUSES = [1, 2, 3, 4, 5];
-  const canEdit = isSupervisor || (isPlanner && PLANNER_EDITABLE_STATUSES.includes(currentStatus));
+  const canEdit = isSupervisor || (isPlanner && (PLANNER_EDITABLE_STATUSES as readonly number[]).includes(currentStatus));
 
   return (
     <div>
@@ -393,7 +388,7 @@ export function OperationFormPage() {
               : t('operations.operationNumber', { id: operation?.id })}
           </h1>
           {!isCreate && (
-            <Badge className={STATUS_BADGE_CLASS[currentStatus] ?? ""}>
+            <Badge className={OPERATION_FORM_STATUS_BADGE_CLASS[currentStatus] ?? ""}>
               {t(`operations.status${currentStatus}`, { defaultValue: `Status ${currentStatus}` })}
             </Badge>
           )}
@@ -907,8 +902,8 @@ function StatusActions({
   resignPending: boolean;
 }) {
   const { t } = useTranslation();
-  const showSupervisorActions = isSupervisor && status === 1;
-  const showResign = isPlanner && [1, 3, 4].includes(status);
+  const showSupervisorActions = isSupervisor && status === OPERATION_STATUS.INTRODUCED;
+  const showResign = isPlanner && ([OPERATION_STATUS.INTRODUCED, OPERATION_STATUS.CONFIRMED, OPERATION_STATUS.ORDERED] as number[]).includes(status);
 
   if (!showSupervisorActions && !showResign) return null;
 

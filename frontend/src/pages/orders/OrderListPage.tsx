@@ -20,6 +20,12 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Plus } from "lucide-react";
+import {
+  ORDER_STATUS_KEYS,
+  ORDER_STATUS_BADGE_VARIANT,
+  ORDER_STATUS_BADGE_CLASS,
+  SYSTEM_ROLE,
+} from "@/lib/constants";
 
 interface OrderListItem {
   id: number;
@@ -29,30 +35,6 @@ interface OrderListItem {
   status: number;
 }
 
-const STATUS_KEYS = [1, 2, 3, 4, 5, 6, 7];
-
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
-
-const STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
-  1: "default",
-  2: "outline",
-  3: "destructive",
-  4: "default",
-  5: "outline",
-  6: "default",
-  7: "secondary",
-};
-
-const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-gray-900",
-  3: "", // destructive handles red
-  4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-gray-900",
-  6: "bg-green-600 text-white",
-  7: "", // secondary handles grey
-};
-
 export function OrderListPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,7 +42,7 @@ export function OrderListPage() {
   // Default filter: status=2 per PRD 6.6.g
   const [statusFilter, setStatusFilter] = useState<string>("2");
 
-  const canCreate = user?.system_role === "Pilot";
+  const canCreate = user?.system_role === SYSTEM_ROLE.PILOT;
 
   const queryParams =
     statusFilter === "" ? "" : `?order_status=${statusFilter}`;
@@ -125,7 +107,7 @@ export function OrderListPage() {
           className="w-56"
         >
           <option value="">{t('orders.allStatuses')}</option>
-          {STATUS_KEYS.map((val) => (
+          {ORDER_STATUS_KEYS.map((val) => (
             <option key={val} value={val}>
               {t(`orders.status${val}`)}
             </option>
@@ -174,9 +156,9 @@ export function OrderListPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        STATUS_BADGE_VARIANT[order.status] ?? "secondary"
+                        ORDER_STATUS_BADGE_VARIANT[order.status] ?? "secondary"
                       }
-                      className={STATUS_BADGE_CLASS[order.status] ?? ""}
+                      className={ORDER_STATUS_BADGE_CLASS[order.status] ?? ""}
                     >
                       {t(`orders.status${order.status}`, { defaultValue: `Status ${order.status}` })}
                     </Badge>

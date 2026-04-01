@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
+import { HELICOPTER_STATUSES, HELICOPTER_STATUS_DISPLAY_KEY } from "@/lib/constants";
 
 interface Helicopter {
   id: number;
@@ -25,13 +26,6 @@ interface Helicopter {
   range_km: number;
 }
 
-const STATUSES = ["aktywny", "nieaktywny"];
-
-const statusDisplayKey: Record<string, string> = {
-  aktywny: "helicopters.statusActive",
-  nieaktywny: "helicopters.statusInactive",
-};
-
 export function HelicopterFormPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -44,7 +38,7 @@ export function HelicopterFormPage() {
   const [description, setDescription] = useState("");
   const [maxCrew, setMaxCrew] = useState("1");
   const [maxPayloadWeight, setMaxPayloadWeight] = useState("1");
-  const [status, setStatus] = useState(STATUSES[0]!);
+  const [status, setStatus] = useState<string>(HELICOPTER_STATUSES[0]!);
   const [inspectionDate, setInspectionDate] = useState("");
   const [rangeKm, setRangeKm] = useState("1");
   const [error, setError] = useState<string | null>(null);
@@ -248,9 +242,9 @@ export function HelicopterFormPage() {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              {STATUSES.map((s) => (
+              {HELICOPTER_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {t(statusDisplayKey[s] ?? s)}
+                  {t(HELICOPTER_STATUS_DISPLAY_KEY[s] ?? s)}
                 </option>
               ))}
             </Select>

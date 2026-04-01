@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { HELICOPTER_STATUS_BADGE_VARIANT, HELICOPTER_STATUS_DISPLAY_KEY, SYSTEM_ROLE } from "@/lib/constants";
 
 interface Helicopter {
   id: number;
@@ -40,20 +41,10 @@ interface Helicopter {
   range_km: number;
 }
 
-const statusBadgeVariant: Record<string, "default" | "secondary"> = {
-  aktywny: "default",
-  nieaktywny: "secondary",
-};
-
-const statusDisplayKey: Record<string, string> = {
-  aktywny: "helicopters.statusActive",
-  nieaktywny: "helicopters.statusInactive",
-};
-
 export function HelicopterListPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const isAdmin = user?.system_role === "Administrator";
+  const isAdmin = user?.system_role === SYSTEM_ROLE.ADMIN;
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<Helicopter | null>(null);
 
@@ -141,8 +132,8 @@ export function HelicopterListPage() {
                   <TableCell className="font-medium">{h.registration_number}</TableCell>
                   <TableCell>{h.helicopter_type}</TableCell>
                   <TableCell>
-                    <Badge variant={statusBadgeVariant[h.status] ?? "secondary"}>
-                      {t(statusDisplayKey[h.status] ?? h.status)}
+                    <Badge variant={HELICOPTER_STATUS_BADGE_VARIANT[h.status] ?? "secondary"}>
+                      {t(HELICOPTER_STATUS_DISPLAY_KEY[h.status] ?? h.status)}
                     </Badge>
                   </TableCell>
                   <TableCell>{h.inspection_date ?? "—"}</TableCell>

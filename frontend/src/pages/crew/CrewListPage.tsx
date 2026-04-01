@@ -27,6 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2 } from "lucide-react";
+import { CREW_ROLE_BADGE_VARIANT, CREW_ROLE_DISPLAY_KEY, SYSTEM_ROLE } from "@/lib/constants";
 
 interface CrewMember {
   id: number;
@@ -40,24 +41,10 @@ interface CrewMember {
   training_expiry: string;
 }
 
-const roleBadgeVariant: Record<string, "default" | "secondary"> = {
-  Pilot: "default",
-  Obserwator: "secondary",
-  Mechanik: "secondary",
-  Operator: "secondary",
-};
-
-const roleDisplayKey: Record<string, string> = {
-  Pilot: "crew.rolePilot",
-  Obserwator: "crew.roleObserver",
-  Mechanik: "crew.roleMechanic",
-  Operator: "crew.roleOperator",
-};
-
 export function CrewListPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const isAdmin = user?.system_role === "Administrator";
+  const isAdmin = user?.system_role === SYSTEM_ROLE.ADMIN;
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = useState<CrewMember | null>(null);
 
@@ -143,8 +130,8 @@ export function CrewListPage() {
                   <TableCell>{c.first_name}</TableCell>
                   <TableCell>{c.last_name}</TableCell>
                   <TableCell>
-                    <Badge variant={roleBadgeVariant[c.role] ?? "secondary"}>
-                      {t(roleDisplayKey[c.role] ?? c.role)}
+                    <Badge variant={CREW_ROLE_BADGE_VARIANT[c.role] ?? "secondary"}>
+                      {t(CREW_ROLE_DISPLAY_KEY[c.role] ?? c.role)}
                     </Badge>
                   </TableCell>
                   <TableCell>{c.pilot_license_number ?? "—"}</TableCell>

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { OrderMap } from "@/components/maps/OrderMap";
 import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { ORDER_FORM_STATUS_BADGE_CLASS, SYSTEM_ROLE, CREW_ROLE } from "@/lib/constants";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -107,19 +108,7 @@ interface OperationDetailForMap {
   route_coordinates: [number, number][] | null;
 }
 
-// ── Constants ──────────────────────────────────────────────────────
-
 // Status labels now use t('orders.statusN') via i18n
-
-const STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-blue-500 text-white",
-  2: "bg-amber-500 text-white",
-  3: "bg-red-500 text-white",
-  4: "bg-green-600 text-white",
-  5: "bg-orange-500 text-white",
-  6: "bg-green-600 text-white",
-  7: "bg-gray-400 text-white",
-};
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -161,8 +150,8 @@ export function OrderFormPage() {
   const { t } = useTranslation();
 
   const role = user?.system_role ?? "";
-  const isPilot = role === "Pilot";
-  const isSupervisor = role === "Osoba nadzorująca";
+  const isPilot = role === SYSTEM_ROLE.PILOT;
+  const isSupervisor = role === SYSTEM_ROLE.SUPERVISOR;
 
   // ── Form state ─────────────────────────────────────────────────
   const [plannedStart, setPlannedStart] = useState("");
@@ -244,7 +233,7 @@ export function OrderFormPage() {
   const totalCrewWeight = useMemo(() => {
     const crewWeight = selectedCrewMembers.reduce((sum, c) => sum + c.weight, 0);
     // Include pilot weight from their crew-member profile (matched by email)
-    const pilotMember = allCrew.find((c) => c.role === "Pilot" && c.email === user?.email);
+    const pilotMember = allCrew.find((c) => c.role === CREW_ROLE.PILOT && c.email === user?.email);
     const pilotWeight = pilotMember?.weight ?? 0;
     return crewWeight + pilotWeight;
   }, [selectedCrewMembers, allCrew, user]);
@@ -523,7 +512,7 @@ export function OrderFormPage() {
             {isCreate ? t('orders.newOrder') : t('orders.orderNumber', { id: order?.id })}
           </h1>
           {!isCreate && (
-            <Badge className={STATUS_BADGE_CLASS[currentStatus] ?? ""}>
+            <Badge className={ORDER_FORM_STATUS_BADGE_CLASS[currentStatus] ?? ""}>
               {t(`orders.status${currentStatus}`, { defaultValue: `Status ${currentStatus}` })}
             </Badge>
           )}
