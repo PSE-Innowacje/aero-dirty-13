@@ -18,7 +18,7 @@ function Badge({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all duration-200 hover:scale-105 led-badge",
+        "before:content-[''] before:inline-block before:w-1 before:h-1 before:rounded-full before:bg-current before:mr-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all duration-200 hover:scale-105 led-badge",
         variantClasses[variant],
         className
       )}
