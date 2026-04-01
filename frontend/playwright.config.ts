@@ -13,7 +13,10 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: 'http://localhost:5173',
+    /* Use nginx (port 80) which serves both frontend and proxies /api to backend.
+       Vite dev server (port 5173) proxy doesn't work when backend runs in Docker
+       because port 8000 is not exposed to host. */
+    baseURL: 'http://localhost',
     trace: 'on-first-retry',
   },
 
@@ -24,9 +27,6 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: true,
-  },
+  /* No webServer — tests run against docker-compose stack (nginx on port 80).
+     Start with: docker-compose up -d */
 });

@@ -35,9 +35,9 @@ test.describe('Operation workflows', () => {
     // After creation, should redirect to the operation detail page
     await page.waitForURL(/\/operations\/\d+/);
 
-    // Verify operation details are visible
-    await expect(page.getByText('OP-E2E-001')).toBeVisible();
-    await expect(page.getByText('E2E Test Op')).toBeVisible();
+    // Verify operation details are visible — values are inside input fields on detail page
+    await expect(page.getByLabel(/order.*no|nr.*zlecenia/i)).toHaveValue('OP-E2E-001');
+    await expect(page.getByLabel(/short description|krótki opis/i)).toHaveValue('E2E Test Op');
   });
 
   test('supervisor confirms operation', async ({ page, loginAs }) => {

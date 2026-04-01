@@ -59,22 +59,21 @@ test.describe('Sidebar collapse/expand', () => {
     const collapseButton = page.getByRole('button', { name: /collapse sidebar/i });
     await collapseButton.click();
 
-    // Wait for transition to complete
-    await expect(sidebar).toHaveCSS('width', /\d+px/, { timeout: 1000 });
-
-    // Sidebar should now be collapsed (w-16 = 64px)
-    const collapsedWidth = await sidebar.evaluate((el) => el.getBoundingClientRect().width);
-    expect(collapsedWidth).toBeLessThanOrEqual(80); // w-16 = 64px
+    // Wait for sidebar to actually collapse (poll until width < 80)
+    await expect(async () => {
+      const w = await sidebar.evaluate((el) => el.getBoundingClientRect().width);
+      expect(w).toBeLessThanOrEqual(80);
+    }).toPass({ timeout: 3000 });
 
     // Click expand button to restore
     const expandButton = page.getByRole('button', { name: /expand sidebar/i });
     await expandButton.click();
 
-    await expect(sidebar).toHaveCSS('width', /\d+px/, { timeout: 1000 });
-
-    // Should be expanded again
-    const restoredWidth = await sidebar.evaluate((el) => el.getBoundingClientRect().width);
-    expect(restoredWidth).toBeGreaterThanOrEqual(200);
+    // Wait for sidebar to expand back
+    await expect(async () => {
+      const w = await sidebar.evaluate((el) => el.getBoundingClientRect().width);
+      expect(w).toBeGreaterThanOrEqual(200);
+    }).toPass({ timeout: 3000 });
   });
 });
 
