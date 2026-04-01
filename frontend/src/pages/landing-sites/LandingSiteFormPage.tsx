@@ -85,9 +85,9 @@ export function LandingSiteFormPage() {
     const errors: Record<string, string> = {};
     if (!name.trim()) errors.name = t('landingSites.validationNameRequired');
     const lat = Number(latitude);
-    if (isNaN(lat) || lat < -90 || lat > 90) errors.latitude = t('landingSites.validationLatitudeRange');
+    if (isNaN(lat) || lat < 49.0 || lat > 54.9) errors.latitude = t('landingSites.validationLatitudeRange');
     const lng = Number(longitude);
-    if (isNaN(lng) || lng < -180 || lng > 180) errors.longitude = t('landingSites.validationLongitudeRange');
+    if (isNaN(lng) || lng < 14.1 || lng > 24.2) errors.longitude = t('landingSites.validationLongitudeRange');
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
@@ -138,9 +138,9 @@ export function LandingSiteFormPage() {
             <Input
               id="latitude"
               type="number"
-              step="0.000001"
-              min={-90}
-              max={90}
+              step="0.0001"
+              min={49.0}
+              max={54.9}
               value={latitude}
               onChange={(e) => setLatitude(e.target.value)}
               required
@@ -155,9 +155,9 @@ export function LandingSiteFormPage() {
             <Input
               id="longitude"
               type="number"
-              step="0.000001"
-              min={-180}
-              max={180}
+              step="0.0001"
+              min={14.1}
+              max={24.2}
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
               required

@@ -50,7 +50,6 @@ interface OperationListItem {
   planned_date_earliest: string | null;
   planned_date_latest: string | null;
   status: number;
-  route_km: number | null;
 }
 
 function formatDateRange(earliest: string | null, latest: string | null): string {
@@ -227,7 +226,6 @@ export function OperationListPage() {
               <TableHead>{t('operations.proposedDates')}</TableHead>
               <TableHead>{t('operations.plannedDates')}</TableHead>
               <TableHead>{t('common.status')}</TableHead>
-              <TableHead className="text-right">{t('operations.routeKm')}</TableHead>
               {showActionsColumn && (
                 <TableHead className="text-right">{t('common.actions')}</TableHead>
               )}
@@ -237,7 +235,7 @@ export function OperationListPage() {
             {operations.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={showActionsColumn ? 8 : 7}
+                  colSpan={showActionsColumn ? 7 : 6}
                   className="text-center text-muted-foreground py-8"
                 >
                   {t('operations.noOperations')}
@@ -274,9 +272,6 @@ export function OperationListPage() {
                     >
                       {t(`operations.status${op.status}`, { defaultValue: `Status ${op.status}` })}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {op.route_km != null ? `${op.route_km}` : "—"}
                   </TableCell>
                   {showActionsColumn && (
                     <TableCell className="text-right">
