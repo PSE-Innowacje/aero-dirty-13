@@ -94,6 +94,8 @@ export interface OrderCreateFormProps {
   onSubmit: (e: FormEvent) => void;
   onCancel: () => void;
   isCreating: boolean;
+  // Field-level validation errors
+  fieldErrors: Record<string, string>;
 }
 
 export function OrderCreateForm({
@@ -127,6 +129,7 @@ export function OrderCreateForm({
   onSubmit,
   onCancel,
   isCreating,
+  fieldErrors,
 }: OrderCreateFormProps) {
   const { t } = useTranslation();
 
@@ -204,6 +207,12 @@ export function OrderCreateForm({
         {dateError && (
           <p className="text-sm text-destructive-foreground">{t('orders.validationPlannedEndBeforeStart')}</p>
         )}
+        {fieldErrors.plannedStart && (
+          <p className="text-xs text-destructive">{fieldErrors.plannedStart}</p>
+        )}
+        {fieldErrors.plannedEnd && (
+          <p className="text-xs text-destructive">{fieldErrors.plannedEnd}</p>
+        )}
 
         {/* Helicopter dropdown */}
         <div className="space-y-2">
@@ -226,6 +235,9 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+          )}
+          {fieldErrors.helicopter && (
+            <p className="text-xs text-destructive">{fieldErrors.helicopter}</p>
           )}
         </div>
 
@@ -309,6 +321,9 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+            {fieldErrors.startSite && (
+              <p className="text-xs text-destructive">{fieldErrors.startSite}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="endSite">{t('orders.endLandingSite')} *</Label>
@@ -325,6 +340,9 @@ export function OrderCreateForm({
                 </option>
               ))}
             </Select>
+            {fieldErrors.endSite && (
+              <p className="text-xs text-destructive">{fieldErrors.endSite}</p>
+            )}
           </div>
         </div>
 
@@ -370,6 +388,9 @@ export function OrderCreateForm({
                 ))}
             </div>
           )}
+          {fieldErrors.operations && (
+            <p className="text-xs text-destructive">{fieldErrors.operations}</p>
+          )}
         </div>
 
         {/* Estimated route km */}
@@ -383,6 +404,9 @@ export function OrderCreateForm({
             onChange={(e) => onEstimatedRouteKmChange(e.target.value)}
             required
           />
+          {fieldErrors.routeKm && (
+            <p className="text-xs text-destructive">{fieldErrors.routeKm}</p>
+          )}
         </div>
 
         {/* Create-mode map preview */}

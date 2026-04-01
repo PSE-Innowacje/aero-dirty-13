@@ -327,7 +327,13 @@
     "loadingError": "Błąd ładowania",
     "unknownError": "Nieznany błąd",
     "validationPlannedEndBeforeStart": "Data końca musi być późniejsza niż data startu",
-    "validationActualEndBeforeStart": "Rzeczywisty koniec musi być późniejszy niż rzeczywisty start"
+    "validationActualEndBeforeStart": "Rzeczywisty koniec musi być późniejszy niż rzeczywisty start",
+    "validationFieldRequired": "To pole jest wymagane",
+    "validationHelicopterRequired": "Wybierz helikopter",
+    "validationStartSiteRequired": "Wybierz lądowisko startowe",
+    "validationEndSiteRequired": "Wybierz lądowisko końcowe",
+    "validationOperationsRequired": "Wybierz co najmniej jedną operację",
+    "validationRouteKmRequired": "Podaj szacowaną trasę (km)"
   },
   "dashboard": {
     "title": "Panel operacyjny",

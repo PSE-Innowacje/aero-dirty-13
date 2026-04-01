@@ -326,7 +326,13 @@
     "loadingError": "Loading error",
     "unknownError": "Unknown error",
     "validationPlannedEndBeforeStart": "End date must be after start date",
-    "validationActualEndBeforeStart": "Actual end must be after actual start"
+    "validationActualEndBeforeStart": "Actual end must be after actual start",
+    "validationFieldRequired": "This field is required",
+    "validationHelicopterRequired": "Select a helicopter",
+    "validationStartSiteRequired": "Select start landing site",
+    "validationEndSiteRequired": "Select end landing site",
+    "validationOperationsRequired": "Select at least one operation",
+    "validationRouteKmRequired": "Enter estimated route (km)"
   },
   "dashboard": {
     "title": "Operations Dashboard",

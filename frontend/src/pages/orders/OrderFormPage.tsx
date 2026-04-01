@@ -177,6 +177,7 @@ export function OrderFormPage() {
   const [actualEndTime, setActualEndTime] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // ── Confirm dialog state ───────────────────────────────────────
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -453,6 +454,19 @@ export function OrderFormPage() {
     e.preventDefault();
     setError(null);
     setValidationErrors([]);
+
+    // Client-side validation for required fields
+    const errors: Record<string, string> = {};
+    if (!plannedStartDate) errors.plannedStart = t('orders.validationFieldRequired');
+    if (!plannedEndDate) errors.plannedEnd = t('orders.validationFieldRequired');
+    if (!helicopterId) errors.helicopter = t('orders.validationHelicopterRequired');
+    if (!startSiteId) errors.startSite = t('orders.validationStartSiteRequired');
+    if (!endSiteId) errors.endSite = t('orders.validationEndSiteRequired');
+    if (selectedOpIds.length === 0) errors.operations = t('orders.validationOperationsRequired');
+    if (!estimatedRouteKm) errors.routeKm = t('orders.validationRouteKmRequired');
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
     createMutation.mutate();
   }
 
@@ -566,6 +580,7 @@ export function OrderFormPage() {
           onSubmit={handleSubmit}
           onCancel={() => navigate("/orders")}
           isCreating={createMutation.isPending}
+          fieldErrors={fieldErrors}
         />
       ) : order ? (
         <>
