@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { OrderMap } from "@/components/maps/OrderMap";
+import { FormLegend } from "@/components/ui/FormLegend";
 import { CREW_ROLE } from "@/lib/constants";
 
 // ---- Types for props ------------------------------------------------
@@ -162,6 +163,7 @@ export function OrderCreateForm({
   return (
     <div className="rounded-md bg-surface-container-low p-6">
       <form onSubmit={onSubmit} className="space-y-5">
+        <FormLegend />
         {/* Pilot -- auto-filled, read-only */}
         <div className="space-y-2">
           <Label>{t('orders.pilotAutoFilled')}</Label>
@@ -171,7 +173,7 @@ export function OrderCreateForm({
         {/* Planned dates */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')}</Label>
+            <Label htmlFor="plannedStart">{t('orders.plannedStartLabel')} *</Label>
             <Input
               id="plannedStart"
               type="datetime-local"
@@ -181,7 +183,7 @@ export function OrderCreateForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="plannedEnd">{t('orders.plannedEndLabel')}</Label>
+            <Label htmlFor="plannedEnd">{t('orders.plannedEndLabel')} *</Label>
             <Input
               id="plannedEnd"
               type="datetime-local"
@@ -197,7 +199,7 @@ export function OrderCreateForm({
 
         {/* Helicopter dropdown */}
         <div className="space-y-2">
-          <Label htmlFor="helicopter">{t('orders.helicopterLabel')}</Label>
+          <Label htmlFor="helicopter">{t('orders.helicopterLabel')} *</Label>
           {activeHelicopters.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t('orders.noActiveHelicopters')}
@@ -285,7 +287,7 @@ export function OrderCreateForm({
         {/* Landing sites */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="startSite">{t('orders.startLandingSite')}</Label>
+            <Label htmlFor="startSite">{t('orders.startLandingSite')} *</Label>
             <Select
               id="startSite"
               value={startSiteId}
@@ -301,7 +303,7 @@ export function OrderCreateForm({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="endSite">{t('orders.endLandingSite')}</Label>
+            <Label htmlFor="endSite">{t('orders.endLandingSite')} *</Label>
             <Select
               id="endSite"
               value={endSiteId}
@@ -320,7 +322,7 @@ export function OrderCreateForm({
 
         {/* Operations multi-select */}
         <div className="space-y-2">
-          <Label>{t('orders.operationsConfirmed')}</Label>
+          <Label>{t('orders.operationsConfirmed')} *</Label>
           {confirmedOps.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t('orders.noConfirmedOperations')}
