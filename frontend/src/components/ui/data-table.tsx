@@ -7,6 +7,7 @@
  *   4. Table wrapper with configurable columns
  *   5. Empty state (centered row spanning all columns)
  */
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,13 +18,16 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface DataTableColumn<T> {
   key: string;
   header: string;
   render: (item: T) => React.ReactNode;
   className?: string;
+  sortable?: boolean;
+  sortFn?: (a: T, b: T) => number;
 }
 
 export interface DataTableProps<T> {
@@ -64,6 +68,23 @@ export function DataTable<T>({
   actionsHeader,
   filter,
 }: DataTableProps<T>) {
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  function handleSort(key: string) {
+    if (sortKey === key) {
+      if (sortDir === "asc") {
+        setSortDir("desc");
+      } else {
+        setSortKey(null);
+        setSortDir("asc");
+      }
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
   const errorText = error
     ? `${errorMessage}: ${error.message}`
     : "";
@@ -88,6 +109,13 @@ export function DataTable<T>({
   }
 
   const items = data ?? [];
+  const sortedItems = (() => {
+    if (!sortKey) return items;
+    const col = columns.find((c) => c.key === sortKey);
+    if (!col?.sortFn) return items;
+    const s = [...items].sort(col.sortFn);
+    return sortDir === "desc" ? s.reverse() : s;
+  })();
   const totalColumns = columns.length + (actions ? 1 : 0);
 
   return (
@@ -118,8 +146,24 @@ export function DataTable<T>({
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
-                <TableHead key={col.key} className={col.className}>
-                  {col.header}
+                <TableHead
+                  key={col.key}
+                  className={cn(
+                    col.className,
+                    col.sortable && "cursor-pointer select-none hover:text-foreground transition-colors"
+                  )}
+                  onClick={col.sortable ? () => handleSort(col.key) : undefined}
+                >
+                  <span className="inline-flex items-center gap-1">
+                    {col.header}
+                    {col.sortable && (
+                      sortKey === col.key
+                        ? sortDir === "asc"
+                          ? <ArrowUp className="h-3 w-3" />
+                          : <ArrowDown className="h-3 w-3" />
+                        : <ArrowUpDown className="h-3 w-3 opacity-40" />
+                    )}
+                  </span>
                 </TableHead>
               ))}
               {actions && (
@@ -130,7 +174,7 @@ export function DataTable<T>({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 ? (
+            {sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={totalColumns}
@@ -140,7 +184,7 @@ export function DataTable<T>({
                 </TableCell>
               </TableRow>
             ) : (
-              items.map((item) => (
+              sortedItems.map((item) => (
                 <TableRow
                   key={rowKey(item)}
                   onClick={onRowClick ? () => onRowClick(item) : undefined}

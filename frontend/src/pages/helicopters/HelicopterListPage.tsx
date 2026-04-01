@@ -84,11 +84,15 @@ export function HelicopterListPage() {
       key: "registration_number",
       header: t('helicopters.registrationNumber'),
       render: (h) => <span className="font-medium">{h.registration_number}</span>,
+      sortable: true,
+      sortFn: (a, b) => a.registration_number.localeCompare(b.registration_number),
     },
     {
       key: "type",
       header: t('helicopters.type'),
       render: (h) => h.helicopter_type,
+      sortable: true,
+      sortFn: (a, b) => a.helicopter_type.localeCompare(b.helicopter_type),
     },
     {
       key: "status",
@@ -98,16 +102,22 @@ export function HelicopterListPage() {
           {t(HELICOPTER_STATUS_DISPLAY_KEY[h.status] ?? h.status)}
         </Badge>
       ),
+      sortable: true,
+      sortFn: (a, b) => a.status.localeCompare(b.status),
     },
     {
       key: "inspection_date",
       header: t('helicopters.inspectionDate'),
       render: (h) => h.inspection_date ?? "\u2014",
+      sortable: true,
+      sortFn: (a, b) => (a.inspection_date ?? "").localeCompare(b.inspection_date ?? ""),
     },
     {
       key: "range_km",
       header: t('helicopters.rangeKm'),
       render: (h) => h.range_km,
+      sortable: true,
+      sortFn: (a, b) => a.range_km - b.range_km,
     },
   ];
 
