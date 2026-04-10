@@ -52,9 +52,9 @@ A web application for managing helicopter flight operations — planning aerial 
 ┌─────────────┐
 │   Browser    │
 └──────┬──────┘
-       │ :80
+       │ :443 (TLS) / :80 → redirect to :443
 ┌──────▼──────┐
-│    nginx    │  reverse proxy
+│    nginx    │  reverse proxy + TLS termination
 │  (alpine)   │
 └──┬───────┬──┘
    │       │
@@ -74,17 +74,18 @@ A web application for managing helicopter flight operations — planning aerial 
 └──────────┘
 ```
 
-**Four Docker services:**
+**Five Docker services:**
 
 | Service | Image | Role |
 |---------|-------|------|
 | `db` | `postgres:16-alpine` | Data persistence, health-checked |
 | `backend` | `python:3.12-slim` | REST API, JWT auth, KML parsing, business logic |
 | `frontend` | `node:20-alpine` → `nginx:alpine` | Multi-stage build: Vite SPA served by nginx |
+| `tls-init` | `alpine:3.20` | One-shot self-signed cert generation for local HTTPS |
 | `nginx` | `nginx:alpine` | Reverse proxy: `/api/*` → backend, `/*` → frontend |
 
 **Request flow:**
-1. Browser hits `http://localhost` (port 80)
+1. Browser hits `https://localhost` (port 443); `http://localhost` automatically redirects to HTTPS
 2. nginx routes `/api/*` to the FastAPI backend on port 8000
 3. All other paths serve the React SPA (with `try_files` fallback to `index.html` for client-side routing)
 
@@ -123,7 +124,7 @@ A web application for managing helicopter flight operations — planning aerial 
 ### Infrastructure
 | Technology | Purpose |
 |-----------|---------|
-| **Docker Compose** | Container orchestration (4 services) |
+| **Docker Compose** | Container orchestration (5 services) |
 | **PostgreSQL 16** | Relational database |
 | **nginx** | Reverse proxy & static file serving |
 
@@ -149,7 +150,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-The application will be available at **http://localhost**.
+The application will be available at **https://localhost** (self-signed cert in dev).
+
+On first startup, `tls-init` generates a local self-signed certificate used by nginx for TLS termination.
 
 On first startup, the database is automatically seeded with demo data (users, helicopters, crew, landing sites, operations, and orders).
 
@@ -465,7 +468,7 @@ Copy `.env.example` to `.env` before first run:
 | `POSTGRES_PASSWORD` | `change_me` | Database password |
 | `DATABASE_URL` | `postgresql+asyncpg://aero:change_me@db:5432/aero` | SQLAlchemy async connection string |
 | `SECRET_KEY` | `change-me-in-production` | JWT signing secret |
-| `BACKEND_CORS_ORIGINS` | `["http://localhost","http://localhost:3000"]` | Allowed CORS origins (JSON array) |
+| `BACKEND_CORS_ORIGINS` | `["https://localhost","https://localhost:3000","http://localhost","http://localhost:3000"]` | Allowed CORS origins (JSON array) |
 
 ---
 
@@ -496,17 +499,17 @@ This drops the database volume and re-seeds all demo data on next startup.
 
 ```bash
 # Login and get token
-TOKEN=$(curl -s -X POST http://localhost/api/auth/login \
+TOKEN=$(curl -ks -X POST https://localhost/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"admin@aero.local","password":"admin123"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
 # Use token for authenticated requests
-curl -s http://localhost/api/users \
+curl -ks https://localhost/api/users \
   -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
 
 # Health check (no auth required)
-curl http://localhost/api/health
+curl -k https://localhost/api/health
 ```
 
 ---
