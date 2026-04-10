@@ -52,9 +52,9 @@ A web application for managing helicopter flight operations — planning aerial 
 ┌─────────────┐
 │   Browser    │
 └──────┬──────┘
-       │ :80
+       │ :443 (TLS) / :80 → redirect to :443
 ┌──────▼──────┐
-│    nginx    │  reverse proxy
+│    nginx    │  reverse proxy + TLS termination
 │  (alpine)   │
 └──┬───────┬──┘
    │       │
