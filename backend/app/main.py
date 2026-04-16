@@ -56,8 +56,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Build and return the FastAPI application instance."""
     application = FastAPI(
-        title="AERO PSE",
-        description="Aviation Event Report & Oversight — Process Safety Engine",
+        title="AERO",
+        description="Aviation Event Report & Oversight",
         version="0.1.0",
         lifespan=lifespan,
         redirect_slashes=False,
