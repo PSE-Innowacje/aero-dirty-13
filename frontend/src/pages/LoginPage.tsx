@@ -2,7 +2,6 @@ import { useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/lib/auth";
-import { PseLogo } from "@/components/ui/pse-logo";
 import { Mail, Lock } from "lucide-react";
 
 export function LoginPage() {
@@ -68,7 +67,7 @@ export function LoginPage() {
           </h2>
           <p className="text-sm font-medium leading-relaxed text-[#c3c6d1]">
             Monitoring infrastruktury najwyzszych napiec z wykorzystaniem
-            zaawansowanej floty powietrznej PSE.
+            zaawansowanej floty powietrznej.
           </p>
         </div>
       </section>
@@ -87,7 +86,6 @@ export function LoginPage() {
             <span className="text-2xl font-black tracking-tighter text-white">
               AERO
             </span>
-            <PseLogo height={20} id="hero-mobile" />
           </div>
         </div>
       </div>
@@ -102,7 +100,6 @@ export function LoginPage() {
                 <h1 className="text-3xl font-black tracking-tighter text-white">
                   AERO
                 </h1>
-                <PseLogo height={34} id="form" />
               </div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#9BB5CC] [font-variant:small-caps]">
                 {t("auth.subtitle")}
@@ -113,7 +110,7 @@ export function LoginPage() {
             Autoryzacja Uzytkownika
           </h3>
           <p className="text-xs text-[#c3c6d1]">
-            Wprowadz dane dostepowe PSE Innowacje
+            Wprowadz dane dostepowe
           </p>
         </div>
 
@@ -132,7 +129,7 @@ export function LoginPage() {
               <input
                 id="email"
                 type="email"
-                placeholder="nazwisko.i@pse.pl"
+                placeholder="user@aero.local"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -184,7 +181,7 @@ export function LoginPage() {
         <div className="space-y-4">
           <div className="h-px bg-gradient-to-r from-transparent via-[#43474f]/20 to-transparent" />
           <p className="text-[10px] font-medium uppercase leading-relaxed tracking-widest text-[#48a2ce]">
-            System zastrzezony dla autoryzowanego personelu PSE Innowacje
+            System zastrzezony dla autoryzowanego personelu
           </p>
         </div>
       </section>
@@ -198,7 +195,7 @@ export function LoginPage() {
           </span>
         </div>
         <span className="text-[9px] font-mono uppercase tracking-widest text-[#8d909a]">
-          AERO PSE v0.1.0
+          AERO v0.1.0
         </span>
       </div>
     </div>

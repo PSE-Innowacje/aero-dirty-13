@@ -25,7 +25,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SYSTEM_ROLE } from "@/lib/constants";
-import { PseLogo } from "@/components/ui/pse-logo";
 
 /* ── Menu structure per PRD 7.1 ────────────────────────────── */
 interface MenuItem {
@@ -134,7 +133,6 @@ export function AppSidebar({ collapsed, onToggle, mobileOpen = false, onMobileCl
         {!collapsed && (
           <div className="flex items-center gap-2">
             <span className="text-lg font-bold text-foreground">AERO</span>
-            <PseLogo height={20} id="sidebar-pse" />
           </div>
         )}
         <button
