@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pl"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AERO | Helikoptery Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container-lowest": "#000f22",
+                        "on-surface-variant": "#c4c6ce",
+                        "on-tertiary": "#2f3131",
+                        "surface-container-low": "#041c35",
+                        "outline": "#8e9198",
+                        "outline-variant": "#44474d",
+                        "primary-container": "#400009",
+                        "on-primary-container": "#ff2347",
+                        "surface-container-high": "#152b44",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "background": "#00142a",
+                        "primary-fixed": "#ffdad9",
+                        "on-secondary": "#00363d",
+                        "tertiary-fixed": "#e2e2e2",
+                        "surface-tint": "#ffb3b3",
+                        "on-background": "#d3e4ff",
+                        "surface-variant": "#213650",
+                        "on-primary-fixed": "#400009",
+                        "tertiary-container": "#1a1c1c",
+                        "surface-dim": "#00142a",
+                        "on-secondary-fixed": "#001f24",
+                        "primary": "#ffb3b3",
+                        "secondary-container": "#00e3fd",
+                        "surface-container-highest": "#213650",
+                        "surface-bright": "#263a55",
+                        "on-secondary-fixed-variant": "#004f58",
+                        "surface-container": "#092039",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "secondary": "#bdf4ff",
+                        "surface": "#00142a",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#ffb3b3",
+                        "on-surface": "#d3e4ff",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#9cf0ff",
+                        "secondary-fixed-dim": "#00daf3",
+                        "on-secondary-container": "#00616d",
+                        "inverse-surface": "#d3e4ff",
+                        "inverse-on-surface": "#1c314b",
+                        "on-primary-fixed-variant": "#920021",
+                        "inverse-primary": "#bf002e",
+                        "on-primary": "#680014",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#838484",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "tertiary": "#c6c6c7"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #00142a;
+            background-image: 
+                linear-gradient(rgba(4, 28, 53, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(4, 28, 53, 0.5) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.02) 0%, transparent 1%);
+            background-size: 4px 4px;
+            z-index: 100;
+        }
+
+        .glass-panel {
+            background: rgba(4, 28, 53, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-glow {
+            position: relative;
+        }
+
+        .table-glow::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        }
+
+        .led-active {
+            box-shadow: 0 0 8px #bdf4ff;
+        }
+
+        .led-error {
+            box-shadow: 0 0 8px #ffb4ab;
+        }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface selection:bg-primary selection:text-on-primary min-h-screen">
+<!-- SideNavBar Component -->
+<nav class="fixed left-0 top-0 h-full flex flex-col z-50 w-64 bg-[#041C35]/70 backdrop-blur-xl border-r border-white/10 shadow-[0_0_40px_rgba(255,179,179,0.04)]" data-component="SideNavBar">
+<div class="p-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-xl">helicopter</span>
+</div>
+<div>
+<h1 class="text-xl font-black text-[#bdf4ff] tracking-tighter leading-none">AERO</h1>
+<p class="text-[10px] uppercase tracking-[0.2em] text-secondary opacity-50">Internal Dashboard</p>
+</div>
+</div>
+</div>
+<div class="flex-1 px-4 space-y-1">
+<!-- Active: Helikoptery -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#ffb3b3] border-r-2 border-[#ffb3b3] bg-white/5 font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 scale-102 translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="helicopter">helicopter</span>
+<span>Helikoptery</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#bdf4ff]/60 hover:text-[#bdf4ff] font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Członkowie załogi</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#bdf4ff]/60 hover:text-[#bdf4ff] font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span>Lądowiska planowe</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#bdf4ff]/60 hover:text-[#bdf4ff] font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Użytkownicy</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#bdf4ff]/60 hover:text-[#bdf4ff] font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span>Lista operacji</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#bdf4ff]/60 hover:text-[#bdf4ff] font-['Inter'] uppercase tracking-[0.1em] text-xs font-bold transition-all duration-300 hover:bg-white/10 hover:backdrop-blur-2xl" href="#">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span>Lista zleceń</span>
+</a>
+</div>
+<div class="mt-auto p-4 border-t border-white/5">
+<div class="flex items-center gap-3 px-4 py-4 rounded-xl bg-white/5 backdrop-blur-md">
+<div class="relative">
+<img alt="Jan Kowalski" class="w-10 h-10 rounded-full border border-white/10" data-alt="Close-up portrait of a professional man in a dark polo shirt with a serious and focused expression, indoor studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0xTTyu1_Fp7Tbx36VsbErYvfrz8zSYDvR8ryt6hk652ZszVcJvCLtYTllhAgphQfQSRO8Q9XbKCI-jV0v0YlFCWFJY3MvJygFulIN2bIbl8yVmm4kEZT1jZxfj1dj56fzgGigyi7THvYqZwRQoEAWOUC4OAXIsh4kQh4cO0ElHGcojn9s0ZsZD36fJuo0jGFKB_6aHzRMlabJtRg_I0_W5jZ3JUCSAxnDCejMS4YFcoTyWKwRKZBVtE1QgZNgZWUo7_A3juJDJXYn"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-[#bdf4ff] rounded-full border-2 border-[#041C35] led-active"></div>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface leading-tight">Jan Kowalski</span>
+<span class="text-[10px] uppercase tracking-wider text-secondary opacity-70">Administrator</span>
+</div>
+<button class="ml-auto text-[#bdf4ff]/60 hover:text-[#bdf4ff]">
+<span class="material-symbols-outlined" data-icon="admin_panel_settings">admin_panel_settings</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- TopNavBar Component -->
+<header class="sticky top-4 z-40 flex items-center justify-between px-8 py-4 ml-64 mr-6 rounded-xl border border-white/10 bg-white/3 backdrop-blur-lg inner-glow-white/10" data-component="TopNavBar">
+<div class="flex items-center gap-4">
+<div class="px-4 py-2 bg-white/5 backdrop-blur-lg rounded-lg border border-white/10">
+<h2 class="font-['Inter'] font-bold text-lg uppercase tracking-widest text-[#ffb3b3]">Helikoptery</h2>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-secondary/40 text-sm">search</span>
+<input class="bg-white/5 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-xs font-bold tracking-widest text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all w-64 uppercase" placeholder="SZUKAJ..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-secondary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-secondary/60 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 p-6 min-h-[calc(100vh-100px)]">
+<!-- Action Header -->
+<div class="flex items-center justify-between mb-8 px-2">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-6 bg-primary rounded-full"></span>
+<h3 class="text-2xl font-black tracking-tight text-on-surface">FLIGHT INVENTORY</h3>
+</div>
+<p class="text-xs font-bold text-secondary tracking-widest opacity-60 uppercase">System operacyjny: Aktywne Jednostki Powietrzne</p>
+</div>
+<button class="flex items-center gap-3 px-6 py-3 bg-gradient-to-br from-primary to-on-primary-container rounded-lg border border-white/10 shadow-lg shadow-primary/10 hover:scale-105 transition-all active:scale-95 group backdrop-blur-md">
+<span class="material-symbols-outlined text-on-primary">add_circle</span>
+<span class="text-xs font-black tracking-[0.15em] text-on-primary">DODAJ HELIKOPTER</span>
+</button>
+</div>
+<!-- Tactical Table Container -->
+<div class="table-glow bg-white/3 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden shadow-2xl shadow-black/40">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-white/5 backdrop-blur-sm">
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80">ID JEDNOSTKI</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80">MODEL</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80">STATUS</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80">OSTATNI PRZEGLĄD</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80">DYSTANS (H)</th>
+<th class="px-6 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-secondary opacity-80 text-right">AKCJE</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-6 font-mono text-sm text-primary tracking-wider">SP-HEL1</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Robinson R44</span>
+<span class="text-[10px] text-secondary/60">Light Utility Helicopter</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] font-bold text-secondary tracking-widest uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary led-active"></span>
+                                    AKTYWNY
+                                </span>
+</td>
+<td class="px-6 py-6 text-sm text-on-surface-variant font-mono">24.05.2024</td>
+<td class="px-6 py-6 text-sm text-secondary font-mono">600 km</td>
+<td class="px-6 py-6 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-6 font-mono text-sm text-primary tracking-wider">SP-HEL2</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Airbus H135</span>
+<span class="text-[10px] text-secondary/60">Twin-engine Multipurpose</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-error/10 border border-error/20 text-[10px] font-bold text-error tracking-widest uppercase">
+<span class="w-2 h-2 rounded-full bg-error led-error"></span>
+                                    NIEAKTYWNY
+                                </span>
+</td>
+<td class="px-6 py-6 text-sm text-on-surface-variant font-mono">15.02.2024</td>
+<td class="px-6 py-6 text-sm text-secondary font-mono">635 km</td>
+<td class="px-6 py-6 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 transition-colors group">
+<td class="px-6 py-6 font-mono text-sm text-primary tracking-wider">SP-HEL3</td>
+<td class="px-6 py-6">
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Bell 407</span>
+<span class="text-[10px] text-secondary/60">Single-engine Civil Utility</span>
+</div>
+</td>
+<td class="px-6 py-6">
+<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 text-[10px] font-bold text-secondary tracking-widest uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary led-active"></span>
+                                    AKTYWNY
+                                </span>
+</td>
+<td class="px-6 py-6 text-sm text-on-surface-variant font-mono">30.06.2024</td>
+<td class="px-6 py-6 text-sm text-secondary font-mono">598 km</td>
+<td class="px-6 py-6 text-right">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">edit</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer/Pagination -->
+<div class="px-6 py-4 bg-white/2 flex items-center justify-between border-t border-white/5">
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#bdf4ff] led-active"></span>
+<span class="text-[10px] font-bold tracking-widest text-secondary uppercase">2 ONLINE</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error led-error"></span>
+<span class="text-[10px] font-bold tracking-widest text-error uppercase">1 MAINTENANCE</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="text-[10px] font-bold text-on-surface-variant tracking-widest">PAGE 1 OF 1</span>
+<div class="flex gap-1">
+<button class="p-1 rounded bg-white/5 text-secondary/40 border border-white/10">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="p-1 rounded bg-white/10 text-secondary border border-white/20">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Info Panel -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="p-6 glass-panel rounded-xl flex flex-col gap-4">
+<span class="text-[10px] font-black tracking-[0.2em] text-secondary opacity-50 uppercase">Fuel Status</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">84%</span>
+<span class="text-secondary material-symbols-outlined text-3xl">local_gas_station</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full w-[84%] bg-secondary led-active"></div>
+</div>
+</div>
+<div class="p-6 glass-panel rounded-xl flex flex-col gap-4">
+<span class="text-[10px] font-black tracking-[0.2em] text-secondary opacity-50 uppercase">Fleet Readiness</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">92.1%</span>
+<span class="text-primary material-symbols-outlined text-3xl">shield</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full w-[92%] bg-primary"></div>
+</div>
+</div>
+<div class="p-6 glass-panel rounded-xl flex flex-col gap-4">
+<span class="text-[10px] font-black tracking-[0.2em] text-secondary opacity-50 uppercase">Operational Range</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-black text-on-surface">1,833 KM</span>
+<span class="text-secondary material-symbols-outlined text-3xl">explore</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full w-[65%] bg-secondary opacity-60"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Area -->
+<footer class="ml-64 px-10 py-8 flex flex-col md:flex-row items-center justify-between border-t border-white/5 gap-4">
+<p class="text-[10px] font-bold text-on-surface-variant tracking-[0.2em] uppercase">
+            © 2024 AERO TACTICAL SYSTEMS. ALL RIGHTS RESERVED.
+        </p>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant tracking-[0.2em] uppercase">SYSTEM STATUS:</span>
+<div class="flex items-center gap-2 px-3 py-1 rounded bg-secondary/10 border border-secondary/20">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary led-active"></span>
+<span class="text-[10px] font-black text-secondary tracking-widest uppercase">OPTIMAL</span>
+</div>
+</div>
+<div class="h-4 w-px bg-white/10"></div>
+<div class="text-[10px] font-bold text-on-surface-variant tracking-[0.2em] uppercase">
+                V.2.4.0-STABLE
+            </div>
+</div>
+</footer>
+</body></html>

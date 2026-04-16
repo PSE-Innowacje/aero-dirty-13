@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pl"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AERO - Helikoptery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#071c32",
+              "surface-variant": "#23364c",
+              "tertiary-fixed-dim": "#ffb3ac",
+              "secondary": "#b5c8e4",
+              "on-primary-fixed-variant": "#004c68",
+              "primary-container": "#48a2ce",
+              "error-container": "#93000a",
+              "primary": "#7bd0ff",
+              "error": "#ffb4ab",
+              "on-surface": "#d2e4ff",
+              "tertiary-fixed": "#ffdad6",
+              "on-tertiary-fixed": "#410003",
+              "inverse-primary": "#006689",
+              "on-tertiary-container": "#ffffff",
+              "surface-container-high": "#0c2136",
+              "on-primary-container": "#00354a",
+              "on-tertiary": "#680007",
+              "tertiary-container": "#C00017",
+              "on-secondary-container": "#a7bad6",
+              "background": "#001429",
+              "on-primary-fixed": "#001e2c",
+              "inverse-on-surface": "#1f3248",
+              "on-tertiary-fixed-variant": "#93000f",
+              "surface-container-lowest": "#000f21",
+              "secondary-fixed-dim": "#b5c8e4",
+              "outline": "#899299",
+              "on-error-container": "#ffdad6",
+              "outline-variant": "#3f484e",
+              "surface-dim": "#000f21",
+              "primary-fixed-dim": "#7bd0ff",
+              "secondary-fixed": "#d2e4ff",
+              "tertiary": "#ffb3ac",
+              "on-error": "#690005",
+              "on-background": "#d2e4ff",
+              "surface-container-highest": "#182b41",
+              "surface": "#001429",
+              "on-primary": "#003549",
+              "surface-tint": "#7bd0ff",
+              "secondary-container": "#384a62",
+              "surface-bright": "#283a51",
+              "inverse-surface": "#d2e4ff",
+              "primary-fixed": "#c3e8ff",
+              "on-secondary-fixed": "#071c32",
+              "on-secondary": "#1f3248",
+              "surface-container-low": "#041C35",
+              "on-secondary-fixed-variant": "#35485f",
+              "on-surface-variant": "#bfc8cf"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .hud-grid {
+        background-image: linear-gradient(to right, rgba(210, 228, 255, 0.03) 1px, transparent 1px),
+                          linear-gradient(to bottom, rgba(210, 228, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+      .red-glass-btn {
+        background: linear-gradient(to bottom, rgba(192, 0, 23, 0.9), rgba(105, 0, 8, 0.9));
+        box-shadow: 0 0 15px rgba(192, 0, 23, 0.3);
+      }
+      .aero-underline {
+        height: 4px;
+        background: linear-gradient(to right, #003063, #723248, #C90C0F);
+      }
+      .aero-gradient-text {
+        background: linear-gradient(to right, #003063, #723248, #C90C0F);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .bg-gradient-horizon {
+        background: linear-gradient(to top, #001429, #041C35), 
+                    linear-gradient(135deg, rgba(72, 162, 206, 0.02) 0%, transparent 40%);
+      }
+    </style>
+</head>
+<body class="bg-gradient-horizon text-on-surface font-body selection:bg-primary/30 selection:text-white min-h-screen overflow-hidden">
+<!-- Background Layering -->
+<div class="fixed inset-0 hud-grid pointer-events-none"></div>
+<div class="fixed inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-transparent pointer-events-none"></div>
+<div class="flex h-screen w-full relative">
+<!-- SideNavBar (Left) -->
+<aside class="w-64 bg-[#041C35]/60 backdrop-blur-xl flex flex-col h-full py-6 px-4 border-r border-white/5 shadow-[40px_0_60px_-15px_rgba(0,20,41,0.5)] z-20">
+<!-- Branding -->
+<div class="mb-10 px-2">
+<div class="flex items-baseline gap-1">
+<span class="text-[30px] font-black uppercase text-[#D2E4FF]">AERO</span>
+
+</div>
+<div class="aero-underline w-full mt-1"></div>
+<div class="mt-2 text-[#D2E4FF]/40 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em]">Mission Control</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 space-y-1">
+<!-- Helikoptery (ACTIVE) -->
+<div class="group flex items-center gap-3 px-3 py-3 border-l-2 border-cyan-500 shadow-[0_0_10px_rgba(76,136,50,0.4)] text-cyan-400 bg-white/5 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer translate-x-1">
+<span class="material-symbols-outlined" data-icon="helicopter">helicopter</span>
+<span>Helikoptery</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-3 text-[#D2E4FF]/60 hover:text-[#D2E4FF] hover:bg-white/10 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>Członkowie załogi</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-3 text-[#D2E4FF]/60 hover:text-[#D2E4FF] hover:bg-white/10 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="location_on">location_on</span>
+<span>Lądowiska planowe</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-3 text-[#D2E4FF]/60 hover:text-[#D2E4FF] hover:bg-white/10 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Użytkownicy</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-3 text-[#D2E4FF]/60 hover:text-[#D2E4FF] hover:bg-white/10 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span>Lista operacji</span>
+</div>
+<div class="group flex items-center gap-3 px-3 py-3 text-[#D2E4FF]/60 hover:text-[#D2E4FF] hover:bg-white/10 font-['Inter'] text-[11px] font-bold uppercase tracking-[0.2em] transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span>Lista zleceń</span>
+</div>
+</nav>
+<!-- Footer Section -->
+<div class="mt-auto space-y-6 pt-6 border-t border-white/5 bg-gradient-to-t from-surface-container-lowest/50 to-transparent">
+<!-- User Info -->
+<div class="flex items-center gap-3 px-2">
+<div class="w-10 h-10 bg-surface-variant rounded-lg flex items-center justify-center border border-white/10 overflow-hidden">
+<img alt="Operator" class="w-full h-full object-cover" data-alt="professional portrait of a middle-aged male flight administrator in technical uniform, serious expression, high-tech office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyJ30ojpBA_rNcLLM3xPHhQLSirUaC-3yIIhEDE_lYxRnN5ls2P6t7nAxKeQ25mV6leTpxCiWSUgVaHTZM43A6J8ZsfcMKZjfcYNYmH7mGGGOaK2aZuvbQ33c20Sya5xKIS87C_W0iLePSAmxwUFBivtnSDKHF3laNYm8_hS6DRNvNx4sRPgaEJH868KZqmYPAY89mRsqPktboP9298aSSO8lvmxwGh2hP5y_-0WJ1KUMh-VAsHRDtIHWf8vhEU3GVY0f-XnsY7C58"/>
+</div>
+<div class="flex flex-col">
+<span class="text-[12px] font-bold text-[#D2E4FF]">Jan Kowalski</span>
+<span class="text-[10px] text-cyan-500/80 font-bold uppercase tracking-wider">Administrator</span>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="grid grid-cols-3 gap-2">
+<button class="flex flex-col items-center gap-1 py-2 rounded hover:bg-white/5 text-[#D2E4FF]/40 hover:text-cyan-400 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="language">language</span>
+<span class="text-[9px] font-bold">PL/EN</span>
+</button>
+<button class="flex flex-col items-center gap-1 py-2 rounded hover:bg-white/5 text-[#D2E4FF]/40 hover:text-cyan-400 transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="dark_mode">dark_mode</span>
+<span class="text-[9px] font-bold">THEME</span>
+</button>
+<button class="flex flex-col items-center gap-1 py-2 rounded hover:bg-white/5 text-[#D2E4FF]/40 hover:text-tertiary transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="logout">logout</span>
+<span class="text-[9px] font-bold">LOGOUT</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-8 relative">
+<!-- Title Section -->
+<div class="mb-10">
+<div class="w-12 h-1 bg-tertiary-container mb-4"></div>
+<div class="flex items-center gap-4">
+<h1 class="text-4xl font-[900] uppercase tracking-tight text-on-surface shadow-[0_0_20px_rgba(72,162,206,0.08)]">Helikoptery</h1>
+<span class="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary/70">3 helikoptery w systemie</span>
+</div>
+<p class="text-sm font-medium tracking-wide text-on-surface-variant/70 mt-1 uppercase">Zarządzanie flotą powietrzną</p>
+</div>
+<!-- Header Action -->
+<div class="flex justify-end mb-6">
+<button class="red-glass-btn backdrop-blur-md border border-white/5 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                    Dodaj helikopter
+                </button>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-low/40 backdrop-blur-md rounded-xl border border-white/5 overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/80 border-b border-white/5">
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40">Rejestracja</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40">Typ</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40 text-center">Status</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40">Data przeglądu</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40 text-right">Zasięg (km)</th>
+<th class="px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#D2E4FF]/40 text-center">Akcje</th>
+</tr>
+</thead>
+<tbody>
+<!-- Row 1 -->
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity absolute left-0"></div>
+<span class="font-black text-[#D2E4FF] tracking-wider text-sm">SP-HEL1</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium text-on-surface-variant">Robinson R44</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center">
+<div class="flex items-center gap-2 bg-green-500/10 border border-green-500/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(76,136,50,0.4)]">
+<div class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+<span class="text-[9px] font-black uppercase text-green-400 tracking-tighter">AKTYWNY</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-mono tracking-tight">2024.12.15</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-cyan-400">560</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center gap-2">
+<button class="p-2 text-[#D2E4FF]/40 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-[#D2E4FF]/40 hover:text-tertiary hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 (Even - Alternating Background) -->
+<tr class="bg-surface-container/30 hover:bg-white/5 group transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity absolute left-0"></div>
+<span class="font-black text-[#D2E4FF] tracking-wider text-sm">SP-HEL2</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium text-on-surface-variant">Airbus H135</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center">
+<div class="flex items-center gap-2 bg-green-500/10 border border-green-500/30 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(76,136,50,0.4)]">
+<div class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
+<span class="text-[9px] font-black uppercase text-green-400 tracking-tighter">AKTYWNY</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-mono tracking-tight">2025.02.01</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-cyan-400">635</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center gap-2">
+<button class="p-2 text-[#D2E4FF]/40 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-[#D2E4FF]/40 hover:text-tertiary hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-white/5 group transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-1 h-8 bg-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity absolute left-0"></div>
+<span class="font-black text-[#D2E4FF] tracking-wider text-sm">SP-HEL3</span>
+</div>
+</td>
+<td class="px-6 py-5 text-sm font-medium text-on-surface-variant">Bell 407</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center">
+<div class="flex items-center gap-2 bg-white/5 border border-white/20 px-3 py-1 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-on-surface-variant/40"></div>
+<span class="text-[9px] font-black uppercase text-on-surface-variant/60 tracking-tighter">NIEAKTYWNY</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-sm text-on-surface-variant font-mono tracking-tight">2024.11.20</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-cyan-400">595</td>
+<td class="px-6 py-5">
+<div class="flex items-center justify-center gap-2">
+<button class="p-2 text-[#D2E4FF]/40 hover:text-cyan-400 hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-[#D2E4FF]/40 hover:text-tertiary hover:bg-white/5 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="delete">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer Meta -->
+<footer class="mt-8 flex justify-between items-center px-2">
+<span class="font-['Inter'] text-[10px] font-medium tracking-tight text-[#D2E4FF]/30 uppercase">© 2024 AERO TACTICAL SYSTEMS. ALL RIGHTS RESERVED.</span>
+<span class="font-['Inter'] text-[10px] font-bold tracking-widest text-cyan-500 uppercase flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-cyan-500 rounded-full"></span>
+                    System Status: Optimal
+                </span>
+</footer>
+</main>
+</div>
+</body></html>
