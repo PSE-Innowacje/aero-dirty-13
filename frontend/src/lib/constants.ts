@@ -1,5 +1,5 @@
 /**
- * Shared constants for the AERO PSE frontend.
+ * Shared constants for the AERO frontend.
  *
  * Single source of truth for status enums, role strings, badge mappings,
  * and validation patterns used across multiple page components.
@@ -108,24 +108,24 @@ export const OPERATION_STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 };
 
 export const OPERATION_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
+  1: "bg-[#48A2CE] text-white",     // accent blue — introduced
   2: "",                              // destructive variant handles red
-  3: "bg-[#4C8832] text-white",     // PSE green — confirmed
-  4: "bg-[#F2C432] text-gray-900",  // PSE yellow — ordered
+  3: "bg-[#4C8832] text-white",     // accent green — confirmed
+  4: "bg-[#F2C432] text-gray-900",  // accent yellow — ordered
   5: "bg-orange-500 text-gray-900", // in realization
-  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  6: "bg-[#4C8832] text-white",     // accent green — completed
   7: "",                              // secondary variant handles grey
 };
 
 // ── Operation Form Status Badge Classes (without variant) ────────────
 
 export const OPERATION_FORM_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
-  2: "bg-[#C90019] text-white",     // PSE red — rejected
-  3: "bg-[#4C8832] text-white",     // PSE green — confirmed
-  4: "bg-[#F2C432] text-gray-900",  // PSE yellow — ordered
+  1: "bg-[#48A2CE] text-white",     // accent blue — introduced
+  2: "bg-[#C90019] text-white",     // accent red — rejected
+  3: "bg-[#4C8832] text-white",     // accent green — confirmed
+  4: "bg-[#F2C432] text-gray-900",  // accent yellow — ordered
   5: "bg-orange-500 text-white",     // in realization
-  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  6: "bg-[#4C8832] text-white",     // accent green — completed
   7: "bg-gray-400 text-white",       // resigned
 };
 
@@ -142,24 +142,24 @@ export const ORDER_STATUS_BADGE_VARIANT: Record<number, BadgeVariant> = {
 };
 
 export const ORDER_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
-  2: "bg-[#F2C432] text-gray-900",  // PSE yellow — submitted
+  1: "bg-[#48A2CE] text-white",     // accent blue — introduced
+  2: "bg-[#F2C432] text-gray-900",  // accent yellow — submitted
   3: "",                              // destructive handles red
-  4: "bg-[#4C8832] text-white",     // PSE green — accepted
+  4: "bg-[#4C8832] text-white",     // accent green — accepted
   5: "bg-orange-500 text-gray-900", // in settlement
-  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  6: "bg-[#4C8832] text-white",     // accent green — completed
   7: "",                              // secondary handles grey
 };
 
 // ── Order Form Status Badge Classes (without variant) ────────────────
 
 export const ORDER_FORM_STATUS_BADGE_CLASS: Record<number, string> = {
-  1: "bg-[#48A2CE] text-white",     // PSE blue — introduced
-  2: "bg-[#F2C432] text-gray-900",  // PSE yellow — submitted
-  3: "bg-[#C90019] text-white",     // PSE red — rejected
-  4: "bg-[#4C8832] text-white",     // PSE green — accepted
+  1: "bg-[#48A2CE] text-white",     // accent blue — introduced
+  2: "bg-[#F2C432] text-gray-900",  // accent yellow — submitted
+  3: "bg-[#C90019] text-white",     // accent red — rejected
+  4: "bg-[#4C8832] text-white",     // accent green — accepted
   5: "bg-orange-500 text-white",     // in settlement
-  6: "bg-[#4C8832] text-white",     // PSE green — completed
+  6: "bg-[#4C8832] text-white",     // accent green — completed
   7: "bg-gray-400 text-white",       // not completed
 };
 

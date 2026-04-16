@@ -11,7 +11,7 @@ test.describe('Login page', () => {
     await page.goto('/login');
 
     // Verify the login form is present with branded header
-    await expect(page.getByText('AERO PSE')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'AERO' })).toBeVisible();
 
     // Email field
     const emailInput = page.getByLabel(/email/i);

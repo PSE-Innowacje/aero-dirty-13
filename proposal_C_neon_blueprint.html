@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pl"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AERO - Helikoptery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #001429;
+            color: #d2e4ff;
+            margin: 0;
+        }
+
+        /* Blueprint Grid Implementation */
+        .blueprint-bg {
+            background-color: #001429;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(72, 162, 206, 0.03) 2px, transparent 0),
+                linear-gradient(rgba(72, 162, 206, 0.05) 1px, transparent 1px), 
+                linear-gradient(90deg, rgba(72, 162, 206, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px;
+            background-position: -1px -1px;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(72, 162, 206, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(72, 162, 206, 0.2);
+        }
+
+        /* Tabular numbers for technical data */
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary-fixed": "#c3e8ff",
+                "on-secondary-container": "#ffcdc7",
+                "primary": "#7bd0ff",
+                "error-container": "#93000a",
+                "surface-bright": "#283a51",
+                "secondary-fixed": "#ffdad6",
+                "on-secondary-fixed": "#410003",
+                "surface-container-high": "#182b41",
+                "on-primary": "#003549",
+                "secondary-container": "#c00017",
+                "surface-container-low": "#071c32",
+                "on-error": "#690005",
+                "inverse-surface": "#d2e4ff",
+                "tertiary-fixed": "#c3e8ff",
+                "on-secondary-fixed-variant": "#93000f",
+                "on-primary-fixed": "#001e2c",
+                "surface-container-lowest": "#000f21",
+                "on-background": "#d2e4ff",
+                "error": "#ffb4ab",
+                "secondary-fixed-dim": "#ffb3ac",
+                "on-primary-fixed-variant": "#004c68",
+                "surface": "#001429",
+                "primary-container": "#48a2ce",
+                "outline-variant": "#3f484e",
+                "background": "#001429",
+                "outline": "#899299",
+                "on-primary-container": "#00354a",
+                "tertiary-fixed-dim": "#7bd0ff",
+                "on-surface-variant": "#bfc8cf",
+                "surface-variant": "#23364c",
+                "primary-fixed-dim": "#7bd0ff",
+                "on-tertiary-fixed-variant": "#004c68",
+                "tertiary": "#7bd0ff",
+                "on-error-container": "#ffdad6",
+                "on-tertiary-fixed": "#001e2c",
+                "tertiary-container": "#48a2ce",
+                "on-tertiary": "#003549",
+                "on-tertiary-container": "#00354a",
+                "surface-dim": "#001429",
+                "inverse-primary": "#006689",
+                "surface-tint": "#7bd0ff",
+                "on-secondary": "#680007",
+                "secondary": "#ffb3ac",
+                "inverse-on-surface": "#1f3248",
+                "surface-container-highest": "#23364c",
+                "surface-container": "#0c2136",
+                "on-surface": "#d2e4ff"
+              },
+              fontFamily: {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+              },
+              borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+            },
+          },
+        }
+      </script>
+</head>
+<body class="blueprint-bg min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col justify-between py-8 bg-[#001429] border-r border-[#48A2CE]/20 w-64 z-50">
+<div class="flex flex-col">
+<div class="px-8 mb-12">
+<h1 class="font-black text-white text-2xl tracking-tighter">AERO</h1>
+<p class="font-['Inter'] tracking-wider uppercase text-[10px] text-slate-400 opacity-70">Internal Dashboard</p>
+</div>
+<nav class="flex flex-col space-y-1">
+<!-- Helikoptery - Active -->
+<a class="group flex items-center px-8 py-3 space-x-4 border-l-2 border-[#48A2CE] bg-[#48A2CE]/10 shadow-[0_0_8px_rgba(72,162,206,0.15)] text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="helicopter">helicopter</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px] font-bold">Helikoptery</span>
+</a>
+<a class="group flex items-center px-8 py-3 space-x-4 text-slate-400 opacity-70 hover:bg-[#48A2CE]/5 hover:text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="groups">groups</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px]">Członkowie załogi</span>
+</a>
+<a class="group flex items-center px-8 py-3 space-x-4 text-slate-400 opacity-70 hover:bg-[#48A2CE]/5 hover:text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="routine">routine</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px]">Lądowiska planowe</span>
+</a>
+<a class="group flex items-center px-8 py-3 space-x-4 text-slate-400 opacity-70 hover:bg-[#48A2CE]/5 hover:text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px]">Użytkownicy</span>
+</a>
+<a class="group flex items-center px-8 py-3 space-x-4 text-slate-400 opacity-70 hover:bg-[#48A2CE]/5 hover:text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="engineering">engineering</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px]">Lista operacji</span>
+</a>
+<a class="group flex items-center px-8 py-3 space-x-4 text-slate-400 opacity-70 hover:bg-[#48A2CE]/5 hover:text-[#48A2CE] transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="assignment">assignment</span>
+<span class="font-['Inter'] tracking-wider uppercase text-[10px]">Lista zleceń</span>
+</a>
+</nav>
+</div>
+<div class="px-6 space-y-4">
+<div class="flex items-center space-x-3 px-2 py-2">
+<div class="w-8 h-8 bg-surface-container-high flex items-center justify-center border border-[#48A2CE]/20 overflow-hidden">
+<img alt="Jan Kowalski profile avatar" class="w-full h-full object-cover" data-alt="professional male portrait for user profile avatar in technical dashboard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzBcy2ij9tLf5-iVALvGhivkPZgx9PPQ2G9EhJ6yD9QG0Uyk-vbqIDm7Hxirjl2rTb5ckI2kv_rzftpccE4wEzquo_LC7hrOz5lTXk3eGyTJtYMxOikHxMqRE6kF1aCdipvTh9Bi4v_FlFUq4THzKLaD1GUpje79S7Gc0KwAWKuySeu0TOkqc80VEvestL0-bbgsZhVnQIjsDwaaxUNF9g-VuYE0-MTjBF5Ns0y9BPF_ZN5dr40TAEvx8yDgr1o4h_9Wm9LYm3Q5RX"/>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-white uppercase tracking-wider">Jan Kowalski</span>
+<span class="text-[9px] text-[#48A2CE] uppercase tracking-widest">Administrator</span>
+</div>
+</div>
+<div class="flex justify-between items-center px-2">
+<button class="text-slate-500 hover:text-[#48A2CE] transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="account_circle">account_circle</span>
+</button>
+<button class="text-slate-500 hover:text-[#48A2CE] transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="admin_panel_settings">admin_panel_settings</span>
+</button>
+<button class="text-slate-500 hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-sm" data-icon="logout">logout</span>
+</button>
+</div>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 h-16 flex justify-between items-center px-8 ml-64 w-[calc(100%-16rem)] z-40 bg-transparent">
+<div class="flex items-center space-x-2">
+<span class="text-xl font-bold text-white font-['Inter'] tracking-tight">Helikoptery</span>
+</div>
+<div class="flex items-center space-x-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#48A2CE] text-sm" data-icon="search">search</span>
+<input class="bg-surface-container-low border-b border-outline-variant focus:border-primary-container focus:ring-0 text-[10px] py-1 pl-10 pr-4 w-48 tracking-widest text-white transition-all uppercase" placeholder="SZUKAJ..." type="text"/>
+</div>
+<div class="flex items-center space-x-4">
+<button class="text-slate-300 hover:text-[#48A2CE] transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="notifications">notifications</span>
+</button>
+<button class="text-slate-300 hover:text-[#48A2CE] transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-64 pt-24 pb-16 px-12 min-h-screen">
+<div class="max-w-7xl mx-auto">
+<!-- Page Header Cluster -->
+<div class="flex justify-between items-end mb-14">
+<div class="space-y-1">
+<span class="label-sm text-[#48A2CE] opacity-60 uppercase tracking-[0.3em] text-[9px]">Flota Operacyjna</span>
+<h2 class="text-4xl font-black text-white uppercase tracking-tighter leading-none">Status Floty</h2>
+</div>
+<button class="bg-surface-container-high text-white text-[11px] font-bold tracking-widest uppercase px-6 py-3 border-l-[3px] border-secondary-container hover:bg-gradient-to-b hover:from-[#C00017] hover:to-[#93000a] transition-all flex items-center space-x-3 group">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+<span>DODAJ HELIKOPTER</span>
+</button>
+</div>
+<!-- Dashboard Stats Cluster (Bento Inspired) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+<div class="bg-surface-container-low border border-outline-variant/20 p-6 flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl" data-icon="helicopter">helicopter</span>
+</div>
+<span class="text-[9px] uppercase tracking-widest text-[#48A2CE]">Całkowita Flota</span>
+<span class="text-3xl font-black tabular-nums">24</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/20 p-6 flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 text-green-500/10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl" data-icon="check_circle">check_circle</span>
+</div>
+<span class="text-[9px] uppercase tracking-widest text-[#48A2CE]">W gotowości</span>
+<div class="flex items-center space-x-2">
+<span class="text-3xl font-black tabular-nums">18</span>
+<span class="text-[10px] text-green-500 font-bold bg-green-500/10 px-1.5 py-0.5">75%</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/20 p-6 flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 text-secondary-container/10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl" data-icon="engineering">engineering</span>
+</div>
+<span class="text-[9px] uppercase tracking-widest text-[#48A2CE]">W serwisie</span>
+<span class="text-3xl font-black tabular-nums">04</span>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/20 p-6 flex flex-col justify-between h-32 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 text-orange-500/10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-4xl" data-icon="schedule">schedule</span>
+</div>
+<span class="text-[9px] uppercase tracking-widest text-[#48A2CE]">Oczekujące</span>
+<span class="text-3xl font-black tabular-nums">02</span>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-surface-container-low/40 border border-[#48A2CE]/15 shadow-[inset_0_0_12px_rgba(72,162,206,0.02)] backdrop-blur-sm">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-[#48A2CE]/20">
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="fingerprint">fingerprint</span>
+<span>REJESTRACJA</span>
+</div>
+</th>
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="category">category</span>
+<span>TYP</span>
+</div>
+</th>
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="sensors">sensors</span>
+<span>STATUS</span>
+</div>
+</th>
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="calendar_today">calendar_today</span>
+<span>DATA PRZEGLĄDU</span>
+</div>
+</th>
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="map">map</span>
+<span>ZASIĘG (KM)</span>
+</div>
+</th>
+<th class="px-6 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-[#48A2CE]/60 text-right">
+<div class="flex items-center justify-end space-x-2">
+<span class="material-symbols-outlined text-[12px]" data-icon="bolt">bolt</span>
+<span>AKCJE</span>
+</div>
+</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#48A2CE]/5">
+<!-- Row 1 -->
+<tr class="hover:bg-[#48A2CE]/5 transition-all group">
+<td class="px-6 py-5">
+<span class="text-xs font-bold text-white tabular-nums tracking-wider">SP-HEL1</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-300">Robinson R44</span>
+</td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center bg-green-500/10 border border-green-500/20 px-3 py-1 rounded-full space-x-2">
+<span class="w-1 h-1 rounded-full bg-green-500 shadow-[0_0_4px_#22c55e]"></span>
+<span class="text-[9px] font-black text-green-500 uppercase tracking-widest">AKTYWNY</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-400 tabular-nums">2024.12.15</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-white font-medium tabular-nums">560</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-[#48A2CE]/5 transition-all group">
+<td class="px-6 py-5">
+<span class="text-xs font-bold text-white tabular-nums tracking-wider">SP-HEL2</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-300">Airbus H135</span>
+</td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center bg-green-500/10 border border-green-500/20 px-3 py-1 rounded-full space-x-2">
+<span class="w-1 h-1 rounded-full bg-green-500 shadow-[0_0_4px_#22c55e]"></span>
+<span class="text-[9px] font-black text-green-500 uppercase tracking-widest">AKTYWNY</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-400 tabular-nums">2025.02.01</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-white font-medium tabular-nums">635</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-[#48A2CE]/5 transition-all group">
+<td class="px-6 py-5">
+<span class="text-xs font-bold text-white tabular-nums tracking-wider">SP-HEL3</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-300">Bell 407</span>
+</td>
+<td class="px-6 py-5">
+<div class="inline-flex items-center bg-slate-500/10 border border-slate-500/20 px-3 py-1 rounded-full space-x-2">
+<span class="w-1 h-1 rounded-full bg-slate-500"></span>
+<span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">NIEAKTYWNY</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-slate-400 tabular-nums">2024.11.20</span>
+</td>
+<td class="px-6 py-5">
+<span class="text-xs text-white font-medium tabular-nums">595</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-6 py-4 border-t border-[#48A2CE]/10 flex justify-between items-center bg-[#001429]/40">
+<span class="text-[9px] uppercase tracking-widest text-slate-500">Pokazano 3 z 24 helikopterów</span>
+<div class="flex space-x-2">
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/20 text-[#48A2CE] hover:bg-[#48A2CE]/10 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center border border-primary-container/40 bg-[#48A2CE]/10 text-white font-bold text-[10px]">1</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/20 text-slate-400 hover:bg-[#48A2CE]/10 transition-all font-bold text-[10px]">2</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/20 text-slate-400 hover:bg-[#48A2CE]/10 transition-all font-bold text-[10px]">3</button>
+<button class="w-8 h-8 flex items-center justify-center border border-outline-variant/20 text-[#48A2CE] hover:bg-[#48A2CE]/10 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Shell -->
+<footer class="fixed bottom-0 right-0 flex justify-between items-center px-8 py-3 ml-64 w-[calc(100%-16rem)] bg-[#001429] border-t border-[#48A2CE]/30 z-40">
+<div class="flex items-center space-x-6">
+<span class="font-['Inter'] text-[9px] uppercase tracking-widest text-slate-500">© 2024 AERO</span>
+<div class="flex items-center space-x-4">
+<span class="font-['Inter'] text-[9px] uppercase tracking-widest text-[#48A2CE] font-black flex items-center before:content-[''] before:inline-block before:w-1.5 before:h-1.5 before:bg-green-500 before:rounded-full before:mr-2 before:shadow-[0_0_4px_#22c55e]">
+                    System Status: NOMINAL
+                </span>
+</div>
+</div>
+<div class="flex space-x-6">
+<a class="font-['Inter'] text-[9px] uppercase tracking-widest text-slate-500 hover:text-white transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[9px] uppercase tracking-widest text-slate-500 hover:text-white transition-colors" href="#">Technical Contact</a>
+</div>
+</footer>
+</body></html>

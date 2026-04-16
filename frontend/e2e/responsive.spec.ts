@@ -1,5 +1,5 @@
 /**
- * Responsive / mobile E2E tests — verifies that the AERO PSE frontend
+ * Responsive / mobile E2E tests — verifies that the AERO frontend
  * adapts correctly across mobile (375x667), tablet (768x1024), and
  * enforces minimum touch-target sizes.
  *
