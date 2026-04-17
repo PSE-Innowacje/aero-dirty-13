@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.security import decode_access_token, oauth2_scheme
+from app.core.security import decode_access_token
 from app.models.user import User
 
 logger = logging.getLogger("aero")
@@ -17,19 +17,15 @@ logger = logging.getLogger("aero")
 
 async def get_current_user(
     request: Request,
-    bearer_token: Annotated[str | None, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> User:
-    """Decode JWT from cookie or Bearer header and return the authenticated User, or raise 401."""
+    """Decode JWT from httpOnly cookie and return the authenticated User, or raise 401."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
     )
 
     token = request.cookies.get("access_token")
-    if not token:
-        token = bearer_token
     if not token:
         raise credentials_exception
 

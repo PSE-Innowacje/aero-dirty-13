@@ -37,8 +37,7 @@ class TestSmokeLogin:
         )
         assert resp.status_code == 200, f"Login failed for {email}: {resp.text}"
         data = resp.json()
-        assert "access_token" in data
-        assert data["token_type"] == "bearer"
+        assert data == {"message": "ok"}
 
 
 class TestSmokeAdministrator:

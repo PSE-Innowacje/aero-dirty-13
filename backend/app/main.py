@@ -108,8 +108,6 @@ def create_app() -> FastAPI:
             return await call_next(request)
         if not request.cookies.get("access_token"):
             return await call_next(request)
-        if request.headers.get("authorization"):
-            return await call_next(request)
         if request.url.path in ("/api/auth/login", "/api/auth/refresh"):
             return await call_next(request)
         if request.headers.get("x-requested-with") != "XMLHttpRequest":

@@ -11,7 +11,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch, ApiError, getStoredToken } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -208,11 +208,11 @@ export function OperationFormPage() {
     formData.append("file", kmlFile);
 
     try {
-      const token = getStoredToken();
       const res = await fetch(`/api/operations/${id}/kml`, {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: { "X-Requested-With": "XMLHttpRequest" },
         body: formData,
+        credentials: 'include',
       });
 
       if (!res.ok) {

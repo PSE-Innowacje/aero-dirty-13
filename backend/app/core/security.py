@@ -6,15 +6,12 @@ from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Response
-from fastapi.security import OAuth2PasswordBearer
 
 from app.core.config import settings
 
 logger = logging.getLogger("aero")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 ALGORITHM = "HS256"
 

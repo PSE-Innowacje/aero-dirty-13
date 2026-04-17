@@ -19,20 +19,20 @@ from app.core.security import (
 )
 from app.api.deps import get_current_user
 from app.models.user import User
-from app.schemas.user import LoginRequest, Token, UserResponse
+from app.schemas.user import LoginRequest, UserResponse
 
 logger = logging.getLogger("aero")
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 async def login(
     body: LoginRequest,
     response: Response,
     db: Annotated[AsyncSession, Depends(get_db)],
-) -> Token:
-    """Authenticate with email/password, set httpOnly cookies, return JWT access token."""
+) -> dict:
+    """Authenticate with email/password, set httpOnly cookies."""
     result = await db.execute(select(User).where(User.email == body.email))
     user = result.scalars().first()
 
@@ -41,14 +41,13 @@ async def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
     access_token = create_access_token(data={"sub": user.email})
     refresh_token = create_refresh_token(data={"sub": user.email})
     set_auth_cookies(response, access_token, refresh_token)
     logger.info("Successful login for user=%s role=%s", user.email, user.system_role)
-    return Token(access_token=access_token, token_type="bearer")
+    return {"message": "ok"}
 
 
 @router.post("/refresh")
