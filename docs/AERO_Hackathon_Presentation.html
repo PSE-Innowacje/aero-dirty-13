@@ -438,6 +438,59 @@ body {
 }
 .prompt-decor.top-left  { top: 16px; left: 16px; }
 .prompt-decor.bottom-right { bottom: 20px; right: 16px; text-align: right; }
+
+/* ===== SLIDE 4 — DOWÓD ===== */
+.proof-layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items: start; }
+.proof-screencast {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(72,162,206,0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  aspect-ratio: 16/10;
+  background: #0a1628;
+}
+.proof-screencast img, .proof-screencast video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.proof-numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.proof-number-cell {
+  padding: 14px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  text-align: center;
+}
+.proof-number {
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 800;
+  color: #48a2ce;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.proof-number.green { color: #3fc37a; }
+.proof-number.orange { color: #ff6b35; }
+.proof-number-label { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+.proof-rbac { margin-top: 8px; }
+.proof-rbac-heading { font-size: 12px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; }
+.proof-rbac-roles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.proof-rbac-role {
+  display: flex; gap: 10px; align-items: center;
+  padding: 8px 10px;
+  background: rgba(72,162,206,0.05);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.proof-rbac-role-icon { font-size: 18px; }
+.proof-rbac-role-name { color: #fff; font-weight: 500; }
+.proof-irony {
+  margin-top: 22px;
+  padding: 14px 18px;
+  background: rgba(63,195,122,0.08);
+  border-left: 3px solid #3fc37a;
+  border-radius: 6px;
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+}
+.proof-irony strong { color: #3fc37a; font-style: normal; }
 </style>
 </head>
 <body>
@@ -577,7 +630,41 @@ body {
         </div>
       </div>
     </section>
-    <section class="slide" data-slide="3"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 4 — placeholder</h1></div></section>
+    <section class="slide" data-slide="3">
+      <div class="slide-inner">
+        <div class="anim-fade-up delay-1 slide-title">To nie jest prototyp.</div>
+        <div class="anim-fade-up delay-2 slide-subtitle">Po 48 godzinach — pełna aplikacja. Oto co powstało.</div>
+        <div class="proof-layout">
+          <div class="anim-slide-left delay-3 proof-screencast">
+            <img src="assets/screencast-placeholder.svg" alt="Screencast aplikacji AERO — login, operacje, mapa, KML upload, akceptacja">
+          </div>
+          <div class="anim-slide-right delay-4">
+            <div class="proof-numbers">
+              <div class="proof-number-cell"><div class="proof-number" data-count="113">113</div><div class="proof-number-label">commitów</div></div>
+              <div class="proof-number-cell"><div class="proof-number" data-count="44">44</div><div class="proof-number-label">endpointów API</div></div>
+              <div class="proof-number-cell"><div class="proof-number green" data-count="166">166</div><div class="proof-number-label">testów backend</div></div>
+              <div class="proof-number-cell"><div class="proof-number green" data-count="63">63</div><div class="proof-number-label">E2E Playwright</div></div>
+              <div class="proof-number-cell"><div class="proof-number">5</div><div class="proof-number-label">serwisów Docker</div></div>
+              <div class="proof-number-cell"><div class="proof-number">4</div><div class="proof-number-label">role RBAC</div></div>
+              <div class="proof-number-cell"><div class="proof-number">2</div><div class="proof-number-label">języki (PL/EN)</div></div>
+              <div class="proof-number-cell"><div class="proof-number orange">48h</div><div class="proof-number-label">czas</div></div>
+            </div>
+            <div class="proof-rbac">
+              <div class="proof-rbac-heading">4 role · pełny RBAC</div>
+              <div class="proof-rbac-roles">
+                <div class="proof-rbac-role"><span class="proof-rbac-role-icon">📝</span><span class="proof-rbac-role-name">Planujący</span></div>
+                <div class="proof-rbac-role"><span class="proof-rbac-role-icon">✅</span><span class="proof-rbac-role-name">Nadzorujący</span></div>
+                <div class="proof-rbac-role"><span class="proof-rbac-role-icon">🚁</span><span class="proof-rbac-role-name">Pilot</span></div>
+                <div class="proof-rbac-role"><span class="proof-rbac-role-icon">⚙️</span><span class="proof-rbac-role-name">Administrator</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="anim-fade-up delay-6 proof-irony">
+          Powiem to jako specjalista IAM: <strong>RBAC który tu wyszedł jest porządny</strong>. Nie bawił się tym ktoś, kto nie wie co to zasada najmniejszych uprawnień. A to napisał agent.
+        </div>
+      </div>
+    </section>
     <section class="slide" data-slide="4"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 5 — placeholder</h1></div></section>
     <section class="slide" data-slide="5"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 6 — placeholder</h1></div></section>
   </div>
