@@ -1,0 +1,1655 @@
+# AERO Hackathon Town Hall Presentation — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Zbudować single-file HTML prezentację town-hallową o tym jak dwóch non-developerów (Mariusz Kędziora + Mariusz Szustka) zbudowało aplikację AERO na 2-dniowym hackatonie używając Claude Code. 1 title + 5 content slides, 15 min, dwugłos.
+
+**Architecture:** Single self-contained `docs/AERO_Hackathon_Presentation.html`. Reuse glassmorphism/animations CSS z istniejącego `docs/AERO_Presentation.html` (dark navy, particles, glass cards, anim-fade-up). Dodajemy vibecode akcenty: JetBrains Mono na snippety, terminal frames na brief/stack, typing cursor animation, subtle prompt decorations. Zero JS frameworks — vanilla.
+
+**Tech Stack:** HTML5, CSS3 (custom properties + keyframe animations + backdrop-filter), vanilla JavaScript (keyboard nav, swipe, number count-up, dot navigation), Google Fonts (Inter + JetBrains Mono). No build step.
+
+---
+
+## File Structure
+
+**Single new file:**
+- `docs/AERO_Hackathon_Presentation.html` — prezentacja kompletna (HTML + inline CSS + inline JS)
+
+**Reference (read-only, nie modyfikujemy):**
+- `docs/AERO_Presentation.html` — źródło glassmorphism CSS (linie 10-260 dla bg/animations, 143-160 dla slides)
+- `docs/superpowers/specs/2026-04-17-aero-townhall-presentation-design.md` — spec z copy per slajd, speaker scripts, style guide
+- `.gsd/projects/49b632c5e274/KNOWLEDGE.md` — anegdoty do lekcji
+
+**Placeholder asset (Task 8):**
+- `docs/assets/screencast-placeholder.svg` — statyczny placeholder do czasu dostarczenia realnego screencastu przez prezenterów
+
+---
+
+## Task 0: Branch setup
+
+**Files:** (none — git operations only)
+
+- [ ] **Step 1: Verify clean working directory**
+
+Run: `git status --short`
+Expected: tylko untracked (`.claude/`, `.gsd-id`, `.mcp.json`, `.superpowers/`, nowy spec + plan). Żadnych modyfikacji w source code.
+
+- [ ] **Step 2: Create feature branch**
+
+Run: `git checkout -b feature/hackathon-townhall-presentation`
+Expected: `Switched to a new branch 'feature/hackathon-townhall-presentation'`
+
+- [ ] **Step 3: Stage and commit spec + plan files**
+
+Run:
+```bash
+git add docs/superpowers/specs/2026-04-17-aero-townhall-presentation-design.md
+git add docs/superpowers/plans/2026-04-17-aero-hackathon-presentation.md
+git commit -m "docs: add spec and plan for hackathon townhall presentation"
+```
+Expected: `1 file changed` twice, branch now 1 ahead of origin.
+
+---
+
+## Task 1: HTML skeleton + fonts + empty slides
+
+**Files:**
+- Create: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Create file with skeleton**
+
+Create `docs/AERO_Hackathon_Presentation.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AERO — Jak zbudowaliśmy aplikację w 2 dni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* CSS will be added in subsequent tasks */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #000a1a;
+  color: #ffffff;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.presentation { position: relative; width: 100vw; height: 100vh; z-index: 1; }
+.slides-container { position: relative; width: 100%; height: 100%; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.slide.active { opacity: 1; pointer-events: auto; }
+.slide-inner {
+  width: min(90%, 1400px);
+  max-height: 90vh;
+  padding: 40px;
+}
+</style>
+</head>
+<body>
+<div class="presentation">
+  <div class="slides-container" id="slidesContainer">
+    <section class="slide active" data-slide="0"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 1 — placeholder</h1></div></section>
+    <section class="slide" data-slide="1"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 2 — placeholder</h1></div></section>
+    <section class="slide" data-slide="2"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 3 — placeholder</h1></div></section>
+    <section class="slide" data-slide="3"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 4 — placeholder</h1></div></section>
+    <section class="slide" data-slide="4"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 5 — placeholder</h1></div></section>
+    <section class="slide" data-slide="5"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 6 — placeholder</h1></div></section>
+  </div>
+</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let currentSlide = 0;
+  function goToSlide(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[currentSlide].classList.remove('active');
+    slides[n].classList.add('active');
+    currentSlide = n;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') goToSlide(currentSlide + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') goToSlide(currentSlide - 1);
+    if (e.key === 'Home') goToSlide(0);
+    if (e.key === 'End') goToSlide(slides.length - 1);
+  });
+</script>
+</body>
+</html>
+```
+
+- [ ] **Step 2: Open in browser and verify navigation**
+
+Run: `open docs/AERO_Hackathon_Presentation.html`
+Expected: widać "Slide 1 — placeholder" na czarnym tle. Strzałki ← → przełączają slajdy 1→6. Home / End skacze na początek/koniec. Brak błędów w konsoli DevTools.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): scaffold HTML with 6 empty slides and keyboard navigation"
+```
+
+---
+
+## Task 2: Animated background (gradient + particles + grid + glow orbs)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html` (add CSS + background div)
+
+- [ ] **Step 1: Add background CSS inside `<style>` block (after existing `.slide-inner` rule)**
+
+Insert:
+
+```css
+/* ===== ANIMATED BACKGROUND ===== */
+.bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #000a1a 0%, #001429 40%, #0a1628 70%, #000a1a 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(72,162,206,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72,162,206,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridFloat 30s linear infinite;
+}
+@keyframes gridFloat {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+.particles { position: absolute; inset: 0; overflow: hidden; }
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: rgba(72,162,206,0.3);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+.particle:nth-child(1)  { left: 10%; top: 20%; animation-duration: 18s; animation-delay: 0s; width: 3px; height: 3px; }
+.particle:nth-child(2)  { left: 20%; top: 80%; animation-duration: 22s; animation-delay: -3s; }
+.particle:nth-child(3)  { left: 35%; top: 10%; animation-duration: 25s; animation-delay: -7s; width: 2.5px; height: 2.5px; }
+.particle:nth-child(4)  { left: 50%; top: 60%; animation-duration: 20s; animation-delay: -2s; }
+.particle:nth-child(5)  { left: 65%; top: 30%; animation-duration: 28s; animation-delay: -5s; width: 3px; height: 3px; }
+.particle:nth-child(6)  { left: 75%; top: 75%; animation-duration: 19s; animation-delay: -8s; }
+.particle:nth-child(7)  { left: 85%; top: 15%; animation-duration: 23s; animation-delay: -1s; }
+.particle:nth-child(8)  { left: 40%; top: 45%; animation-duration: 26s; animation-delay: -6s; width: 2.5px; height: 2.5px; }
+.particle:nth-child(9)  { left: 90%; top: 55%; animation-duration: 21s; animation-delay: -4s; }
+.particle:nth-child(10) { left: 5%;  top: 50%; animation-duration: 24s; animation-delay: -9s; }
+.particle:nth-child(11) { left: 55%; top: 90%; animation-duration: 27s; animation-delay: -2s; width: 3px; height: 3px; }
+.particle:nth-child(12) { left: 30%; top: 35%; animation-duration: 17s; animation-delay: -7s; }
+@keyframes particleFloat {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) translateX(40px); opacity: 0; }
+}
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: orbFloat 25s ease-in-out infinite;
+}
+.glow-orb:nth-child(1) {
+  width: 500px; height: 500px;
+  top: -10%; left: -5%;
+  background: radial-gradient(circle, rgba(72,162,206,0.6), transparent 70%);
+}
+.glow-orb:nth-child(2) {
+  width: 400px; height: 400px;
+  bottom: -10%; right: -5%;
+  background: radial-gradient(circle, rgba(63,195,122,0.4), transparent 70%);
+  animation-delay: -8s;
+}
+.glow-orb:nth-child(3) {
+  width: 350px; height: 350px;
+  top: 40%; right: 30%;
+  background: radial-gradient(circle, rgba(255,107,53,0.3), transparent 70%);
+  animation-delay: -15s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.95); }
+}
+```
+
+- [ ] **Step 2: Insert `.bg-layer` div at start of `<body>` (before `.presentation`)**
+
+Insert before `<div class="presentation">`:
+
+```html
+<div class="bg-layer">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+  <div class="particles">
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+  </div>
+  <div class="glow-orb"></div>
+  <div class="glow-orb"></div>
+  <div class="glow-orb"></div>
+</div>
+```
+
+- [ ] **Step 3: Reload browser and verify**
+
+Run: reload `docs/AERO_Hackathon_Presentation.html` in browser.
+Expected: animowany gradient, lekko ruszający się grid, ~12 cząsteczek unoszących się, 3 subtelne kolorowe orbs w tle. Brak stuttering (60fps).
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): animated background with gradient, particles, grid and glow orbs"
+```
+
+---
+
+## Task 3: Core CSS — glass cards, animations, typography, terminal frames
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add core CSS utilities after background CSS**
+
+Insert:
+
+```css
+/* ===== TYPOGRAPHY ===== */
+.mono { font-family: 'JetBrains Mono', 'Menlo', 'Consolas', monospace; }
+.slide-title {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(72,162,206,0.9) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.slide-subtitle {
+  font-size: clamp(16px, 1.6vw, 22px);
+  font-weight: 400;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 40px;
+  max-width: 900px;
+}
+
+/* ===== GLASS CARDS ===== */
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* ===== TERMINAL FRAME (vibecode akcent) ===== */
+.terminal {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(72,162,206,0.25);
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+.terminal-header {
+  display: flex;
+  gap: 6px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.terminal-header .dot {
+  width: 12px; height: 12px; border-radius: 50%;
+}
+.terminal-header .dot.red    { background: #ff5f56; }
+.terminal-header .dot.yellow { background: #ffbd2e; }
+.terminal-header .dot.green  { background: #27c93f; }
+.terminal-body {
+  padding: 20px 24px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.85);
+}
+.terminal-body .comment { color: rgba(72,162,206,0.7); }
+.terminal-body .prompt  { color: #3fc37a; }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInLeft  { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(40px); }  to { opacity: 1; transform: translateX(0); } }
+@keyframes scaleIn   { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+.slide.active .anim-fade-up    { animation: fadeInUp 0.6s ease forwards; }
+.slide.active .anim-fade       { animation: fadeIn 0.6s ease forwards; }
+.slide.active .anim-slide-left { animation: slideInLeft 0.6s ease forwards; }
+.slide.active .anim-slide-right{ animation: slideInRight 0.6s ease forwards; }
+.slide.active .anim-scale      { animation: scaleIn 0.6s ease forwards; }
+
+.delay-1  { animation-delay: 0.1s !important; opacity: 0; }
+.delay-2  { animation-delay: 0.2s !important; opacity: 0; }
+.delay-3  { animation-delay: 0.3s !important; opacity: 0; }
+.delay-4  { animation-delay: 0.4s !important; opacity: 0; }
+.delay-5  { animation-delay: 0.5s !important; opacity: 0; }
+.delay-6  { animation-delay: 0.6s !important; opacity: 0; }
+.delay-7  { animation-delay: 0.7s !important; opacity: 0; }
+.delay-8  { animation-delay: 0.8s !important; opacity: 0; }
+.delay-9  { animation-delay: 0.9s !important; opacity: 0; }
+.delay-10 { animation-delay: 1.0s !important; opacity: 0; }
+
+/* ===== BLINKING CURSOR (vibecode akcent) ===== */
+.blink-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 1em;
+  background: #48a2ce;
+  margin-left: 6px;
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+```
+
+- [ ] **Step 2: Reload and verify terminal + glass utilities render**
+
+Temporarily replace `<section class="slide active" data-slide="0">...</section>` with:
+
+```html
+<section class="slide active" data-slide="0">
+  <div class="slide-inner">
+    <div class="slide-title">Test tytułu</div>
+    <div class="slide-subtitle">Test podtytułu</div>
+    <div class="glass-card">Glass card test</div>
+    <div class="terminal" style="margin-top:20px;max-width:500px">
+      <div class="terminal-header">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+      </div>
+      <div class="terminal-body">
+        <div class="comment"># Test</div>
+        <div><span class="prompt">$</span> echo "test"</div>
+      </div>
+    </div>
+    <div style="margin-top:20px">Kursor<span class="blink-cursor"></span></div>
+  </div>
+</section>
+```
+
+Reload. Expected: gradient title, subtitle w 65% białym, glass card z blur, terminal z 3 kropkami i monospace treścią, mrugający kursor. Po zatwierdzeniu wizualnym — przywróć placeholder "Slide 1 — placeholder" żeby Task 5 mógł zbudować prawdziwy slajd 1 od zera.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): core CSS — glass cards, animations, terminal frames, JetBrains Mono"
+```
+
+---
+
+## Task 4: Navigation dots + slide counter + progress bar
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add navigation CSS**
+
+Insert (after cursor styles):
+
+```css
+/* ===== NAVIGATION ===== */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #48a2ce, #3fc37a);
+  width: 0%;
+  transition: width 0.4s ease;
+  z-index: 100;
+  box-shadow: 0 0 10px rgba(72,162,206,0.6);
+}
+.nav-dots {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.nav-dot:hover { background: rgba(72,162,206,0.6); transform: scale(1.3); }
+.nav-dot.active { background: #48a2ce; transform: scale(1.4); box-shadow: 0 0 12px rgba(72,162,206,0.8); }
+.nav-dot::before {
+  content: attr(data-label);
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.nav-dot:hover::before { opacity: 1; }
+.slide-counter {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  z-index: 100;
+}
+```
+
+- [ ] **Step 2: Add navigation HTML before closing `</body>`**
+
+Insert before `<script>`:
+
+```html
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots">
+  <button class="nav-dot active" data-slide="0" data-label="Tytuł" aria-label="Slajd 1: Tytuł"></button>
+  <button class="nav-dot" data-slide="1" data-label="Sytuacja" aria-label="Slajd 2: Sytuacja"></button>
+  <button class="nav-dot" data-slide="2" data-label="Magia" aria-label="Slajd 3: Magia"></button>
+  <button class="nav-dot" data-slide="3" data-label="Dowód" aria-label="Slajd 4: Dowód"></button>
+  <button class="nav-dot" data-slide="4" data-label="Kuchnia" aria-label="Slajd 5: Kuchnia"></button>
+  <button class="nav-dot" data-slide="5" data-label="Wasz ruch" aria-label="Slajd 6: Wasz ruch"></button>
+</div>
+<div class="slide-counter" id="slideCounter">1 / 6</div>
+```
+
+- [ ] **Step 3: Update `<script>` to handle dots, counter, progress**
+
+Replace existing `<script>` content with:
+
+```javascript
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.nav-dot');
+const counter = document.getElementById('slideCounter');
+const progressBar = document.getElementById('progressBar');
+let currentSlide = 0;
+
+function goToSlide(n) {
+  if (n < 0 || n >= slides.length) return;
+  slides[currentSlide].classList.remove('active');
+  dots[currentSlide].classList.remove('active');
+  slides[n].classList.add('active');
+  dots[n].classList.add('active');
+  currentSlide = n;
+  counter.textContent = `${n + 1} / ${slides.length}`;
+  progressBar.style.width = `${((n + 1) / slides.length) * 100}%`;
+}
+
+dots.forEach(dot => {
+  dot.addEventListener('click', () => goToSlide(parseInt(dot.dataset.slide)));
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goToSlide(currentSlide + 1); }
+  if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goToSlide(currentSlide - 1); }
+  if (e.key === 'Home') { e.preventDefault(); goToSlide(0); }
+  if (e.key === 'End')  { e.preventDefault(); goToSlide(slides.length - 1); }
+});
+
+// Initialize progress bar
+progressBar.style.width = `${(1 / slides.length) * 100}%`;
+```
+
+- [ ] **Step 4: Reload and verify**
+
+Reload browser. Expected:
+- Pasek postępu u góry (~16.6% szerokości na slajdzie 1)
+- 6 kropek u dołu, pierwsza aktywna (niebieska ze świeceniem)
+- Counter "1 / 6" w prawym dolnym rogu
+- Klik w kropkę → slajd się zmienia, counter updatuje, progress bar rośnie
+- Hover na kropkę → tooltip ("Tytuł" / "Sytuacja" / etc.)
+- Arrow keys + spacja działają
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): navigation — dots, counter, progress bar, keyboard handlers"
+```
+
+---
+
+## Task 5: Slide 1 — Tytuł (Hero + AERO + blinking cursor)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add slide 1 specific CSS**
+
+Insert (after navigation CSS):
+
+```css
+/* ===== SLIDE 1 — TYTUŁ ===== */
+.hero-content { text-align: center; }
+.hero-title {
+  font-size: clamp(80px, 12vw, 180px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  background: linear-gradient(135deg, #ffffff 0%, #48a2ce 50%, #3fc37a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+  position: relative;
+  display: inline-block;
+}
+.hero-title .blink-cursor {
+  width: 8px;
+  height: clamp(60px, 9vw, 140px);
+  vertical-align: middle;
+}
+.hero-subtitle {
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 10px;
+}
+.hero-tagline {
+  font-size: clamp(14px, 1.3vw, 18px);
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 30px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.hero-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(72,162,206,0.8), transparent);
+  margin: 0 auto 24px;
+  animation: expandLine 1.2s ease forwards;
+  animation-delay: 0.8s;
+}
+@keyframes expandLine { to { width: 400px; } }
+.hero-presenters {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 8px;
+}
+.hero-presenter-name { color: #ffffff; font-weight: 500; }
+.hero-presenter-role { color: rgba(72,162,206,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.hero-date {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 20px;
+}
+```
+
+- [ ] **Step 2: Replace slide 1 placeholder with final content**
+
+Replace `<section class="slide active" data-slide="0">...</section>` with:
+
+```html
+<section class="slide active" data-slide="0">
+  <div class="slide-inner">
+    <div class="hero-content">
+      <div class="anim-fade-up delay-1 hero-title">AERO<span class="blink-cursor"></span></div>
+      <div class="anim-fade-up delay-2 hero-subtitle">Jak dwóch non-developerów zbudowało aplikację w 2 dni</div>
+      <div class="anim-fade-up delay-3 hero-tagline">Hackathon · LLM · Vibecoding — historia z kuchni</div>
+      <div class="anim-fade delay-4 hero-line"></div>
+      <div class="anim-fade delay-5 hero-presenters">
+        <div>
+          <div class="hero-presenter-name">Mariusz Kędziora</div>
+          <div class="hero-presenter-role">SSDLC · Cyber</div>
+        </div>
+        <div>
+          <div class="hero-presenter-name">Mariusz Szustka</div>
+          <div class="hero-presenter-role">Endpoint · IAM</div>
+        </div>
+      </div>
+      <div class="anim-fade delay-6 hero-date">&lt;!-- data townhallu do uzupełnienia --&gt;</div>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Reload and verify**
+
+Reload. Expected na slajdzie 1:
+- Wielkie "AERO" z 3-kolorowym gradientem (biel → niebieski → zielony) + mrugający kursor
+- Subtitle "Jak dwóch non-developerów…" biały
+- Tagline monospace
+- Animowana pozioma linia rozszerza się do 400px
+- Dwie kolumny prezenterów: "Mariusz Kędziora / SSDLC · Cyber" + "Mariusz Szustka / Endpoint · IAM"
+- Placeholder daty w monospace (komentarz HTML widoczny)
+- Elementy pojawiają się sekwencyjnie (delay 0.1s → 0.6s)
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 1 title — AERO hero with gradient, blinking cursor, two presenters"
+```
+
+---
+
+## Task 6: Slide 2 — Sytuacja (split-screen + brief terminal + licznik 48h)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add slide 2 CSS**
+
+Insert:
+
+```css
+/* ===== SLIDE 2 — SYTUACJA ===== */
+.sit-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 32px;
+  margin-top: 20px;
+}
+.sit-us-heading { font-size: 14px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+.sit-presenter-card {
+  display: flex; gap: 14px; align-items: center;
+  margin-bottom: 14px;
+}
+.sit-presenter-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(72,162,206,0.4), rgba(63,195,122,0.4));
+  border: 2px solid rgba(72,162,206,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px;
+  flex-shrink: 0;
+}
+.sit-presenter-info .name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+.sit-presenter-info .role { font-size: 13px; color: rgba(72,162,206,0.8); }
+.sit-presenter-info .daily { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+.sit-badge {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(255,107,53,0.08);
+  border: 1px solid rgba(255,107,53,0.3);
+  border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-align: center;
+}
+.sit-badge strong { color: #ff6b35; }
+.sit-brief { position: relative; }
+.sit-countdown {
+  position: absolute;
+  top: -10px; right: -10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ff6b35;
+  opacity: 0.35;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 20px rgba(255,107,53,0.6);
+  pointer-events: none;
+}
+.sit-brief-list { list-style: none; }
+.sit-brief-list li {
+  padding: 6px 0;
+  padding-left: 20px;
+  position: relative;
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+.sit-brief-list li::before {
+  content: ">";
+  position: absolute;
+  left: 0;
+  color: #48a2ce;
+  font-weight: 700;
+}
+.sit-brief-list li.deadline { color: #ff6b35; font-weight: 600; margin-top: 10px; }
+```
+
+- [ ] **Step 2: Replace slide 2 placeholder**
+
+Replace `<section class="slide" data-slide="1">...</section>` with:
+
+```html
+<section class="slide" data-slide="1">
+  <div class="slide-inner">
+    <div class="anim-fade-up delay-1 slide-title">Sytuacja</div>
+    <div class="anim-fade-up delay-2 slide-subtitle">Dwóch ludzi z IT, żaden nie jest developerem. Brief wart tygodni pracy. Czasu: 48 godzin.</div>
+    <div class="sit-layout">
+      <div class="anim-slide-left delay-3 glass-card">
+        <div class="sit-us-heading">Kim jesteśmy</div>
+        <div class="sit-presenter-card">
+          <div class="sit-presenter-avatar">MK</div>
+          <div class="sit-presenter-info">
+            <div class="name">Mariusz Kędziora</div>
+            <div class="role">SSDLC · Cyber</div>
+            <div class="daily">codziennie: audyty, procesy, review</div>
+          </div>
+        </div>
+        <div class="sit-presenter-card">
+          <div class="sit-presenter-avatar">MS</div>
+          <div class="sit-presenter-info">
+            <div class="name">Mariusz Szustka</div>
+            <div class="role">Endpoint · IAM</div>
+            <div class="daily">codziennie: zarządzanie kontami i komputerami</div>
+          </div>
+        </div>
+        <div class="sit-badge">Linii kodu w codziennej pracy: <strong>0</strong></div>
+      </div>
+      <div class="anim-slide-right delay-4 terminal sit-brief">
+        <div class="sit-countdown">48:00:00</div>
+        <div class="terminal-header">
+          <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        </div>
+        <div class="terminal-body">
+          <div class="comment"># brief-hackatonu.md</div>
+          <div style="margin-top:10px; font-size:15px; font-weight:600; color:#fff">Zbudujcie system w 2 dni:</div>
+          <ul class="sit-brief-list" style="margin-top:10px">
+            <li>Zarządzanie operacjami lotniczymi helikopterami</li>
+            <li>Inspekcje linii przesyłowych 400 kV</li>
+            <li>4 role użytkowników z RBAC</li>
+            <li>Mapy, trasy KML, workflow akceptacji</li>
+            <li>Audit log, dwujęzyczność (PL/EN)</li>
+            <li class="deadline">! Deadline: 48 godzin</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="anim-fade-up delay-6" style="margin-top:28px; text-align:center; font-size:16px; color:rgba(255,255,255,0.75); font-style: italic">
+      Pierwsza myśl: <span class="mono" style="color:#ff6b35">„jak to w ogóle zacząć?"</span>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Reload and verify**
+
+Klik kropkę "Sytuacja". Expected:
+- Tytuł "Sytuacja" gradient
+- Dwie kolumny: lewa z 2 kartami prezenterów (avatary MK/MS, imiona, role), badge "Linii kodu: 0" z pomarańczowym akcentem
+- Prawa: terminal z kropkami, brief z 6 pozycjami, ostatnia (deadline) pomarańczowa
+- W prawym górnym rogu terminala faded "48:00:00"
+- Pod spodem kursywa "jak to w ogóle zacząć?"
+- Animacje slide-left/slide-right
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 2 sytuacja — split-screen with presenter cards and terminal brief"
+```
+
+---
+
+## Task 7: Slide 3 — Magia / Stack (4 filary grid + flow diagram + prompt decor)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add slide 3 CSS**
+
+Insert:
+
+```css
+/* ===== SLIDE 3 — MAGIA / STACK ===== */
+.stack-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 16px;
+}
+.stack-card {
+  padding: 22px 24px;
+  position: relative;
+}
+.stack-card-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+.stack-card-icon { font-size: 28px; }
+.stack-card-title { font-size: 20px; font-weight: 700; color: #fff; }
+.stack-card-desc { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.55; margin-bottom: 14px; }
+.stack-card-snippet {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 8px 12px;
+  background: rgba(0,0,0,0.3);
+  border-left: 2px solid #48a2ce;
+  border-radius: 4px;
+  color: rgba(255,255,255,0.65);
+}
+.stack-card-snippet .prompt { color: #3fc37a; margin-right: 6px; }
+.stack-flow {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+.stack-flow-node {
+  padding: 7px 12px;
+  background: rgba(72,162,206,0.1);
+  border: 1px solid rgba(72,162,206,0.3);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.85);
+}
+.stack-flow-arrow { color: rgba(72,162,206,0.6); font-size: 14px; }
+.prompt-decor {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.05);
+  pointer-events: none;
+  white-space: nowrap;
+  line-height: 1.8;
+  user-select: none;
+}
+.prompt-decor.top-left  { top: 16px; left: 16px; }
+.prompt-decor.bottom-right { bottom: 20px; right: 16px; text-align: right; }
+```
+
+- [ ] **Step 2: Replace slide 3 placeholder**
+
+Replace `<section class="slide" data-slide="2">...</section>` with:
+
+```html
+<section class="slide" data-slide="2">
+  <div class="prompt-decor top-left">
+&gt; Dodaj endpoint POST /api/orders<br>
+&gt; Walidacja: crew_weight &le; helicopter.max_payload<br>
+&gt; Dodaj testy pytest dla wszystkich statusów
+  </div>
+  <div class="prompt-decor bottom-right">
+# Utwórz model FlightOperation<br>
+# RBAC: tylko supervisor może zaakceptować<br>
+# i18n: przetłumacz cały UI na PL/EN
+  </div>
+  <div class="slide-inner">
+    <div class="anim-fade-up delay-1 slide-title">Magia? Cztery narzędzia.</div>
+    <div class="anim-fade-up delay-2 slide-subtitle">Zero frameworków „no-code". Każde z nich istnieje od lat. Każde darmowe lub tanie. Każde może odpalić <strong>każdy w tej sali</strong>.</div>
+    <div class="stack-grid">
+      <div class="anim-scale delay-3 glass-card stack-card">
+        <div class="stack-card-header">
+          <div class="stack-card-icon">🤖</div>
+          <div class="stack-card-title">Claude Code</div>
+        </div>
+        <div class="stack-card-desc">CLI agent od Anthropic. My opisujemy <em>co</em> i <em>dlaczego</em>, on pisze kod. Sonnet 4.6 + Opus 4.6 (1M context).</div>
+        <div class="stack-card-snippet"><span class="prompt">$</span>claude code --plan</div>
+      </div>
+      <div class="anim-scale delay-4 glass-card stack-card">
+        <div class="stack-card-header">
+          <div class="stack-card-icon">🔧</div>
+          <div class="stack-card-title">GitHub</div>
+        </div>
+        <div class="stack-card-desc">Issues = backlog. Branch per feature. PR + CI = <strong>quality gate</strong>. Zero wyjątków, zero merge bez green.</div>
+        <div class="stack-card-snippet"><span class="prompt">$</span>gh pr create --fill</div>
+      </div>
+      <div class="anim-scale delay-5 glass-card stack-card">
+        <div class="stack-card-header">
+          <div class="stack-card-icon">📋</div>
+          <div class="stack-card-title">GSD workflow</div>
+        </div>
+        <div class="stack-card-desc">Meta-struktura: milestone → slice → phase → task. Wymusza myślenie zanim każesz agentowi pisać.</div>
+        <div class="stack-card-snippet"><span class="prompt">$</span>gsd plan-phase</div>
+      </div>
+      <div class="anim-scale delay-6 glass-card stack-card">
+        <div class="stack-card-header">
+          <div class="stack-card-icon">🐳</div>
+          <div class="stack-card-title">Docker Compose</div>
+        </div>
+        <div class="stack-card-desc">5 serwisów, 1 polecenie. Środowisko prezentera = środowisko produkcji. Zero „u mnie działa".</div>
+        <div class="stack-card-snippet"><span class="prompt">$</span>docker compose up --build</div>
+      </div>
+    </div>
+    <div class="anim-fade-up delay-7 stack-flow">
+      <div class="stack-flow-node">Wymagania po PL</div>
+      <div class="stack-flow-arrow">→</div>
+      <div class="stack-flow-node">Claude Code</div>
+      <div class="stack-flow-arrow">→</div>
+      <div class="stack-flow-node">kod + testy</div>
+      <div class="stack-flow-arrow">→</div>
+      <div class="stack-flow-node">commit + PR</div>
+      <div class="stack-flow-arrow">→</div>
+      <div class="stack-flow-node">CI green</div>
+      <div class="stack-flow-arrow">→</div>
+      <div class="stack-flow-node">merge</div>
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Reload and verify**
+
+Klik kropka "Magia". Expected:
+- Tytuł "Magia? Cztery narzędzia." gradient
+- Grid 2x2 z 4 kartami (🤖 Claude Code, 🔧 GitHub, 📋 GSD, 🐳 Docker)
+- Każda karta ma ikon, tytuł, opis, monospace snippet z zielonym $
+- Flow diagram poniżej: 6 nodes połączonych strzałkami (Wymagania → Claude Code → … → merge)
+- W tle slajdu subtelne (opacity 0.05) fragmenty promptów w monospace w rogach
+- Animacje scale-in z delay stepping
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 3 magia — 4 stack pillars grid with flow diagram and prompt decorations"
+```
+
+---
+
+## Task 8: Slide 4 — Dowód (screencast placeholder + liczby + RBAC)
+
+**Files:**
+- Create: `docs/assets/screencast-placeholder.svg`
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Create placeholder SVG for screencast**
+
+Create `docs/assets/screencast-placeholder.svg`:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a1628"/>
+      <stop offset="1" stop-color="#001429"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <rect x="40" y="40" width="720" height="40" rx="6" fill="#000a1a" stroke="#48a2ce" stroke-opacity="0.3"/>
+  <circle cx="62" cy="60" r="6" fill="#ff5f56"/>
+  <circle cx="82" cy="60" r="6" fill="#ffbd2e"/>
+  <circle cx="102" cy="60" r="6" fill="#27c93f"/>
+  <text x="400" y="220" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" fill="#48a2ce" opacity="0.85">[ SCREENCAST — 25-30 sek ]</text>
+  <text x="400" y="260" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#ffffff" opacity="0.55">login → operacje → mapa → upload KML → akceptacja</text>
+  <text x="400" y="320" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="#ffffff" opacity="0.3">placeholder — zastąp realnym nagraniem przed townhallem</text>
+</svg>
+```
+
+- [ ] **Step 2: Add slide 4 CSS**
+
+Insert in main HTML:
+
+```css
+/* ===== SLIDE 4 — DOWÓD ===== */
+.proof-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.proof-screencast {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(72,162,206,0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  aspect-ratio: 16/10;
+  background: #0a1628;
+}
+.proof-screencast img, .proof-screencast video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.proof-numbers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.proof-number-cell {
+  padding: 14px 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  text-align: center;
+}
+.proof-number {
+  font-size: clamp(24px, 3vw, 38px);
+  font-weight: 800;
+  color: #48a2ce;
+  line-height: 1;
+  font-family: 'JetBrains Mono', monospace;
+}
+.proof-number.green { color: #3fc37a; }
+.proof-number.orange { color: #ff6b35; }
+.proof-number-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.proof-rbac {
+  margin-top: 8px;
+}
+.proof-rbac-heading {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+}
+.proof-rbac-roles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.proof-rbac-role {
+  display: flex; gap: 10px; align-items: center;
+  padding: 8px 10px;
+  background: rgba(72,162,206,0.05);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.proof-rbac-role-icon { font-size: 18px; }
+.proof-rbac-role-name { color: #fff; font-weight: 500; }
+.proof-irony {
+  margin-top: 22px;
+  padding: 14px 18px;
+  background: rgba(63,195,122,0.08);
+  border-left: 3px solid #3fc37a;
+  border-radius: 6px;
+  font-size: 14px;
+  font-style: italic;
+  color: rgba(255,255,255,0.85);
+}
+.proof-irony strong { color: #3fc37a; font-style: normal; }
+```
+
+- [ ] **Step 3: Replace slide 4 placeholder**
+
+Replace `<section class="slide" data-slide="3">...</section>` with:
+
+```html
+<section class="slide" data-slide="3">
+  <div class="slide-inner">
+    <div class="anim-fade-up delay-1 slide-title">To nie jest prototyp.</div>
+    <div class="anim-fade-up delay-2 slide-subtitle">Po 48 godzinach — pełna aplikacja. Oto co powstało.</div>
+    <div class="proof-layout">
+      <div class="anim-slide-left delay-3 proof-screencast">
+        <img src="assets/screencast-placeholder.svg" alt="Screencast aplikacji AERO — login, operacje, mapa, KML upload, akceptacja">
+      </div>
+      <div class="anim-slide-right delay-4">
+        <div class="proof-numbers">
+          <div class="proof-number-cell"><div class="proof-number" data-count="113">113</div><div class="proof-number-label">commitów</div></div>
+          <div class="proof-number-cell"><div class="proof-number" data-count="44">44</div><div class="proof-number-label">endpointów API</div></div>
+          <div class="proof-number-cell"><div class="proof-number green" data-count="166">166</div><div class="proof-number-label">testów backend</div></div>
+          <div class="proof-number-cell"><div class="proof-number green" data-count="63">63</div><div class="proof-number-label">E2E Playwright</div></div>
+          <div class="proof-number-cell"><div class="proof-number">5</div><div class="proof-number-label">serwisów Docker</div></div>
+          <div class="proof-number-cell"><div class="proof-number">4</div><div class="proof-number-label">role RBAC</div></div>
+          <div class="proof-number-cell"><div class="proof-number">2</div><div class="proof-number-label">języki (PL/EN)</div></div>
+          <div class="proof-number-cell"><div class="proof-number orange">48h</div><div class="proof-number-label">czas</div></div>
+        </div>
+        <div class="proof-rbac">
+          <div class="proof-rbac-heading">4 role · pełny RBAC</div>
+          <div class="proof-rbac-roles">
+            <div class="proof-rbac-role"><span class="proof-rbac-role-icon">📝</span><span class="proof-rbac-role-name">Planujący</span></div>
+            <div class="proof-rbac-role"><span class="proof-rbac-role-icon">✅</span><span class="proof-rbac-role-name">Nadzorujący</span></div>
+            <div class="proof-rbac-role"><span class="proof-rbac-role-icon">🚁</span><span class="proof-rbac-role-name">Pilot</span></div>
+            <div class="proof-rbac-role"><span class="proof-rbac-role-icon">⚙️</span><span class="proof-rbac-role-name">Administrator</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="anim-fade-up delay-6 proof-irony">
+      Powiem to jako specjalista IAM: <strong>RBAC który tu wyszedł jest porządny</strong>. Nie bawił się tym ktoś, kto nie wie co to zasada najmniejszych uprawnień. A to napisał agent.
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 4: Reload and verify**
+
+Klik kropka "Dowód". Expected:
+- Tytuł "To nie jest prototyp." gradient
+- Lewa: duża ramka screencast z placeholderem SVG (dark gradient + 3 kropki + napis "SCREENCAST 25-30 sek")
+- Prawa: grid 4×2 liczb (113/44/166/63 + 5/4/2/48h). Testy zielone, 48h pomarańczowe.
+- Pod liczbami sekcja RBAC z 4 rolami + ikonami
+- Pod spodem ironia IAM w zielonej ramce
+- Animacja slide-left/right
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/assets/screencast-placeholder.svg docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 4 dowód — screencast placeholder, numbers grid, RBAC, IAM irony callout"
+```
+
+---
+
+## Task 9: Slide 5 — Kuchnia (3 lekcje glass cards)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add slide 5 CSS**
+
+Insert:
+
+```css
+/* ===== SLIDE 5 — KUCHNIA ===== */
+.kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 10px;
+}
+.kitchen-card {
+  padding: 22px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.kitchen-card.success { border-top: 3px solid #3fc37a; }
+.kitchen-card.surprise { border-top: 3px solid #ff6b35; }
+.kitchen-card.human { border-top: 3px solid #48a2ce; }
+.kitchen-card-file {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 12px;
+}
+.kitchen-card-emoji { font-size: 36px; margin-bottom: 8px; }
+.kitchen-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.kitchen-card.success .kitchen-card-label  { color: #3fc37a; }
+.kitchen-card.surprise .kitchen-card-label { color: #ff6b35; }
+.kitchen-card.human .kitchen-card-label    { color: #48a2ce; }
+.kitchen-section { margin-bottom: 14px; }
+.kitchen-section-title {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.kitchen-section-text {
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.55;
+}
+.kitchen-wniosek {
+  margin-top: auto;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  font-style: italic;
+  font-size: 13px;
+  color: #fff;
+}
+```
+
+- [ ] **Step 2: Replace slide 5 placeholder**
+
+Replace `<section class="slide" data-slide="4">...</section>` with:
+
+```html
+<section class="slide" data-slide="4">
+  <div class="slide-inner">
+    <div class="anim-fade-up delay-1 slide-title">Kuchnia — trzy lekcje</div>
+    <div class="anim-fade-up delay-2 slide-subtitle">Nie wszystko było różowe. Oto co naprawdę się wydarzyło w 48h.</div>
+    <div class="kitchen-grid">
+      <div class="anim-fade-up delay-3 glass-card kitchen-card success">
+        <div class="kitchen-card-file">// lesson-01.md</div>
+        <div class="kitchen-card-emoji">✅</div>
+        <div class="kitchen-card-label">Co działało</div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Sytuacja</div>
+          <div class="kitchen-section-text">Agent miał napisać moduł walidacji zleceń. Pięć warunków bezpieczeństwa.</div>
+        </div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Co się stało</div>
+          <div class="kitchen-section-text">Poza kodem walidacji sam napisał 40+ testów pokrywających wszystkie warianty. Bez proszenia.</div>
+        </div>
+        <div class="kitchen-wniosek">Pisanie wymagań po polsku → szybsze niż pisanie kodu. <strong>229 testów zrobionych bez zamawiania.</strong></div>
+      </div>
+      <div class="anim-fade-up delay-4 glass-card kitchen-card surprise">
+        <div class="kitchen-card-file">// lesson-02.md</div>
+        <div class="kitchen-card-emoji">😱</div>
+        <div class="kitchen-card-label">Co zaskoczyło</div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Sytuacja</div>
+          <div class="kitchen-section-text">Wgrywamy pierwszy plik KML z trasą w Polsce. Klik „Pokaż na mapie".</div>
+        </div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Co się stało</div>
+          <div class="kitchen-section-text">Trasa pojawiła się 90° obok — na środku Oceanu Indyjskiego. Godzina debugowania.</div>
+        </div>
+        <div class="kitchen-wniosek">KML przechowuje <span class="mono">(lon, lat)</span>, Leaflet oczekuje <span class="mono">[lat, lon]</span>. <strong>Agent znalazł, naprawił, zapisał w knowledge base.</strong></div>
+      </div>
+      <div class="anim-fade-up delay-5 glass-card kitchen-card human">
+        <div class="kitchen-card-file">// lesson-03.md</div>
+        <div class="kitchen-card-emoji">🧠</div>
+        <div class="kitchen-card-label">Gdzie człowiek</div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Sytuacja</div>
+          <div class="kitchen-section-text">Pierwsza wersja miała hardcoded tokeny w testach. Zero rotacji.</div>
+        </div>
+        <div class="kitchen-section">
+          <div class="kitchen-section-title">Co się stało</div>
+          <div class="kitchen-section-text">Agent napisał tak, jak mu kazaliśmy. To <strong>my</strong> musieliśmy zauważyć, że to wpadka bezpieczeństwa.</div>
+        </div>
+        <div class="kitchen-wniosek">Decyzje architektoniczne, security, UX — człowiek w pętli. <strong>Vibecoding to pilot, nie autopilot.</strong></div>
+      </div>
+    </div>
+    <div class="anim-fade-up delay-7" style="margin-top:28px; text-align:center; font-size:16px; color:rgba(255,255,255,0.75)">
+      Nauczyliśmy się <span style="color:#3fc37a">czego od agenta</span>, gdzie <span style="color:#ff6b35">agent potrzebuje nas</span>, i czego <span style="color:#48a2ce">agent nie zrobi za nas</span>.
+    </div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Reload and verify**
+
+Klik kropka "Kuchnia". Expected:
+- Tytuł "Kuchnia — trzy lekcje"
+- 3 kolumny kart glass: pierwsza z zielonym top border (✅ Co działało), druga pomarańczowy (😱 Co zaskoczyło), trzecia niebieski (🧠 Gdzie człowiek)
+- Każda karta: `// lesson-0N.md` monospace, emoji, label colored, "Sytuacja" / "Co się stało" sekcje, "Wniosek" wyróżniony w kursywie
+- Pod spodem linia podsumowująca z 3 kolorami
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 5 kuchnia — 3 lessons cards with situation/stało/wniosek structure"
+```
+
+---
+
+## Task 10: Slide 6 — Wasz ruch (hero + 3 CTA)
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add slide 6 CSS**
+
+Insert:
+
+```css
+/* ===== SLIDE 6 — WASZ RUCH ===== */
+.cta-hero {
+  text-align: center;
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 40px;
+}
+.cta-hero .accent {
+  background: linear-gradient(135deg, #48a2ce, #3fc37a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.cta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 36px;
+}
+.cta-card {
+  padding: 22px;
+  text-align: center;
+}
+.cta-number {
+  display: inline-block;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(72,162,206,0.15);
+  border: 1px solid rgba(72,162,206,0.4);
+  color: #48a2ce;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 34px;
+  margin-bottom: 14px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cta-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.cta-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.55;
+}
+.cta-question {
+  text-align: center;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-top: 20px;
+}
+.cta-footer {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 14px;
+}
+```
+
+- [ ] **Step 2: Replace slide 6 placeholder**
+
+Replace `<section class="slide" data-slide="5">...</section>` with:
+
+```html
+<section class="slide" data-slide="5">
+  <div class="slide-inner">
+    <div class="anim-fade-up delay-1 cta-hero">
+      Nie musisz być developerem, żeby budować oprogramowanie.<br>
+      <span class="accent">Musisz umieć myśleć.</span>
+    </div>
+    <div class="cta-grid">
+      <div class="anim-scale delay-2 glass-card cta-card">
+        <div class="cta-number">1</div>
+        <div class="cta-title">Spróbuj</div>
+        <div class="cta-desc">Weź jeden drobny problem z Twojej pracy. Otwórz Claude Code. Opisz po polsku. Zobacz co się stanie.</div>
+      </div>
+      <div class="anim-scale delay-3 glass-card cta-card">
+        <div class="cta-number">2</div>
+        <div class="cta-title">Zmień nawyk</div>
+        <div class="cta-desc">Ucz się pisać <strong>wymagania</strong>, nie kod. To nowa kompetencja — i jest deficytowa.</div>
+      </div>
+      <div class="anim-scale delay-4 glass-card cta-card">
+        <div class="cta-number">3</div>
+        <div class="cta-title">Porozmawiajmy</div>
+        <div class="cta-desc">Obaj Mariuszowie — ten wysoki i ten drugi. Slack, korytarz, kawa. Poprowadzimy warsztat.</div>
+      </div>
+    </div>
+    <div class="anim-fade delay-6 cta-question">Pytania?</div>
+    <div class="anim-fade delay-7 cta-footer">&lt;!-- kontakt: slack / email do uzupełnienia --&gt;</div>
+  </div>
+</section>
+```
+
+- [ ] **Step 3: Reload and verify**
+
+Klik kropka "Wasz ruch". Expected:
+- Wielkie hero: "Nie musisz być developerem…" + "Musisz umieć myśleć." (gradient)
+- 3 kafelki CTA pod spodem (1/2/3 w kołach, tytuł, opis)
+- "Pytania?" duży biały
+- Placeholder kontaktu monospace
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): slide 6 wasz ruch — hero statement, 3 CTA cards, Q&A trigger"
+```
+
+---
+
+## Task 11: Interactive polish — number count-up + swipe + prefers-reduced-motion
+
+**Files:**
+- Modify: `docs/AERO_Hackathon_Presentation.html`
+
+- [ ] **Step 1: Add number count-up + swipe handlers to script**
+
+Append before closing `</script>`:
+
+```javascript
+// ===== NUMBER COUNT-UP (slide 4) =====
+function animateCount(el) {
+  const target = parseInt(el.dataset.count);
+  if (!target || el.dataset.animated === '1') return;
+  el.dataset.animated = '1';
+  const duration = 1200;
+  const start = performance.now();
+  function tick(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.floor(target * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(tick);
+}
+function onSlideEnter(n) {
+  if (n === 3) {
+    document.querySelectorAll('.proof-number[data-count]').forEach(animateCount);
+  }
+}
+const _origGoToSlide = goToSlide;
+goToSlide = function(n) { _origGoToSlide(n); onSlideEnter(n); };
+
+// ===== SWIPE GESTURES =====
+let touchStartX = null;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', (e) => {
+  if (touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) {
+    if (dx < 0) goToSlide(currentSlide + 1);
+    else goToSlide(currentSlide - 1);
+  }
+  touchStartX = null;
+}, { passive: true });
+
+// ===== REDUCED MOTION PREFERENCE =====
+if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.style.setProperty('--motion', 'reduce');
+  document.querySelectorAll('.particle, .glow-orb, .bg-gradient, .bg-grid').forEach(el => {
+    el.style.animation = 'none';
+  });
+}
+```
+
+- [ ] **Step 2: Verify count-up animation**
+
+Reload. Start on slide 1. Navigate to slide 4 (Dowód) using arrow key or dot click.
+Expected: liczby 113, 44, 166, 63 **animują się od 0 do wartości** w ~1.2 sek easing. Pozostałe liczby (5, 4, 2, 48h) renderowane staticznie. Wraca na slide 4 — nie re-animuje (dataset.animated=1 guard).
+
+- [ ] **Step 3: Verify swipe (tablet/phone or Chrome DevTools device emulation)**
+
+Open DevTools → Toggle device toolbar → iPad. Swipe left/right on slide.
+Expected: slide changes. Tap poza kropkami — no change (bo touchstart/end delta < 50px przy tap).
+
+- [ ] **Step 4: Verify reduced motion**
+
+In Chrome DevTools → Rendering tab → "Emulate CSS media feature prefers-reduced-motion" → "reduce".
+Expected: particles znikają (animacja none), gradient zatrzymany, grid static. Tekst i slajdy nadal działają.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add docs/AERO_Hackathon_Presentation.html
+git commit -m "feat(presentation): interactive polish — number count-up animation, swipe gestures, reduced-motion support"
+```
+
+---
+
+## Task 12: Content verification + cross-browser + timing rehearsal
+
+**Files:** (none — verification only, may result in fix commits)
+
+- [ ] **Step 1: Re-verify numbers from repo**
+
+Run:
+```bash
+git rev-list --count HEAD
+grep -rE "@router\.(get|post|put|delete|patch)" backend/app/api/ | wc -l
+find backend/tests -name "test_*.py" -exec grep -cE "^\s*(async )?def test_" {} + | awk -F: '{s+=$NF} END {print s}'
+grep -rE "^\s*test\(" frontend/e2e/ | wc -l
+grep -cE "^  [a-z_-]+:$" docker-compose.yml
+```
+Expected: 113, 44, 166, 63, 5. Jeśli którakolwiek różni się o >5%, update `data-count` w slide 4 i commit:
+```bash
+git commit -am "chore(presentation): refresh slide 4 numbers to match current repo state"
+```
+
+- [ ] **Step 2: Cross-browser check**
+
+Open `docs/AERO_Hackathon_Presentation.html` in Chrome i Firefox (oba — jeśli zainstalowane).
+Expected w obu:
+- Wszystkie 6 slajdów renderują identycznie
+- backdrop-filter działa (glass cards mają blur)
+- Animacje płynne
+- Zero błędów w konsoli (DevTools → Console)
+- Fonts (Inter + JetBrains Mono) loadują (nie widać FOUT trwale)
+
+Safari (jeśli dostępne na macOS): quick check że backdrop-filter + grid działają. Drobne kosmetyczne różnice OK.
+
+- [ ] **Step 3: Responsive check**
+
+DevTools → Toggle device toolbar:
+- 1920×1080 (projektor) → layout nie łamie się, fonty nie przycinane
+- 1440×900 (laptop) → jak wyżej
+- 1024×768 (awaryjne) → slajdy zmieszczą się, może mniejsze fonty — to OK dla prezentera
+
+- [ ] **Step 4: Timing rehearsal simulation**
+
+Otwórz spec speaker scripts (`docs/superpowers/specs/2026-04-17-aero-townhall-presentation-design.md`). Przeczytaj każdy speaker script na głos z timerem:
+- Slide 1: target ≤30 sek
+- Slide 2: target ≤150 sek (2.5 min)
+- Slide 3: target ≤150 sek
+- Slide 4: target ≤180 sek (3 min, z 30 sek screencastu)
+- Slide 5: target ≤180 sek
+- Slide 6: target ≤90 sek
+
+Suma: 780 sek = 13 min, z 2 min buforu = 15 min. Jeśli którykolwiek slide przekracza target >20% — trim copy w spec lub zredukuj liczbę elementów.
+
+- [ ] **Step 5: Security content review**
+
+SSDLC perspektywa: czy na którymkolwiek slajdzie nie ma:
+- Realnych sekretów / API keys / tokenów
+- Realnych URL wewnętrznych firmy
+- Danych osobowych poza imionami prezenterów (które są świadomie ujawnione)
+- Screenshotów / placeholderów które pokazywałyby coś poufnego
+
+Placeholder SVG: clean. Prompt decorations (fake examples): clean. OK.
+
+- [ ] **Step 6: Final commit (if any fixes applied during verification)**
+
+```bash
+git status --short
+# jeśli są zmiany:
+git commit -am "chore(presentation): verification fixes — timing, numbers, accessibility"
+```
+
+---
+
+## Task 13: Pull Request
+
+**Files:** (none — git/gh operations)
+
+- [ ] **Step 1: Push branch**
+
+Run: `git push -u origin feature/hackathon-townhall-presentation`
+Expected: `Branch 'feature/hackathon-townhall-presentation' set up to track 'origin/feature/hackathon-townhall-presentation'.`
+
+- [ ] **Step 2: Create PR**
+
+Run:
+```bash
+gh pr create --title "docs: AERO Hackathon town hall presentation (HTML, 6 slides, 2 presenters)" --body "$(cat <<'EOF'
+## Summary
+- New self-contained HTML presentation at `docs/AERO_Hackathon_Presentation.html`
+- 1 title + 5 content slides, 15 min runtime, dwugłos (Mariusz Kędziora + Mariusz Szustka)
+- Hybryda glassmorphism (reuse z `docs/AERO_Presentation.html`) + vibecode akcenty (JetBrains Mono, terminal frames, typing cursor, prompt decorations)
+- Content gaps oznaczone HTML comments — prezenterzy uzupełnią przed townhallem
+
+## Test plan
+- [ ] Open `docs/AERO_Hackathon_Presentation.html` in Chrome — wszystkie 6 slajdów render
+- [ ] Keyboard navigation (← → Home End spacja) działa
+- [ ] Click navigation dots skacze na wybrany slajd
+- [ ] Animacja count-up liczb na slajdzie 4 (przy pierwszym wejściu)
+- [ ] Swipe gesture na mobile DevTools view
+- [ ] Firefox render match
+- [ ] Timing rehearsal: full read speaker scripts ≤13 min
+- [ ] Content check: zero sekretów / realnych URL
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+Expected: URL PR-a zwrócony. CI rusza (GitHub Actions).
+
+- [ ] **Step 3: Wait for CI green, then merge**
+
+Run: `gh pr checks --watch`
+Expected: wszystkie checks green.
+
+Po green: **nie mergujemy automatycznie**. Informujemy usera: "PR gotowy: <URL>, CI green, czekam na Twój manual merge" — zgodnie z regułą "never merge PRs until GitHub Actions CI is green" + merge tylko po explicit user approval.
+
+---
+
+## Self-review notes
+
+**Spec coverage:**
+- ✅ Sekcja 4 (slajdy 1-6): każdy slajd ma własny task z exact HTML/CSS (Task 5-10)
+- ✅ Sekcja 5 (visual style): background (Task 2), glass/animations/terminal (Task 3), navigation (Task 4), slide-specific (Task 5-10), interactive polish (Task 11)
+- ✅ Sekcja 6 (content inputs): TBD-items oznaczone jako HTML comments (`<!-- … -->`) i monospace placeholdery — visible, zastępowalne przed townhallem
+- ✅ Sekcja 7 (technical): single HTML, Google Fonts, no JS libs — Task 1 + 11
+- ✅ Sekcja 8 (verification): Task 12 pokrywa wszystkie pkt (content accuracy, visual regression, timing, two-presenter flow, security review)
+
+**Placeholder scan:**
+- Brak "TBD" / "TODO" / "fill in" w plan steps. Wszystkie HTML placeholders wewnątrz pliku są świadome, widoczne jako `<!-- komentarz -->` lub monospace stringi — prezenterzy je zobaczą i uzupełnią.
+
+**Type consistency:**
+- Nazwy funkcji JS spójne: `goToSlide` / `animateCount` / `onSlideEnter` — używane w jednym miejscu każda.
+- Data-attributes spójne: `data-slide`, `data-count`, `data-label` — konsekwentnie przez zadania.
+- CSS class names: `slide` / `slide-inner` / `slide-title` / `slide-subtitle` / `glass-card` / `terminal` — powtarzane bez wariantów.
+
+---
+
+## Execution choice
+
+Plan complete and saved to `docs/superpowers/plans/2026-04-17-aero-hackathon-presentation.md`. Two execution options:
+
+1. **Subagent-Driven (recommended)** — dispatch fresh subagent per task, two-stage review between tasks, fast iteration.
+2. **Inline Execution** — execute tasks in this session using `executing-plans` skill, batch execution with checkpoints for review.
+
+Which approach?
