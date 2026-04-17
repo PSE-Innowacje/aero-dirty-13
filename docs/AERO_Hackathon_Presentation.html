@@ -491,6 +491,31 @@ body {
   color: rgba(255,255,255,0.85);
 }
 .proof-irony strong { color: #3fc37a; font-style: normal; }
+
+/* ===== SLIDE 5 — KUCHNIA ===== */
+.kitchen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 10px; }
+.kitchen-card { padding: 22px 20px; position: relative; display: flex; flex-direction: column; }
+.kitchen-card.success  { border-top: 3px solid #3fc37a; }
+.kitchen-card.surprise { border-top: 3px solid #ff6b35; }
+.kitchen-card.human    { border-top: 3px solid #48a2ce; }
+.kitchen-card-file { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.3); margin-bottom: 12px; }
+.kitchen-card-emoji { font-size: 36px; margin-bottom: 8px; }
+.kitchen-card-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; }
+.kitchen-card.success .kitchen-card-label  { color: #3fc37a; }
+.kitchen-card.surprise .kitchen-card-label { color: #ff6b35; }
+.kitchen-card.human .kitchen-card-label    { color: #48a2ce; }
+.kitchen-section { margin-bottom: 14px; }
+.kitchen-section-title { font-size: 11px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.kitchen-section-text { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.55; }
+.kitchen-wniosek {
+  margin-top: auto;
+  padding: 12px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  font-style: italic;
+  font-size: 13px;
+  color: #fff;
+}
 </style>
 </head>
 <body>
@@ -665,7 +690,59 @@ body {
         </div>
       </div>
     </section>
-    <section class="slide" data-slide="4"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 5 — placeholder</h1></div></section>
+    <section class="slide" data-slide="4">
+      <div class="slide-inner">
+        <div class="anim-fade-up delay-1 slide-title">Kuchnia — trzy lekcje</div>
+        <div class="anim-fade-up delay-2 slide-subtitle">Nie wszystko było różowe. Oto co naprawdę się wydarzyło w 48h.</div>
+        <div class="kitchen-grid">
+          <div class="anim-fade-up delay-3 glass-card kitchen-card success">
+            <div class="kitchen-card-file">// lesson-01.md</div>
+            <div class="kitchen-card-emoji">✅</div>
+            <div class="kitchen-card-label">Co działało</div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Sytuacja</div>
+              <div class="kitchen-section-text">Agent miał napisać moduł walidacji zleceń. Pięć warunków bezpieczeństwa.</div>
+            </div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Co się stało</div>
+              <div class="kitchen-section-text">Poza kodem walidacji sam napisał 40+ testów pokrywających wszystkie warianty. Bez proszenia.</div>
+            </div>
+            <div class="kitchen-wniosek">Pisanie wymagań po polsku → szybsze niż pisanie kodu. <strong>229 testów zrobionych bez zamawiania.</strong></div>
+          </div>
+          <div class="anim-fade-up delay-4 glass-card kitchen-card surprise">
+            <div class="kitchen-card-file">// lesson-02.md</div>
+            <div class="kitchen-card-emoji">😱</div>
+            <div class="kitchen-card-label">Co zaskoczyło</div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Sytuacja</div>
+              <div class="kitchen-section-text">Wgrywamy pierwszy plik KML z trasą w Polsce. Klik „Pokaż na mapie".</div>
+            </div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Co się stało</div>
+              <div class="kitchen-section-text">Trasa pojawiła się 90° obok — na środku Oceanu Indyjskiego. Godzina debugowania.</div>
+            </div>
+            <div class="kitchen-wniosek">KML przechowuje <span class="mono">(lon, lat)</span>, Leaflet oczekuje <span class="mono">[lat, lon]</span>. <strong>Agent znalazł, naprawił, zapisał w knowledge base.</strong></div>
+          </div>
+          <div class="anim-fade-up delay-5 glass-card kitchen-card human">
+            <div class="kitchen-card-file">// lesson-03.md</div>
+            <div class="kitchen-card-emoji">🧠</div>
+            <div class="kitchen-card-label">Gdzie człowiek</div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Sytuacja</div>
+              <div class="kitchen-section-text">Pierwsza wersja miała hardcoded tokeny w testach. Zero rotacji.</div>
+            </div>
+            <div class="kitchen-section">
+              <div class="kitchen-section-title">Co się stało</div>
+              <div class="kitchen-section-text">Agent napisał tak, jak mu kazaliśmy. To <strong>my</strong> musieliśmy zauważyć, że to wpadka bezpieczeństwa.</div>
+            </div>
+            <div class="kitchen-wniosek">Decyzje architektoniczne, security, UX — człowiek w pętli. <strong>Vibecoding to pilot, nie autopilot.</strong></div>
+          </div>
+        </div>
+        <div class="anim-fade-up delay-7" style="margin-top:28px; text-align:center; font-size:16px; color:rgba(255,255,255,0.75)">
+          Nauczyliśmy się <span style="color:#3fc37a">czego od agenta</span>, gdzie <span style="color:#ff6b35">agent potrzebuje nas</span>, i czego <span style="color:#48a2ce">agent nie zrobi za nas</span>.
+        </div>
+      </div>
+    </section>
     <section class="slide" data-slide="5"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 6 — placeholder</h1></div></section>
   </div>
 </div>
