@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, verify_password
 from app.api.deps import require_role
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
@@ -93,6 +93,22 @@ async def update_user(
         )
 
     update_data = body.model_dump(exclude_unset=True)
+
+    # Remove current_password before ORM loop — must never reach the model
+    update_data.pop("current_password", None)
+
+    # Verify current password before allowing password change
+    if "password" in update_data and update_data["password"] is not None:
+        if not body.current_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="current_password is required when changing password",
+            )
+        if not verify_password(body.current_password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="current_password is incorrect",
+            )
 
     # Hash password if provided
     if "password" in update_data:

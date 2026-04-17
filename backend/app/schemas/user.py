@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
+from app.core.sanitize import strip_html
 from app.schemas.crew_member import EMAIL_RE
 
 VALID_ROLES = [
@@ -25,6 +26,7 @@ class UserCreate(BaseModel):
     @classmethod
     def name_not_empty(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
@@ -63,6 +65,7 @@ class UserUpdate(BaseModel):
     last_name: str | None = None
     email: str | None = None
     password: str | None = None
+    current_password: str | None = None
     system_role: str | None = None
 
     @field_validator("first_name", "last_name")
@@ -71,6 +74,7 @@ class UserUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
