@@ -16,6 +16,7 @@ class Settings(BaseSettings):
         "http://localhost:3000",
     ]
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    DEBUG: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
