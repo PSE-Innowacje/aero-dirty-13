@@ -35,9 +35,106 @@ body {
   max-height: 90vh;
   padding: 40px;
 }
+
+/* ===== ANIMATED BACKGROUND ===== */
+.bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.bg-gradient {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #000a1a 0%, #001429 40%, #0a1628 70%, #000a1a 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease infinite;
+}
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(72,162,206,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(72,162,206,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridFloat 30s linear infinite;
+}
+@keyframes gridFloat {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(60px, 60px); }
+}
+.particles { position: absolute; inset: 0; overflow: hidden; }
+.particle {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: rgba(72,162,206,0.3);
+  border-radius: 50%;
+  animation: particleFloat linear infinite;
+}
+.particle:nth-child(1)  { left: 10%; top: 20%; animation-duration: 18s; animation-delay: 0s; width: 3px; height: 3px; }
+.particle:nth-child(2)  { left: 20%; top: 80%; animation-duration: 22s; animation-delay: -3s; }
+.particle:nth-child(3)  { left: 35%; top: 10%; animation-duration: 25s; animation-delay: -7s; width: 2.5px; height: 2.5px; }
+.particle:nth-child(4)  { left: 50%; top: 60%; animation-duration: 20s; animation-delay: -2s; }
+.particle:nth-child(5)  { left: 65%; top: 30%; animation-duration: 28s; animation-delay: -5s; width: 3px; height: 3px; }
+.particle:nth-child(6)  { left: 75%; top: 75%; animation-duration: 19s; animation-delay: -8s; }
+.particle:nth-child(7)  { left: 85%; top: 15%; animation-duration: 23s; animation-delay: -1s; }
+.particle:nth-child(8)  { left: 40%; top: 45%; animation-duration: 26s; animation-delay: -6s; width: 2.5px; height: 2.5px; }
+.particle:nth-child(9)  { left: 90%; top: 55%; animation-duration: 21s; animation-delay: -4s; }
+.particle:nth-child(10) { left: 5%;  top: 50%; animation-duration: 24s; animation-delay: -9s; }
+.particle:nth-child(11) { left: 55%; top: 90%; animation-duration: 27s; animation-delay: -2s; width: 3px; height: 3px; }
+.particle:nth-child(12) { left: 30%; top: 35%; animation-duration: 17s; animation-delay: -7s; }
+@keyframes particleFloat {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) translateX(40px); opacity: 0; }
+}
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: orbFloat 25s ease-in-out infinite;
+}
+.glow-orb:nth-child(1) {
+  width: 500px; height: 500px;
+  top: -10%; left: -5%;
+  background: radial-gradient(circle, rgba(72,162,206,0.6), transparent 70%);
+}
+.glow-orb:nth-child(2) {
+  width: 400px; height: 400px;
+  bottom: -10%; right: -5%;
+  background: radial-gradient(circle, rgba(63,195,122,0.4), transparent 70%);
+  animation-delay: -8s;
+}
+.glow-orb:nth-child(3) {
+  width: 350px; height: 350px;
+  top: 40%; right: 30%;
+  background: radial-gradient(circle, rgba(255,107,53,0.3), transparent 70%);
+  animation-delay: -15s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 40px) scale(0.95); }
+}
 </style>
 </head>
 <body>
+<div class="bg-layer">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+  <div class="particles">
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+    <span class="particle"></span><span class="particle"></span><span class="particle"></span>
+  </div>
+  <div class="glow-orb"></div>
+  <div class="glow-orb"></div>
+  <div class="glow-orb"></div>
+</div>
 <div class="presentation">
   <div class="slides-container" id="slidesContainer">
     <section class="slide active" data-slide="0"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 1 — placeholder</h1></div></section>
