@@ -1,9 +1,7 @@
 /**
- * API client with JWT token injection.
+ * API client — uses httpOnly cookies for auth, credentials:'include' on every request.
  * All paths are relative — nginx proxies /api to the backend.
  */
-
-const TOKEN_KEY = "aero_token";
 
 export class ApiError extends Error {
   constructor(
@@ -15,28 +13,13 @@ export class ApiError extends Error {
   }
 }
 
-export function getStoredToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-export function setStoredToken(token: string): void {
-  localStorage.setItem(TOKEN_KEY, token);
-}
-
-export function clearStoredToken(): void {
-  localStorage.removeItem(TOKEN_KEY);
-}
-
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const headers = new Headers(options.headers);
 
-  const token = getStoredToken();
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
+  headers.set("X-Requested-With", "XMLHttpRequest");
 
   const method = (options.method ?? "GET").toUpperCase();
   if ((method === "POST" || method === "PUT" || method === "PATCH") && !headers.has("Content-Type")) {
@@ -46,6 +29,7 @@ export async function apiFetch<T>(
   const response = await fetch(`/api${path}`, {
     ...options,
     headers,
+    credentials: 'include',
   });
 
   if (!response.ok) {

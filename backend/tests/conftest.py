@@ -1,4 +1,4 @@
-"""Shared test fixtures — async SQLite engine, test users, auth tokens, AsyncClient.
+"""Shared test fixtures — async SQLite engine, test users, auth cookies, AsyncClient.
 
 Also provides reusable DB helper functions for creating test entities
 (helicopters, crew members, landing sites, operations) used across
@@ -140,20 +140,20 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
         yield ac
 
 
-async def _get_token(client: AsyncClient, email: str) -> str:
-    """Login and return the Bearer token string."""
+async def _get_cookies(client: AsyncClient, email: str) -> dict[str, str]:
+    """Login and return cookies dict for the given user."""
     resp = await client.post(
         "/api/auth/login",
         json={"email": email, "password": TEST_PASSWORD},
     )
     assert resp.status_code == 200, f"Login failed for {email}: {resp.text}"
-    return resp.json()["access_token"]
+    return dict(resp.cookies)
 
 
 @pytest_asyncio.fixture
-async def auth_headers(client: AsyncClient, seed_users) -> dict[str, dict[str, str]]:
-    """Return a dict mapping role name → auth headers for that role's test user."""
-    headers: dict[str, dict[str, str]] = {}
+async def auth_cookies(client: AsyncClient, seed_users) -> dict[str, dict[str, str]]:
+    """Return a dict mapping role name → cookie dict for that role's test user."""
+    cookies: dict[str, dict[str, str]] = {}
     role_email = {
         "Administrator": "admin@test.com",
         "Planner": "planner@test.com",
@@ -161,9 +161,8 @@ async def auth_headers(client: AsyncClient, seed_users) -> dict[str, dict[str, s
         "Pilot": "pilot@test.com",
     }
     for role, email in role_email.items():
-        token = await _get_token(client, email)
-        headers[role] = {"Authorization": f"Bearer {token}"}
-    return headers
+        cookies[role] = await _get_cookies(client, email)
+    return cookies
 
 
 # ── Shared DB helper functions (used across multiple test modules) ──
@@ -266,7 +265,7 @@ async def create_pilot_crew_member() -> int:
 
 async def create_operation(
     client: AsyncClient,
-    headers: dict[str, str],
+    cookies: dict[str, str],
     *,
     proposed_earliest: str = "2027-01-15",
     proposed_latest: str = "2027-01-20",
@@ -281,14 +280,15 @@ async def create_operation(
             "proposed_date_earliest": proposed_earliest,
             "proposed_date_latest": proposed_latest,
         },
-        headers=headers,
+        cookies=cookies,
+        headers={"X-Requested-With": "XMLHttpRequest"},
     )
     assert resp.status_code == 201, f"Operation create failed: {resp.text}"
     return resp.json()["id"]
 
 
 async def confirm_operation(
-    client: AsyncClient, headers: dict[str, str], op_id: int
+    client: AsyncClient, cookies: dict[str, str], op_id: int
 ) -> None:
     """Confirm an operation (1→3) via Supervisor."""
     resp = await client.post(
@@ -297,6 +297,7 @@ async def confirm_operation(
             "planned_date_earliest": "2027-01-15",
             "planned_date_latest": "2027-01-20",
         },
-        headers=headers,
+        cookies=cookies,
+        headers={"X-Requested-With": "XMLHttpRequest"},
     )
     assert resp.status_code == 200, f"Operation confirm failed: {resp.text}"

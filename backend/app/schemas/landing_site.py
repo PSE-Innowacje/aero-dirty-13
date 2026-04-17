@@ -2,6 +2,8 @@
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from app.core.sanitize import strip_html
+
 
 class LandingSiteCreate(BaseModel):
     """Schema for creating a landing site."""
@@ -14,6 +16,7 @@ class LandingSiteCreate(BaseModel):
     @classmethod
     def name_not_empty(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 255:

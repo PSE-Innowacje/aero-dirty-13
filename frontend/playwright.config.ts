@@ -17,6 +17,8 @@ export default defineConfig({
        CI: Vite on port 5173 (proxies /api to uvicorn on port 8000) */
     baseURL: process.env.CI ? 'http://localhost:5173' : 'http://localhost',
     trace: 'on-first-retry',
+    /* Self-signed TLS cert in local docker-compose stack */
+    ignoreHTTPSErrors: true,
   },
 
   projects: [

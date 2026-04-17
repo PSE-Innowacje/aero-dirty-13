@@ -12,8 +12,14 @@ logging.basicConfig(
     stream=sys.stdout,
 )
 
-from fastapi import FastAPI
+import logging as _log422
+
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+_validation_logger = _log422.getLogger("aero.validation")
 
 from app.core.config import settings
 from app.core.database import engine, async_session
@@ -86,6 +92,27 @@ def create_app() -> FastAPI:
     application.include_router(operations_router)
     application.include_router(orders_router)
     application.include_router(stats_router)
+
+    @application.exception_handler(RequestValidationError)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        _validation_logger.warning("Validation error on %s: %s", request.url, exc.errors())
+        if settings.DEBUG:
+            return JSONResponse(status_code=422, content={"detail": exc.errors()})
+        return JSONResponse(status_code=422, content={"detail": "Invalid request data"})
+
+    @application.middleware("http")
+    async def csrf_check(request: Request, call_next):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return await call_next(request)
+        if not request.cookies.get("access_token"):
+            return await call_next(request)
+        if request.url.path in ("/api/auth/login", "/api/auth/refresh"):
+            return await call_next(request)
+        if request.headers.get("x-requested-with") != "XMLHttpRequest":
+            return JSONResponse(status_code=403, content={"detail": "CSRF check failed"})
+        return await call_next(request)
 
     return application
 

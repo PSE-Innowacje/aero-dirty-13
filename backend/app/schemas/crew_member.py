@@ -5,6 +5,8 @@ import re
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from app.core.sanitize import strip_html
+
 
 VALID_ROLES = ["Pilot", "Obserwator", "Mechanik", "Operator"]
 
@@ -29,6 +31,7 @@ class CrewMemberCreate(BaseModel):
     @classmethod
     def name_not_empty(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
@@ -67,6 +70,7 @@ class CrewMemberCreate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 30:
             raise ValueError("must be 30 characters or fewer")
         return v
@@ -103,6 +107,7 @@ class CrewMemberUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
@@ -147,6 +152,7 @@ class CrewMemberUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 30:
             raise ValueError("must be 30 characters or fewer")
         return v

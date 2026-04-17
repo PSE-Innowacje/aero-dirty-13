@@ -4,6 +4,8 @@ import datetime
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
+from app.core.sanitize import strip_html
+
 
 VALID_STATUSES = ["aktywny", "nieaktywny"]
 
@@ -24,6 +26,7 @@ class HelicopterCreate(BaseModel):
     @classmethod
     def registration_number_valid(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 30:
@@ -34,6 +37,7 @@ class HelicopterCreate(BaseModel):
     @classmethod
     def helicopter_type_valid(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
@@ -46,6 +50,7 @@ class HelicopterCreate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")
         return v
@@ -105,6 +110,7 @@ class HelicopterUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 30:
@@ -117,6 +123,7 @@ class HelicopterUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 100:
@@ -129,6 +136,7 @@ class HelicopterUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")
         return v

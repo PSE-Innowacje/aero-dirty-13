@@ -1,5 +1,5 @@
 /**
- * Auth context — manages JWT token, current user, login/logout.
+ * Auth context — cookie-based auth, no localStorage token storage.
  */
 
 import {
@@ -10,12 +10,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import {
-  apiFetch,
-  getStoredToken,
-  setStoredToken,
-  clearStoredToken,
-} from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 
 export interface User {
   id: number;
@@ -25,63 +20,42 @@ export interface User {
   system_role: string;
 }
 
-interface LoginResponse {
-  access_token: string;
-  token_type: string;
-}
-
 interface AuthContextValue {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(getStoredToken());
   const [isLoading, setIsLoading] = useState(true);
 
-  const logout = useCallback(() => {
-    clearStoredToken();
-    setToken(null);
+  const logout = useCallback(async () => {
+    try {
+      await apiFetch("/auth/logout", { method: "POST" });
+    } catch {
+      // Server error — still clear local state
+    }
     setUser(null);
   }, []);
 
-  // On mount, validate existing token
+  // On mount, check session via cookie
   useEffect(() => {
-    const existingToken = getStoredToken();
-    if (!existingToken) {
-      setIsLoading(false);
-      return;
-    }
-
     apiFetch<User>("/auth/me")
-      .then((u) => {
-        setUser(u);
-        setToken(existingToken);
-      })
-      .catch(() => {
-        // Token invalid — clear it
-        clearStoredToken();
-        setToken(null);
-        setUser(null);
-      })
+      .then((u) => setUser(u))
+      .catch(() => setUser(null))
       .finally(() => setIsLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (email: string, password: string) => {
-    const data = await apiFetch<LoginResponse>("/auth/login", {
+    await apiFetch("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
-
-    setStoredToken(data.access_token);
-    setToken(data.access_token);
 
     const me = await apiFetch<User>("/auth/me");
     setUser(me);
@@ -91,7 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        token,
         isAuthenticated: !!user,
         isLoading,
         login,

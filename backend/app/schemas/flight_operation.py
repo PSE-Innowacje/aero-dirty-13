@@ -7,6 +7,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.sanitize import strip_html
+
 
 VALID_ACTIVITY_TYPES = [
     "oględziny wizualne",
@@ -59,6 +61,7 @@ class OperationCreate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 30:
             raise ValueError("must be 30 characters or fewer")
         return v
@@ -69,6 +72,7 @@ class OperationCreate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")
         return v
@@ -79,6 +83,7 @@ class OperationCreate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 500:
             raise ValueError("must be 500 characters or fewer")
         return v
@@ -88,10 +93,13 @@ class OperationCreate(BaseModel):
     def validate_emails(cls, v: list[str] | None) -> list[str] | None:
         if v is None:
             return v
+        result = []
         for email in v:
+            email = strip_html(email)
             if "@" not in email:
                 raise ValueError(f"Invalid email: {email}")
-        return v
+            result.append(email)
+        return result
 
     @model_validator(mode="after")
     def check_proposed_dates(self) -> OperationCreate:
@@ -139,6 +147,7 @@ class OperationUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("order_number must not be empty")
         if len(v) > 30:
@@ -151,6 +160,7 @@ class OperationUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 100:
             raise ValueError("must be 100 characters or fewer")
         return v
@@ -161,6 +171,7 @@ class OperationUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 500:
             raise ValueError("must be 500 characters or fewer")
         return v
@@ -171,6 +182,7 @@ class OperationUpdate(BaseModel):
         if v is None:
             return v
         v = v.strip()
+        v = strip_html(v)
         if len(v) > 500:
             raise ValueError("must be 500 characters or fewer")
         return v
@@ -180,10 +192,13 @@ class OperationUpdate(BaseModel):
     def validate_emails(cls, v: list[str] | None) -> list[str] | None:
         if v is None:
             return v
+        result = []
         for email in v:
+            email = strip_html(email)
             if "@" not in email:
                 raise ValueError(f"Invalid email: {email}")
-        return v
+            result.append(email)
+        return result
 
     @model_validator(mode="after")
     def check_date_ordering(self) -> OperationUpdate:
@@ -257,6 +272,7 @@ class CommentCreate(BaseModel):
     @classmethod
     def content_strip(cls, v: str) -> str:
         v = v.strip()
+        v = strip_html(v)
         if not v:
             raise ValueError("must not be empty")
         if len(v) > 500:

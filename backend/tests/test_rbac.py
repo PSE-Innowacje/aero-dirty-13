@@ -16,6 +16,8 @@ from tests.conftest import (
 
 pytestmark = pytest.mark.asyncio
 
+_CSRF = {"X-Requested-With": "XMLHttpRequest"}
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Helicopters RBAC
@@ -29,19 +31,19 @@ class TestHelicoptersRBAC:
 
     @pytest.mark.parametrize("role", ["Administrator", "Supervisor", "Pilot"])
     async def test_allowed_roles_can_list_helicopters(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/helicopters", headers=auth_headers[role])
+        resp = await client.get("/api/helicopters", cookies=auth_cookies[role])
         assert resp.status_code == 200
 
     async def test_planner_cannot_list_helicopters(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/helicopters", headers=auth_headers["Planner"])
+        resp = await client.get("/api/helicopters", cookies=auth_cookies["Planner"])
         assert resp.status_code == 403
 
     async def test_admin_can_create_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/helicopters",
@@ -54,13 +56,14 @@ class TestHelicoptersRBAC:
                 "inspection_date": "2027-12-31",
                 "range_km": 500,
             },
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_create_helicopter(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/helicopters",
@@ -73,51 +76,56 @@ class TestHelicoptersRBAC:
                 "inspection_date": "2027-12-31",
                 "range_km": 500,
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_update_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         heli_id = await create_helicopter(registration="SP-UPD1")
         resp = await client.put(
             f"/api/helicopters/{heli_id}",
             json={"max_crew": 6},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_update_helicopter(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         heli_id = await create_helicopter(registration=f"SP-UPD-{role[:3].upper()}")
         resp = await client.put(
             f"/api/helicopters/{heli_id}",
             json={"max_crew": 6},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_delete_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         heli_id = await create_helicopter(registration="SP-DEL1")
         resp = await client.delete(
             f"/api/helicopters/{heli_id}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_delete_helicopter(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         heli_id = await create_helicopter(registration=f"SP-DEL-{role[:3].upper()}")
         resp = await client.delete(
             f"/api/helicopters/{heli_id}",
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
@@ -134,19 +142,19 @@ class TestCrewMembersRBAC:
 
     @pytest.mark.parametrize("role", ["Administrator", "Supervisor", "Pilot"])
     async def test_allowed_roles_can_list_crew_members(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/crew-members", headers=auth_headers[role])
+        resp = await client.get("/api/crew-members", cookies=auth_cookies[role])
         assert resp.status_code == 200
 
     async def test_planner_cannot_list_crew_members(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/crew-members", headers=auth_headers["Planner"])
+        resp = await client.get("/api/crew-members", cookies=auth_cookies["Planner"])
         assert resp.status_code == 403
 
     async def test_admin_can_create_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/crew-members",
@@ -158,13 +166,14 @@ class TestCrewMembersRBAC:
                 "role": "Obserwator",
                 "training_expiry": "2027-12-31",
             },
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_create_crew_member(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/crew-members",
@@ -176,51 +185,56 @@ class TestCrewMembersRBAC:
                 "role": "Obserwator",
                 "training_expiry": "2027-12-31",
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_update_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         cid = await create_crew_member_db(email="rbac-upd@test.com")
         resp = await client.put(
             f"/api/crew-members/{cid}",
             json={"weight": 85},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_update_crew_member(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         cid = await create_crew_member_db(email=f"rbac-upd-{role.lower()}@test.com")
         resp = await client.put(
             f"/api/crew-members/{cid}",
             json={"weight": 85},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_delete_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         cid = await create_crew_member_db(email="rbac-del@test.com")
         resp = await client.delete(
             f"/api/crew-members/{cid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_delete_crew_member(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         cid = await create_crew_member_db(email=f"rbac-del-{role.lower()}@test.com")
         resp = await client.delete(
             f"/api/crew-members/{cid}",
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
@@ -237,79 +251,85 @@ class TestLandingSitesRBAC:
 
     @pytest.mark.parametrize("role", ["Administrator", "Supervisor", "Pilot"])
     async def test_allowed_roles_can_list_landing_sites(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/landing-sites", headers=auth_headers[role])
+        resp = await client.get("/api/landing-sites", cookies=auth_cookies[role])
         assert resp.status_code == 200
 
     async def test_planner_cannot_list_landing_sites(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/landing-sites", headers=auth_headers["Planner"])
+        resp = await client.get("/api/landing-sites", cookies=auth_cookies["Planner"])
         assert resp.status_code == 403
 
     async def test_admin_can_create_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/landing-sites",
             json={"name": "RBAC Site", "latitude": 50.0, "longitude": 20.0},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_create_landing_site(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/landing-sites",
             json={"name": f"Deny {role}", "latitude": 50.0, "longitude": 20.0},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_update_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         sid = await create_landing_site(name="RBAC Upd Site")
         resp = await client.put(
             f"/api/landing-sites/{sid}",
             json={"name": "Updated Site"},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_update_landing_site(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         sid = await create_landing_site(name=f"RBAC Upd {role}")
         resp = await client.put(
             f"/api/landing-sites/{sid}",
             json={"name": "Denied Update"},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_admin_can_delete_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         sid = await create_landing_site(name="RBAC Del Site")
         resp = await client.delete(
             f"/api/landing-sites/{sid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_delete_landing_site(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         sid = await create_landing_site(name=f"RBAC Del {role}")
         resp = await client.delete(
             f"/api/landing-sites/{sid}",
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
@@ -328,14 +348,14 @@ class TestOperationsRBAC:
         "role", ["Administrator", "Planner", "Supervisor", "Pilot"]
     )
     async def test_all_roles_can_list_operations(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/operations", headers=auth_headers[role])
+        resp = await client.get("/api/operations", cookies=auth_cookies[role])
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor"])
     async def test_planner_supervisor_can_create_operation(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/operations",
@@ -346,13 +366,14 @@ class TestOperationsRBAC:
                 "proposed_date_earliest": "2027-05-01",
                 "proposed_date_latest": "2027-05-10",
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Administrator", "Pilot"])
     async def test_admin_pilot_cannot_create_operation(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/operations",
@@ -361,32 +382,35 @@ class TestOperationsRBAC:
                 "proposed_date_earliest": "2027-05-01",
                 "proposed_date_latest": "2027-05-10",
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor"])
     async def test_planner_supervisor_can_update_operation(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         # Create an operation first (use Planner, which is allowed)
-        op_id = await create_operation(client, auth_headers["Planner"])
+        op_id = await create_operation(client, auth_cookies["Planner"])
         resp = await client.put(
             f"/api/operations/{op_id}",
             json={"short_description": f"Updated by {role}"},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Administrator", "Pilot"])
     async def test_admin_pilot_cannot_update_operation(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        op_id = await create_operation(client, auth_headers["Planner"])
+        op_id = await create_operation(client, auth_cookies["Planner"])
         resp = await client.put(
             f"/api/operations/{op_id}",
             json={"short_description": f"Denied by {role}"},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
@@ -403,43 +427,43 @@ class TestOrdersRBAC:
     """Role-based access on /api/orders."""
 
     async def test_planner_cannot_list_orders(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/orders", headers=auth_headers["Planner"])
+        resp = await client.get("/api/orders", cookies=auth_cookies["Planner"])
         assert resp.status_code == 403
         assert resp.json()["detail"] == "Insufficient permissions"
 
     async def test_planner_cannot_get_order_detail(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/orders/1", headers=auth_headers["Planner"])
+        resp = await client.get("/api/orders/1", cookies=auth_cookies["Planner"])
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Administrator", "Supervisor", "Pilot"])
     async def test_allowed_roles_can_list_orders(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/orders", headers=auth_headers[role])
+        resp = await client.get("/api/orders", cookies=auth_cookies[role])
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Administrator", "Supervisor", "Pilot"])
     async def test_allowed_roles_can_get_order_detail(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/orders/9999", headers=auth_headers[role])
+        resp = await client.get("/api/orders/9999", cookies=auth_cookies[role])
         # 404 proves the role check passed
         assert resp.status_code == 404
 
     async def test_pilot_can_create_order(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Pilot can create an order (requires setup entities)."""
         heli_id = await create_helicopter(registration="SP-ORD1")
         await create_pilot_crew_member()
         site_a = await create_landing_site(name="Ord Site A")
         site_b = await create_landing_site(name="Ord Site B")
-        op_id = await create_operation(client, auth_headers["Planner"])
-        await confirm_operation(client, auth_headers["Supervisor"], op_id)
+        op_id = await create_operation(client, auth_cookies["Planner"])
+        await confirm_operation(client, auth_cookies["Supervisor"], op_id)
 
         resp = await client.post(
             "/api/orders",
@@ -453,13 +477,14 @@ class TestOrdersRBAC:
                 "operation_ids": [op_id],
                 "estimated_route_km": 50,
             },
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Administrator", "Planner", "Supervisor"])
     async def test_non_pilot_cannot_create_order(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/orders",
@@ -472,20 +497,21 @@ class TestOrdersRBAC:
                 "end_landing_site_id": 2,
                 "operation_ids": [],
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     async def test_pilot_can_update_order(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Pilot can update their own order."""
         heli_id = await create_helicopter(registration="SP-ORDU")
         await create_pilot_crew_member()
         site_a = await create_landing_site(name="Upd Site A")
         site_b = await create_landing_site(name="Upd Site B")
-        op_id = await create_operation(client, auth_headers["Planner"])
-        await confirm_operation(client, auth_headers["Supervisor"], op_id)
+        op_id = await create_operation(client, auth_cookies["Planner"])
+        await confirm_operation(client, auth_cookies["Supervisor"], op_id)
 
         resp = await client.post(
             "/api/orders",
@@ -499,7 +525,8 @@ class TestOrdersRBAC:
                 "operation_ids": [op_id],
                 "estimated_route_km": 50,
             },
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         order_id = resp.json()["id"]
@@ -507,20 +534,21 @@ class TestOrdersRBAC:
         resp = await client.put(
             f"/api/orders/{order_id}",
             json={"estimated_route_km": 100},
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     async def test_supervisor_can_update_order(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Supervisor can update an order."""
         heli_id = await create_helicopter(registration="SP-ORDS")
         await create_pilot_crew_member()
         site_a = await create_landing_site(name="Sup Upd A")
         site_b = await create_landing_site(name="Sup Upd B")
-        op_id = await create_operation(client, auth_headers["Planner"])
-        await confirm_operation(client, auth_headers["Supervisor"], op_id)
+        op_id = await create_operation(client, auth_cookies["Planner"])
+        await confirm_operation(client, auth_cookies["Supervisor"], op_id)
 
         resp = await client.post(
             "/api/orders",
@@ -534,7 +562,8 @@ class TestOrdersRBAC:
                 "operation_ids": [op_id],
                 "estimated_route_km": 50,
             },
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         order_id = resp.json()["id"]
@@ -542,18 +571,20 @@ class TestOrdersRBAC:
         resp = await client.put(
             f"/api/orders/{order_id}",
             json={"estimated_route_km": 150},
-            headers=auth_headers["Supervisor"],
+            cookies=auth_cookies["Supervisor"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
 
     @pytest.mark.parametrize("role", ["Administrator", "Planner"])
     async def test_admin_planner_cannot_update_order(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.put(
             "/api/orders/9999",
             json={"estimated_route_km": 100},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
@@ -564,30 +595,30 @@ class TestOrdersRBAC:
 
 
 class TestUsersRBAC:
-    """Users RBAC: read (list/get) for Admin+Supervisor+Pilot; write (create/update/delete) Admin only."""
+    """Users RBAC: all CRUD restricted to Administrator only."""
 
     @pytest.mark.parametrize("role", ["Planner"])
     async def test_planner_cannot_list_users(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/users", headers=auth_headers[role])
+        resp = await client.get("/api/users", cookies=auth_cookies[role])
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Supervisor", "Pilot"])
-    async def test_supervisor_pilot_can_list_users(
-        self, client: AsyncClient, auth_headers: dict, role: str
+    async def test_supervisor_pilot_cannot_list_users(
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/users", headers=auth_headers[role])
-        assert resp.status_code == 200
+        resp = await client.get("/api/users", cookies=auth_cookies[role])
+        assert resp.status_code == 403
 
     async def test_admin_can_list_users(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        resp = await client.get("/api/users", headers=auth_headers["Administrator"])
+        resp = await client.get("/api/users", cookies=auth_cookies["Administrator"])
         assert resp.status_code == 200
 
     async def test_admin_can_create_user(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/users",
@@ -598,13 +629,14 @@ class TestUsersRBAC:
                 "password": "securepass123",
                 "system_role": "Pilot",
             },
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_create_user(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.post(
             "/api/users",
@@ -615,40 +647,46 @@ class TestUsersRBAC:
                 "password": "securepass123",
                 "system_role": "Pilot",
             },
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Planner"])
     async def test_planner_cannot_get_user(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/users/1", headers=auth_headers[role])
+        resp = await client.get("/api/users/1", cookies=auth_cookies[role])
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Supervisor", "Pilot"])
-    async def test_supervisor_pilot_can_get_user(
-        self, client: AsyncClient, auth_headers: dict, role: str
+    async def test_supervisor_pilot_cannot_get_user(
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.get("/api/users/1", headers=auth_headers[role])
-        assert resp.status_code == 200
+        resp = await client.get("/api/users/1", cookies=auth_cookies[role])
+        assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_update_user(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
         resp = await client.put(
             "/api/users/1",
             json={"first_name": "Hacked"},
-            headers=auth_headers[role],
+            cookies=auth_cookies[role],
+            headers=_CSRF,
         )
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_delete_user(
-        self, client: AsyncClient, auth_headers: dict, role: str
+        self, client: AsyncClient, auth_cookies: dict, role: str
     ):
-        resp = await client.delete("/api/users/1", headers=auth_headers[role])
+        resp = await client.delete(
+            "/api/users/1",
+            cookies=auth_cookies[role],
+            headers=_CSRF,
+        )
         assert resp.status_code == 403
 
 
