@@ -102,6 +102,20 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=422, content={"detail": exc.errors()})
         return JSONResponse(status_code=422, content={"detail": "Invalid request data"})
 
+    @application.middleware("http")
+    async def csrf_check(request: Request, call_next):
+        if request.method in ("GET", "HEAD", "OPTIONS"):
+            return await call_next(request)
+        if not request.cookies.get("access_token"):
+            return await call_next(request)
+        if request.headers.get("authorization"):
+            return await call_next(request)
+        if request.url.path in ("/api/auth/login", "/api/auth/refresh"):
+            return await call_next(request)
+        if request.headers.get("x-requested-with") != "XMLHttpRequest":
+            return JSONResponse(status_code=403, content={"detail": "CSRF check failed"})
+        return await call_next(request)
+
     return application
 
 

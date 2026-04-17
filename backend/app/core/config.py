@@ -14,8 +14,11 @@ class Settings(BaseSettings):
         "https://localhost:3000",
         "http://localhost",
         "http://localhost:3000",
+        "https://172.105.79.78",
+        "http://172.105.79.78",
     ]
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     DEBUG: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
