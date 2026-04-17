@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AERO — Jak zbudowaliśmy aplikację w 2 dni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* CSS will be added in subsequent tasks */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #000a1a;
+  color: #ffffff;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.presentation { position: relative; width: 100vw; height: 100vh; z-index: 1; }
+.slides-container { position: relative; width: 100%; height: 100%; }
+.slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.slide.active { opacity: 1; pointer-events: auto; }
+.slide-inner {
+  width: min(90%, 1400px);
+  max-height: 90vh;
+  padding: 40px;
+}
+</style>
+</head>
+<body>
+<div class="presentation">
+  <div class="slides-container" id="slidesContainer">
+    <section class="slide active" data-slide="0"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 1 — placeholder</h1></div></section>
+    <section class="slide" data-slide="1"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 2 — placeholder</h1></div></section>
+    <section class="slide" data-slide="2"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 3 — placeholder</h1></div></section>
+    <section class="slide" data-slide="3"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 4 — placeholder</h1></div></section>
+    <section class="slide" data-slide="4"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 5 — placeholder</h1></div></section>
+    <section class="slide" data-slide="5"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 6 — placeholder</h1></div></section>
+  </div>
+</div>
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let currentSlide = 0;
+  function goToSlide(n) {
+    if (n < 0 || n >= slides.length) return;
+    slides[currentSlide].classList.remove('active');
+    slides[n].classList.add('active');
+    currentSlide = n;
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown') goToSlide(currentSlide + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') goToSlide(currentSlide - 1);
+    if (e.key === 'Home') goToSlide(0);
+    if (e.key === 'End') goToSlide(slides.length - 1);
+  });
+</script>
+</body>
+</html>
