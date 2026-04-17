@@ -16,12 +16,14 @@ from tests.conftest import (
 
 pytestmark = pytest.mark.asyncio
 
+_CSRF = {"X-Requested-With": "XMLHttpRequest"}
+
 
 # ── Shared setup ────────────────────────────────────────────────────
 
 async def _setup_base(
     client: AsyncClient,
-    auth_headers: dict,
+    auth_cookies: dict,
     *,
     heli_reg: str,
     inspection_date: str = "2027-12-31",
@@ -55,8 +57,8 @@ async def _setup_base(
 
     site_a = await create_landing_site(name=f"Safe-A-{heli_reg}", lat=50.0, lon=20.0)
     site_b = await create_landing_site(name=f"Safe-B-{heli_reg}", lat=51.0, lon=21.0)
-    op_id = await create_operation(client, auth_headers["Planner"])
-    await confirm_operation(client, auth_headers["Supervisor"], op_id)
+    op_id = await create_operation(client, auth_cookies["Planner"])
+    await confirm_operation(client, auth_cookies["Supervisor"], op_id)
 
     return {
         "heli_id": heli_id,
@@ -87,36 +89,38 @@ def _order_payload(env: dict, *, crew_ids: list[int] | None = None, estimated_ro
 
 class TestHelicopterInspection:
     async def test_expired_inspection_rejected(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Inspection date in the past → 400."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-INS1",
             inspection_date="2020-01-01",  # expired
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 400
         detail = resp.json()["detail"]
         assert any("inspection" in e.lower() for e in detail), f"Expected inspection error in: {detail}"
 
     async def test_valid_inspection_passes(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Inspection date in the future → 201."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-INS2",
             inspection_date="2028-12-31",  # valid
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
@@ -126,35 +130,37 @@ class TestHelicopterInspection:
 
 class TestPilotLicense:
     async def test_expired_license_rejected(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Pilot license expiry in the past → 400."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-LIC1",
             pilot_license_expiry="2020-01-01",  # expired
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 400
         detail = resp.json()["detail"]
         assert any("license" in e.lower() for e in detail), f"Expected license error in: {detail}"
 
     async def test_valid_license_passes(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-LIC2",
             pilot_license_expiry="2028-12-31",
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
@@ -164,11 +170,11 @@ class TestPilotLicense:
 
 class TestCrewTraining:
     async def test_expired_crew_training_rejected(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Crew member with expired training → 400."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-TRN1",
         )
         # Create a crew member with expired training
@@ -183,17 +189,18 @@ class TestCrewTraining:
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, crew_ids=[crew_id]),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 400
         detail = resp.json()["detail"]
         assert any("training" in e.lower() for e in detail), f"Expected training error in: {detail}"
 
     async def test_valid_crew_training_passes(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-TRN2",
         )
         crew_id = await create_crew_member_db(
@@ -207,7 +214,8 @@ class TestCrewTraining:
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, crew_ids=[crew_id]),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
@@ -217,11 +225,11 @@ class TestCrewTraining:
 
 class TestCrewWeight:
     async def test_overweight_crew_rejected(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Pilot(80) + crew(90) = 170 > max_payload(100) → 400."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-WGT1",
             max_payload_weight=100,  # very low
         )
@@ -235,7 +243,8 @@ class TestCrewWeight:
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, crew_ids=[crew_id]),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 400
         detail = resp.json()["detail"]
@@ -244,11 +253,11 @@ class TestCrewWeight:
         )
 
     async def test_within_weight_limit_passes(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Pilot(80) + crew(90) = 170 < max_payload(500) → 201."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-WGT2",
             max_payload_weight=500,
         )
@@ -262,7 +271,8 @@ class TestCrewWeight:
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, crew_ids=[crew_id]),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
 
@@ -272,18 +282,19 @@ class TestCrewWeight:
 
 class TestRouteRange:
     async def test_over_range_rejected(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """estimated_route_km(200) > range_km(100) → 400."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-RNG1",
             range_km=100,  # short range
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, estimated_route_km=200),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 400
         detail = resp.json()["detail"]
@@ -292,17 +303,18 @@ class TestRouteRange:
         )
 
     async def test_within_range_passes(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """estimated_route_km(100) < range_km(500) → 201."""
         env = await _setup_base(
-            client, auth_headers,
+            client, auth_cookies,
             heli_reg="SP-RNG2",
             range_km=500,
         )
         resp = await client.post(
             "/api/orders",
             json=_order_payload(env, estimated_route_km=100),
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201

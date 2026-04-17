@@ -16,12 +16,14 @@ from tests.conftest import (
 
 pytestmark = pytest.mark.asyncio
 
+_CSRF = {"X-Requested-With": "XMLHttpRequest"}
+
 
 # ── Shared order-setup helper ───────────────────────────────────────
 
 async def _setup_order_env(
     client: AsyncClient,
-    auth_headers: dict,
+    auth_cookies: dict,
     *,
     heli_reg: str = "SP-ORD",
     max_payload: int = 5000,
@@ -39,8 +41,8 @@ async def _setup_order_env(
     pilot_id = await create_pilot_crew_member()
     site_a = await create_landing_site(name=f"Start-{heli_reg}", lat=50.0, lon=20.0)
     site_b = await create_landing_site(name=f"End-{heli_reg}", lat=51.0, lon=21.0)
-    op_id = await create_operation(client, auth_headers["Planner"])
-    await confirm_operation(client, auth_headers["Supervisor"], op_id)
+    op_id = await create_operation(client, auth_cookies["Planner"])
+    await confirm_operation(client, auth_cookies["Supervisor"], op_id)
     return {
         "heli_id": heli_id,
         "pilot_id": pilot_id,
@@ -52,7 +54,7 @@ async def _setup_order_env(
 
 async def _create_order(
     client: AsyncClient,
-    auth_headers: dict,
+    auth_cookies: dict,
     env: dict,
     *,
     start_dt: str = "2027-01-20T08:00:00Z",
@@ -71,7 +73,7 @@ async def _create_order(
         "operation_ids": [env["op_id"]],
         "estimated_route_km": estimated_route_km if estimated_route_km is not None else 50,
     }
-    resp = await client.post("/api/orders", json=payload, headers=auth_headers["Pilot"])
+    resp = await client.post("/api/orders", json=payload, cookies=auth_cookies["Pilot"], headers=_CSRF)
     assert resp.status_code == 201, f"Order create failed: {resp.text}"
     return resp.json()["id"]
 
@@ -81,27 +83,27 @@ async def _create_order(
 
 class TestOrderSubmit:
     async def test_submit_success(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-SUB1")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-SUB1")
+        oid = await _create_order(client, auth_cookies, env)
 
-        resp = await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
+        resp = await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
         assert resp.status_code == 200
         assert resp.json()["status"] == 2
 
     async def test_submit_from_non_status1_fails(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-SUB2")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-SUB2")
+        oid = await _create_order(client, auth_cookies, env)
 
         # Submit once (1→2)
-        resp = await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
+        resp = await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
         assert resp.status_code == 200
 
         # Submit again (2→? should fail)
-        resp = await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
+        resp = await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
         assert resp.status_code == 400
         assert "must be 1" in resp.json()["detail"]
 
@@ -111,24 +113,24 @@ class TestOrderSubmit:
 
 class TestOrderReject:
     async def test_reject_success(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-REJ1")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-REJ1")
+        oid = await _create_order(client, auth_cookies, env)
 
-        await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
-        resp = await client.post(f"/api/orders/{oid}/reject", headers=auth_headers["Supervisor"])
+        await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
+        resp = await client.post(f"/api/orders/{oid}/reject", cookies=auth_cookies["Supervisor"], headers=_CSRF)
         assert resp.status_code == 200
         assert resp.json()["status"] == 3
 
     async def test_reject_from_non_status2_fails(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-REJ2")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-REJ2")
+        oid = await _create_order(client, auth_cookies, env)
 
         # Try reject from status 1 (not submitted)
-        resp = await client.post(f"/api/orders/{oid}/reject", headers=auth_headers["Supervisor"])
+        resp = await client.post(f"/api/orders/{oid}/reject", cookies=auth_cookies["Supervisor"], headers=_CSRF)
         assert resp.status_code == 400
         assert "must be 2" in resp.json()["detail"]
 
@@ -138,32 +140,32 @@ class TestOrderReject:
 
 class TestOrderAccept:
     async def test_accept_success(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-ACC1")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-ACC1")
+        oid = await _create_order(client, auth_cookies, env)
 
-        await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
-        resp = await client.post(f"/api/orders/{oid}/accept", headers=auth_headers["Supervisor"])
+        await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
+        resp = await client.post(f"/api/orders/{oid}/accept", cookies=auth_cookies["Supervisor"], headers=_CSRF)
         assert resp.status_code == 200
         assert resp.json()["status"] == 4
 
     async def test_accept_from_non_status2_fails(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-ACC2")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-ACC2")
+        oid = await _create_order(client, auth_cookies, env)
 
         # Try accept from status 1 (not submitted)
-        resp = await client.post(f"/api/orders/{oid}/accept", headers=auth_headers["Supervisor"])
+        resp = await client.post(f"/api/orders/{oid}/accept", cookies=auth_cookies["Supervisor"], headers=_CSRF)
         assert resp.status_code == 400
         assert "must be 2" in resp.json()["detail"]
 
     async def test_accept_rejects_end_before_start(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Create order with end <= start datetime → 422 (schema validation)."""
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-ACC3")
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-ACC3")
         # Schema validator now rejects invalid dates at create time
         payload = {
             "planned_start_datetime": "2027-01-20T10:00:00Z",
@@ -175,7 +177,7 @@ class TestOrderAccept:
             "operation_ids": [env["op_id"]],
             "estimated_route_km": 50,
         }
-        resp = await client.post("/api/orders", json=payload, headers=auth_headers["Pilot"])
+        resp = await client.post("/api/orders", json=payload, cookies=auth_cookies["Pilot"], headers=_CSRF)
         assert resp.status_code == 422, f"Should reject invalid dates on create: {resp.text}"
 
 
@@ -184,19 +186,19 @@ class TestOrderAccept:
 
 async def _accept_order(
     client: AsyncClient,
-    auth_headers: dict,
+    auth_cookies: dict,
     order_id: int,
 ) -> None:
     """Submit + accept an order (1→2→4)."""
-    resp = await client.post(f"/api/orders/{order_id}/submit", headers=auth_headers["Pilot"])
+    resp = await client.post(f"/api/orders/{order_id}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
     assert resp.status_code == 200
-    resp = await client.post(f"/api/orders/{order_id}/accept", headers=auth_headers["Supervisor"])
+    resp = await client.post(f"/api/orders/{order_id}/accept", cookies=auth_cookies["Supervisor"], headers=_CSRF)
     assert resp.status_code == 200
 
 
 async def _set_actual_datetimes(
     client: AsyncClient,
-    auth_headers: dict,
+    auth_cookies: dict,
     order_id: int,
 ) -> None:
     """Set actual start/end datetimes on an accepted order via PUT."""
@@ -206,7 +208,8 @@ async def _set_actual_datetimes(
             "actual_start_datetime": "2027-01-20T08:30:00Z",
             "actual_end_datetime": "2027-01-20T15:30:00Z",
         },
-        headers=auth_headers["Pilot"],
+        cookies=auth_cookies["Pilot"],
+        headers=_CSRF,
     )
     assert resp.status_code == 200, f"Set actual datetimes failed: {resp.text}"
 
@@ -215,15 +218,15 @@ class TestOrderSettlements:
     """Settlement transitions from status 4 with operation cascades."""
 
     async def test_complete_partial_4_to_5(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-CP1")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
-        await _set_actual_datetimes(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-CP1")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
+        await _set_actual_datetimes(client, auth_cookies, oid)
 
         resp = await client.post(
-            f"/api/orders/{oid}/complete-partial", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-partial", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -233,15 +236,15 @@ class TestOrderSettlements:
             assert op["status"] == 5, f"Operation {op['id']} should be status 5"
 
     async def test_complete_full_4_to_6(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-CF1")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
-        await _set_actual_datetimes(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-CF1")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
+        await _set_actual_datetimes(client, auth_cookies, oid)
 
         resp = await client.post(
-            f"/api/orders/{oid}/complete-full", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-full", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -250,15 +253,15 @@ class TestOrderSettlements:
             assert op["status"] == 6, f"Operation {op['id']} should be status 6"
 
     async def test_not_completed_4_to_7(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-NC1")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
-        await _set_actual_datetimes(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-NC1")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
+        await _set_actual_datetimes(client, auth_cookies, oid)
 
         resp = await client.post(
-            f"/api/orders/{oid}/not-completed", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/not-completed", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -272,41 +275,41 @@ class TestSettlementPrereqs:
     """Settlement without actual datetimes → 400."""
 
     async def test_complete_partial_without_actuals(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-PR1")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-PR1")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
         # Do NOT set actual datetimes
 
         resp = await client.post(
-            f"/api/orders/{oid}/complete-partial", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-partial", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 400
         assert "actual_start_datetime" in resp.json()["detail"]
 
     async def test_complete_full_without_actuals(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-PR2")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-PR2")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
 
         resp = await client.post(
-            f"/api/orders/{oid}/complete-full", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-full", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 400
 
     async def test_not_completed_without_actuals(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         """Status 7 (not completed) does NOT require actual datetimes — flight never happened."""
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-PR3")
-        oid = await _create_order(client, auth_headers, env)
-        await _accept_order(client, auth_headers, oid)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-PR3")
+        oid = await _create_order(client, auth_cookies, env)
+        await _accept_order(client, auth_cookies, oid)
 
         resp = await client.post(
-            f"/api/orders/{oid}/not-completed", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/not-completed", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 200
 
@@ -315,31 +318,31 @@ class TestOperationCascadeOnCreate:
     """Creating an order with confirmed operations (status 3) cascades them to status 4."""
 
     async def test_operations_cascade_3_to_4_on_order_create(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-CAS1")
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-CAS1")
 
         # Verify operation is in status 3 before order creation
         resp = await client.get(
             f"/api/operations/{env['op_id']}",
-            headers=auth_headers["Planner"],
+            cookies=auth_cookies["Planner"],
         )
         assert resp.json()["status"] == 3
 
         # Create order → operation cascades 3→4
-        oid = await _create_order(client, auth_headers, env)
+        oid = await _create_order(client, auth_cookies, env)
 
         # Verify operation is now status 4
         resp = await client.get(
             f"/api/operations/{env['op_id']}",
-            headers=auth_headers["Planner"],
+            cookies=auth_cookies["Planner"],
         )
         assert resp.json()["status"] == 4
 
         # Also verify in the order response
         resp = await client.get(
             f"/api/orders/{oid}",
-            headers=auth_headers["Pilot"],
+            cookies=auth_cookies["Pilot"],
         )
         for op in resp.json()["operations"]:
             assert op["status"] == 4
@@ -349,27 +352,27 @@ class TestSettlementInvalidStatus:
     """Settlement from non-status-4 → 400."""
 
     async def test_complete_partial_from_status1(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-IS1")
-        oid = await _create_order(client, auth_headers, env)
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-IS1")
+        oid = await _create_order(client, auth_cookies, env)
 
         # Try settle from status 1 (not accepted)
         resp = await client.post(
-            f"/api/orders/{oid}/complete-partial", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-partial", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 400
         assert "must be 4" in resp.json()["detail"]
 
     async def test_complete_full_from_status2(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
-        env = await _setup_order_env(client, auth_headers, heli_reg="SP-IS2")
-        oid = await _create_order(client, auth_headers, env)
-        await client.post(f"/api/orders/{oid}/submit", headers=auth_headers["Pilot"])
+        env = await _setup_order_env(client, auth_cookies, heli_reg="SP-IS2")
+        oid = await _create_order(client, auth_cookies, env)
+        await client.post(f"/api/orders/{oid}/submit", cookies=auth_cookies["Pilot"], headers=_CSRF)
 
         resp = await client.post(
-            f"/api/orders/{oid}/complete-full", headers=auth_headers["Pilot"]
+            f"/api/orders/{oid}/complete-full", cookies=auth_cookies["Pilot"], headers=_CSRF
         )
         assert resp.status_code == 400
         assert "must be 4" in resp.json()["detail"]

@@ -7,6 +7,8 @@ from httpx import AsyncClient
 
 pytestmark = pytest.mark.asyncio
 
+_CSRF = {"X-Requested-With": "XMLHttpRequest"}
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Helicopter CRUD
@@ -27,12 +29,13 @@ class TestHelicopterCRUD:
     }
 
     async def test_create_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/helicopters",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         data = resp.json()
@@ -45,16 +48,17 @@ class TestHelicopterCRUD:
         assert "id" in data
 
     async def test_list_helicopters(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         # Create one first
         await client.post(
             "/api/helicopters",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         resp = await client.get(
-            "/api/helicopters", headers=auth_headers["Administrator"]
+            "/api/helicopters", cookies=auth_cookies["Administrator"]
         )
         assert resp.status_code == 200
         items = resp.json()
@@ -64,36 +68,39 @@ class TestHelicopterCRUD:
         assert "SP-CRUD" in regs
 
     async def test_get_helicopter_by_id(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/helicopters",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         heli_id = resp.json()["id"]
 
         resp = await client.get(
             f"/api/helicopters/{heli_id}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 200
         assert resp.json()["registration_number"] == "SP-CRUD"
 
     async def test_update_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/helicopters",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         heli_id = resp.json()["id"]
 
         resp = await client.put(
             f"/api/helicopters/{heli_id}",
             json={"max_crew": 8, "description": "Updated"},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -103,25 +110,27 @@ class TestHelicopterCRUD:
         assert data["registration_number"] == "SP-CRUD"
 
     async def test_delete_helicopter(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/helicopters",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         heli_id = resp.json()["id"]
 
         resp = await client.delete(
             f"/api/helicopters/{heli_id}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
         # Confirm it's gone
         resp = await client.get(
             f"/api/helicopters/{heli_id}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 404
 
@@ -144,12 +153,13 @@ class TestCrewMemberCRUD:
     }
 
     async def test_create_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/crew-members",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         data = resp.json()
@@ -161,15 +171,16 @@ class TestCrewMemberCRUD:
         assert "id" in data
 
     async def test_list_crew_members(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         await client.post(
             "/api/crew-members",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         resp = await client.get(
-            "/api/crew-members", headers=auth_headers["Administrator"]
+            "/api/crew-members", cookies=auth_cookies["Administrator"]
         )
         assert resp.status_code == 200
         items = resp.json()
@@ -179,36 +190,39 @@ class TestCrewMemberCRUD:
         assert "crudtest@test.com" in emails
 
     async def test_get_crew_member_by_id(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/crew-members",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         cid = resp.json()["id"]
 
         resp = await client.get(
             f"/api/crew-members/{cid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 200
         assert resp.json()["email"] == "crudtest@test.com"
 
     async def test_update_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/crew-members",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         cid = resp.json()["id"]
 
         resp = await client.put(
             f"/api/crew-members/{cid}",
             json={"weight": 90, "last_name": "Updated"},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -217,24 +231,26 @@ class TestCrewMemberCRUD:
         assert data["first_name"] == "CrudTest"
 
     async def test_delete_crew_member(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/crew-members",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         cid = resp.json()["id"]
 
         resp = await client.delete(
             f"/api/crew-members/{cid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
         resp = await client.get(
             f"/api/crew-members/{cid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 404
 
@@ -254,12 +270,13 @@ class TestLandingSiteCRUD:
     }
 
     async def test_create_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/landing-sites",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         data = resp.json()
@@ -269,15 +286,16 @@ class TestLandingSiteCRUD:
         assert "id" in data
 
     async def test_list_landing_sites(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         await client.post(
             "/api/landing-sites",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         resp = await client.get(
-            "/api/landing-sites", headers=auth_headers["Administrator"]
+            "/api/landing-sites", cookies=auth_cookies["Administrator"]
         )
         assert resp.status_code == 200
         items = resp.json()
@@ -287,36 +305,39 @@ class TestLandingSiteCRUD:
         assert "Crud Test Site" in names
 
     async def test_get_landing_site_by_id(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/landing-sites",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         sid = resp.json()["id"]
 
         resp = await client.get(
             f"/api/landing-sites/{sid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 200
         assert resp.json()["name"] == "Crud Test Site"
 
     async def test_update_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/landing-sites",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         sid = resp.json()["id"]
 
         resp = await client.put(
             f"/api/landing-sites/{sid}",
             json={"name": "Updated Site", "latitude": 52.0},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -325,24 +346,26 @@ class TestLandingSiteCRUD:
         assert data["longitude"] == 19.5  # unchanged
 
     async def test_delete_landing_site(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/landing-sites",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         sid = resp.json()["id"]
 
         resp = await client.delete(
             f"/api/landing-sites/{sid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
         resp = await client.get(
             f"/api/landing-sites/{sid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 404
 
@@ -364,12 +387,13 @@ class TestUserCRUD:
     }
 
     async def test_create_user(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/users",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 201
         data = resp.json()
@@ -383,15 +407,16 @@ class TestUserCRUD:
         assert "hashed_password" not in data
 
     async def test_list_users(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         await client.post(
             "/api/users",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         resp = await client.get(
-            "/api/users", headers=auth_headers["Administrator"]
+            "/api/users", cookies=auth_cookies["Administrator"]
         )
         assert resp.status_code == 200
         items = resp.json()
@@ -402,36 +427,39 @@ class TestUserCRUD:
         assert "crudnew@test.com" in emails
 
     async def test_get_user_by_id(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/users",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         uid = resp.json()["id"]
 
         resp = await client.get(
             f"/api/users/{uid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 200
         assert resp.json()["email"] == "crudnew@test.com"
 
     async def test_update_user(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/users",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         uid = resp.json()["id"]
 
         resp = await client.put(
             f"/api/users/{uid}",
             json={"first_name": "Updated", "system_role": "Administrator"},
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -440,23 +468,25 @@ class TestUserCRUD:
         assert data["last_name"] == "User"  # unchanged
 
     async def test_delete_user(
-        self, client: AsyncClient, auth_headers: dict
+        self, client: AsyncClient, auth_cookies: dict
     ):
         resp = await client.post(
             "/api/users",
             json=self.CREATE_PAYLOAD,
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         uid = resp.json()["id"]
 
         resp = await client.delete(
             f"/api/users/{uid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
+            headers=_CSRF,
         )
         assert resp.status_code == 204
 
         resp = await client.get(
             f"/api/users/{uid}",
-            headers=auth_headers["Administrator"],
+            cookies=auth_cookies["Administrator"],
         )
         assert resp.status_code == 404
