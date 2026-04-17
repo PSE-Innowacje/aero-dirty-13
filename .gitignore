@@ -28,3 +28,7 @@ coverage/
 tmp/
 playwright-report/
 test-results/
+
+# ── GSD baseline (auto-generated) ──
+.gsd-id
+.bg-shell/

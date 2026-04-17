@@ -564,7 +564,7 @@ class TestOrdersRBAC:
 
 
 class TestUsersRBAC:
-    """Users RBAC: read (list/get) for Admin+Supervisor+Pilot; write (create/update/delete) Admin only."""
+    """Users RBAC: all CRUD restricted to Administrator only."""
 
     @pytest.mark.parametrize("role", ["Planner"])
     async def test_planner_cannot_list_users(
@@ -574,11 +574,11 @@ class TestUsersRBAC:
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Supervisor", "Pilot"])
-    async def test_supervisor_pilot_can_list_users(
+    async def test_supervisor_pilot_cannot_list_users(
         self, client: AsyncClient, auth_headers: dict, role: str
     ):
         resp = await client.get("/api/users", headers=auth_headers[role])
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
     async def test_admin_can_list_users(
         self, client: AsyncClient, auth_headers: dict
@@ -627,11 +627,11 @@ class TestUsersRBAC:
         assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Supervisor", "Pilot"])
-    async def test_supervisor_pilot_can_get_user(
+    async def test_supervisor_pilot_cannot_get_user(
         self, client: AsyncClient, auth_headers: dict, role: str
     ):
         resp = await client.get("/api/users/1", headers=auth_headers[role])
-        assert resp.status_code == 200
+        assert resp.status_code == 403
 
     @pytest.mark.parametrize("role", ["Planner", "Supervisor", "Pilot"])
     async def test_non_admin_cannot_update_user(
