@@ -10,7 +10,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 
 export interface User {
   id: number;

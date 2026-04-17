@@ -88,8 +88,13 @@ test.describe('Logout', () => {
     await page.waitForURL('**/login', { timeout: 10_000 });
     await expect(page).toHaveURL(/\/login/);
 
-    // Token should be cleared from localStorage
+    // Cookie-based auth: token must be null in localStorage, not merely falsy
     const token = await page.evaluate(() => localStorage.getItem('aero_token'));
-    expect(token).toBeFalsy();
+    expect(token).toBeNull();
+
+    // Cookie should also be cleared (httpOnly — not readable from JS, but document.cookie
+    // should not contain any aero-related visible cookie after logout)
+    const visibleCookies = await page.evaluate(() => document.cookie);
+    expect(visibleCookies).not.toContain('access_token');
   });
 });
