@@ -269,6 +269,65 @@ body {
   color: rgba(255,255,255,0.45);
   z-index: 100;
 }
+
+/* ===== SLIDE 1 — TYTUŁ ===== */
+.hero-content { text-align: center; }
+.hero-title {
+  font-size: clamp(80px, 12vw, 180px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  background: linear-gradient(135deg, #ffffff 0%, #48a2ce 50%, #3fc37a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+  position: relative;
+  display: inline-block;
+}
+.hero-title .blink-cursor {
+  width: 8px;
+  height: clamp(60px, 9vw, 140px);
+  vertical-align: middle;
+}
+.hero-subtitle {
+  font-size: clamp(18px, 2vw, 28px);
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 10px;
+}
+.hero-tagline {
+  font-size: clamp(14px, 1.3vw, 18px);
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 30px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+.hero-line {
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(72,162,206,0.8), transparent);
+  margin: 0 auto 24px;
+  animation: expandLine 1.2s ease forwards;
+  animation-delay: 0.8s;
+}
+@keyframes expandLine { to { width: 400px; } }
+.hero-presenters {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 8px;
+}
+.hero-presenter-name { color: #ffffff; font-weight: 500; }
+.hero-presenter-role { color: rgba(72,162,206,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+.hero-date {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 20px;
+}
 </style>
 </head>
 <body>
@@ -287,7 +346,27 @@ body {
 </div>
 <div class="presentation">
   <div class="slides-container" id="slidesContainer">
-    <section class="slide active" data-slide="0"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 1 — placeholder</h1></div></section>
+    <section class="slide active" data-slide="0">
+      <div class="slide-inner">
+        <div class="hero-content">
+          <div class="anim-fade-up delay-1 hero-title">AERO<span class="blink-cursor"></span></div>
+          <div class="anim-fade-up delay-2 hero-subtitle">Jak dwóch non-developerów zbudowało aplikację w 2 dni</div>
+          <div class="anim-fade-up delay-3 hero-tagline">Hackathon · LLM · Vibecoding — historia z kuchni</div>
+          <div class="anim-fade delay-4 hero-line"></div>
+          <div class="anim-fade delay-5 hero-presenters">
+            <div>
+              <div class="hero-presenter-name">Mariusz Kędziora</div>
+              <div class="hero-presenter-role">SSDLC · Cyber</div>
+            </div>
+            <div>
+              <div class="hero-presenter-name">Mariusz Szustka</div>
+              <div class="hero-presenter-role">Endpoint · IAM</div>
+            </div>
+          </div>
+          <div class="anim-fade delay-6 hero-date">&lt;!-- data townhallu do uzupełnienia --&gt;</div>
+        </div>
+      </div>
+    </section>
     <section class="slide" data-slide="1"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 2 — placeholder</h1></div></section>
     <section class="slide" data-slide="2"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 3 — placeholder</h1></div></section>
     <section class="slide" data-slide="3"><div class="slide-inner"><h1 style="font-size:48px;text-align:center">Slide 4 — placeholder</h1></div></section>
