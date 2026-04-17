@@ -853,6 +853,50 @@ body {
   });
 
   progressBar.style.width = `${(1 / slides.length) * 100}%`;
+
+  // ===== NUMBER COUNT-UP (slide 4) =====
+  function animateCount(el) {
+    const target = parseInt(el.dataset.count);
+    if (!target || el.dataset.animated === '1') return;
+    el.dataset.animated = '1';
+    const duration = 1200;
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(target * eased);
+      if (progress < 1) requestAnimationFrame(tick);
+      else el.textContent = target;
+    }
+    requestAnimationFrame(tick);
+  }
+  function onSlideEnter(n) {
+    if (n === 3) {
+      document.querySelectorAll('.proof-number[data-count]').forEach(animateCount);
+    }
+  }
+  const _origGoToSlide = goToSlide;
+  goToSlide = function(n) { _origGoToSlide(n); onSlideEnter(n); };
+
+  // ===== SWIPE GESTURES =====
+  let touchStartX = null;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) goToSlide(currentSlide + 1);
+      else goToSlide(currentSlide - 1);
+    }
+    touchStartX = null;
+  }, { passive: true });
+
+  // ===== REDUCED MOTION =====
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('.particle, .glow-orb, .bg-gradient, .bg-grid').forEach(el => {
+      el.style.animation = 'none';
+    });
+  }
 </script>
 </body>
 </html>
